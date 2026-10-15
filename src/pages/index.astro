@@ -2,6 +2,9 @@
 // Временная страница фазы 2: каркас заменяется по мере задач 2.5–2.9
 import '../styles/global.css';
 import Fonts from '../components/layout/Fonts.astro';
+import Fact from '../components/ui/Fact.astro';
+import { facts } from '../content/facts';
+import { formatUAH } from '../lib/facts';
 
 const sample = 'Ґанок, їжак, єнот, ІІ — 1234 грн';
 ---
@@ -15,14 +18,19 @@ const sample = 'Ґанок, їжак, єнот, ІІ — 1234 грн';
   </head>
   <body>
     <main class="container-site py-(--space-section)">
-      <h1 class="text-h1">Вимір</h1>
-      <p class="text-lead mt-4 text-ink-muted">Кухні та меблі · Черкаси</p>
+      <h1 class="text-h1">{facts.brand.name}</h1>
+      <p class="text-lead mt-4 text-ink-muted">{facts.brand.descriptor}</p>
 
       <section class="mt-12 space-y-6" aria-label="Перевірка шрифтів">
         <p class="font-display text-h3">{sample}</p>
         <p class="text-body">{sample} <span class="font-semibold">({sample})</span></p>
         <p class="font-mono text-price">{sample}</p>
-        <p class="text-small text-ink-muted">Апостроф: м'ята, мʼята</p>
+      </section>
+
+      <section class="mt-12 space-y-3" aria-label="Перевірка фактів">
+        <p>Гарантія: <Fact value={facts.warranty.years} /> років</p>
+        <p>Число (демо форматування): <Fact value={45000} format={formatUAH} class="font-mono" /></p>
+        <p>Рядок: <Fact value={facts.brand.descriptor} /></p>
       </section>
     </main>
   </body>

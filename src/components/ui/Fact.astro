@@ -1,0 +1,46 @@
+---
+// Выводит факт из facts.ts или видимую заглушку (ARCHITECTURE.md 5.3).
+// Заглушка — моноширинная серая плашка с пунктиром, НЕ жёлтая.
+import type { Fact } from '../../content/facts';
+import { isPlaceholder, placeholderName } from '../../lib/facts';
+
+interface Props {
+  value: Fact<string | number>;
+  /** Форматирование реального значения, например formatUAH */
+  format?: (v: never) => string;
+  class?: string;
+}
+
+const { value, format, class: className } = Astro.props;
+const placeholder = isPlaceholder(value);
+const text = placeholder ? value : format ? format(value as never) : String(value);
+---
+
+{
+  placeholder ? (
+    <span class:list={['fact-ph', className]} data-placeholder={placeholderName(value)}>
+      {text}
+    </span>
+  ) : (
+    <span class={className}>{text}</span>
+  )
+}
+
+<style>
+  .fact-ph {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0 0.25em;
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    line-height: 1.4;
+    letter-spacing: 0;
+    vertical-align: 0.05em;
+    color: var(--color-graphite);
+    background: var(--color-placeholder);
+    border: 1px dashed var(--color-graphite);
+    border-radius: var(--radius-sm);
+    overflow-wrap: anywhere;
+    hyphens: none;
+  }
+</style>
