@@ -1,0 +1,34 @@
+# Сборка Astro
+dist/
+.astro/
+
+# Зависимости
+node_modules/
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Переменные окружения (секреты бота, Google, почты)
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Playwright и Lighthouse
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.lighthouseci/
+
+# Системные и редакторы
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
