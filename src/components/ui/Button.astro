@@ -1,0 +1,122 @@
+---
+// Кнопка или ссылка-кнопка (ARCHITECTURE.md 6.7).
+// primary (жёлтая) — ТОЛЬКО для заявки. Текст на жёлтом — графитовый.
+// Кнопки заявки помечены data-cta="primary" для правила «один жёлтый на экран» (6.9, фаза 3).
+// deferPrimary: кнопка заявки в шапке и нижней панели — без JS она графитовая, жёлтой её делает cta-arbiter.
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './Icon.astro';
+
+type Variant = 'primary' | 'secondary' | 'outline';
+
+interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> {
+  href?: string;
+  type?: 'button' | 'submit';
+  variant?: Variant;
+  size?: 'md' | 'lg';
+  icon?: IconName;
+  fullWidth?: boolean;
+  /** Приоритет жёлтой кнопки: hero/квиз/форма — 3, панель — 2, шапка — 1 */
+  ctaPriority?: number;
+  deferPrimary?: boolean;
+}
+
+const {
+  href,
+  type = 'button',
+  variant = 'primary',
+  size = 'md',
+  icon,
+  fullWidth = false,
+  ctaPriority,
+  deferPrimary = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const isCta = variant === 'primary';
+const look: Variant = isCta && deferPrimary ? 'secondary' : variant;
+
+const classes = [
+  'btn',
+  `btn--${look}`,
+  size === 'lg' ? 'btn--lg' : 'btn--md',
+  fullWidth && 'w-full',
+  className,
+];
+
+const ctaAttrs = isCta
+  ? { 'data-cta': 'primary', 'data-cta-priority': String(ctaPriority ?? 3), 'data-cta-deferred': deferPrimary ? '' : undefined }
+  : {};
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...ctaAttrs} {...rest}>
+      {icon && <Icon name={icon} size={20} />}
+      <span>
+        <slot />
+      </span>
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...ctaAttrs} {...rest}>
+      {icon && <Icon name={icon} size={20} />}
+      <span>
+        <slot />
+      </span>
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--control-h);
+    padding-inline: var(--control-px);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-button);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+  .btn--lg {
+    min-height: var(--control-h-lg);
+  }
+  /* Заявка: рулетка + графитовый текст (контраст 8,2 : 1) */
+  .btn--primary {
+    background: var(--color-tape);
+    color: var(--color-graphite);
+  }
+  .btn--primary:hover {
+    background: var(--color-tape-hover);
+  }
+  .btn--secondary {
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .btn--secondary:hover {
+    background: var(--color-graphite-2);
+  }
+  .btn--outline {
+    background: transparent;
+    color: var(--color-graphite);
+    border-color: var(--color-line-strong);
+  }
+  .btn--outline:hover {
+    border-color: var(--color-graphite);
+  }
+  :global(.on-dark) .btn--outline {
+    color: var(--color-plaster);
+    border-color: var(--color-ink-muted-dark);
+  }
+</style>

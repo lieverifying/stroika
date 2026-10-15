@@ -2,6 +2,8 @@
 // Временная страница фазы 2: каркас заменяется по мере задач 2.6–2.9
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Fact from '../components/ui/Fact.astro';
+import Button from '../components/ui/Button.astro';
+import Icon from '../components/ui/Icon.astro';
 import { facts } from '../content/facts';
 
 const sample = 'Ґанок, їжак, єнот, ІІ — 1234 грн';
@@ -23,6 +25,22 @@ const sample = 'Ґанок, їжак, єнот, ІІ — 1234 грн';
       <div class="flex items-center gap-6">
         <img src="/brand/mark.svg" alt="Знак Вимір" width="48" height="48" />
         <img src="/favicon.svg" alt="Favicon" width="48" height="48" />
+      </div>
+    </section>
+
+    <section class="mt-12 flex flex-wrap items-center gap-4" aria-label="Кнопки">
+      <Button href="#kvyz" size="lg" icon="calculator">Розрахувати вартість</Button>
+      <Button href="#viber" variant="secondary" icon="viber">Написати у Viber</Button>
+      <Button variant="outline">Назад</Button>
+      <Button href="#zamir" deferPrimary ctaPriority={1}>Безкоштовний замір</Button>
+      <div class="flex gap-3 text-graphite">
+        <Icon name="phone" label="Телефон" /><Icon name="viber" label="Viber" /><Icon
+          name="telegram"
+          label="Telegram"
+        /><Icon name="instagram" label="Instagram" /><Icon name="menu" label="Меню" /><Icon
+          name="close"
+          label="Закрити"
+        /><Icon name="arrow-right" label="Далі" />
       </div>
     </section>
 
