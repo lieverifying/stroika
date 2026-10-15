@@ -1,0 +1,26 @@
+{
+  "name": "vymir-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ВИМІР — кухні та меблі на замовлення, Черкаси",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.4.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}
