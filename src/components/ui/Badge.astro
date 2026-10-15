@@ -1,0 +1,16 @@
+---
+// Бейдж (сезонный «Встигніть до Нового року» и т. п.). Графитовый, не жёлтый: жёлтый — только кнопки заявки.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    'inline-flex min-h-8 items-center rounded-full bg-graphite px-3 text-small font-semibold text-plaster',
+    className,
+  ]}
+>
+  <slot />
+</span>

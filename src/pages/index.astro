@@ -1,53 +1,12 @@
 ---
-// Временная страница фазы 2: каркас заменяется по мере задач 2.6–2.9
+// Главная — лендинг кухонь (14 блоков по ТЗ). Фаза 2: шапка, блок 1, нижняя панель; остальные блоки — фаза 3.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Fact from '../components/ui/Fact.astro';
-import Button from '../components/ui/Button.astro';
-import Icon from '../components/ui/Icon.astro';
-import { facts } from '../content/facts';
-
-const sample = 'Ґанок, їжак, єнот, ІІ — 1234 грн';
+import Hero from '../components/sections/Hero.astro';
 ---
 
 <BaseLayout
   title="Кухні на замовлення в Черкасах — Вимір"
-  description="Кухні та меблі на замовлення в Черкасах. Безкоштовний замір."
+  description="Кухні та меблі на замовлення в Черкасах: замір, 3D-проєкт, виготовлення та монтаж. Розрахуйте вартість за 1 хвилину."
 >
-  <div class="container-site py-(--space-section)">
-    <h1 class="text-h1">{facts.brand.name}</h1>
-    <p class="text-lead mt-4 text-ink-muted">{facts.brand.descriptor}</p>
-
-    <section class="mt-12 space-y-6" aria-label="Логотип">
-      <img src="/brand/logo.svg" alt="Вимір" width="222" height="48" />
-      <div class="on-dark rounded-md bg-graphite p-6">
-        <img src="/brand/logo-dark.svg" alt="Вимір" width="222" height="48" />
-      </div>
-      <div class="flex items-center gap-6">
-        <img src="/brand/mark.svg" alt="Знак Вимір" width="48" height="48" />
-        <img src="/favicon.svg" alt="Favicon" width="48" height="48" />
-      </div>
-    </section>
-
-    <section class="mt-12 flex flex-wrap items-center gap-4" aria-label="Кнопки">
-      <Button href="#kvyz" size="lg" icon="calculator">Розрахувати вартість</Button>
-      <Button href="#viber" variant="secondary" icon="viber">Написати у Viber</Button>
-      <Button variant="outline">Назад</Button>
-      <Button href="#zamir" deferPrimary ctaPriority={1}>Безкоштовний замір</Button>
-      <div class="flex gap-3 text-graphite">
-        <Icon name="phone" label="Телефон" /><Icon name="viber" label="Viber" /><Icon
-          name="telegram"
-          label="Telegram"
-        /><Icon name="instagram" label="Instagram" /><Icon name="menu" label="Меню" /><Icon
-          name="close"
-          label="Закрити"
-        /><Icon name="arrow-right" label="Далі" />
-      </div>
-    </section>
-
-    <section class="mt-12 space-y-4" aria-label="Перевірка шрифтів і фактів">
-      <p class="font-display text-h3">{sample}</p>
-      <p class="font-mono text-price">{sample}</p>
-      <p>Гарантія: <Fact value={facts.warranty.years} /> років</p>
-    </section>
-  </div>
+  <Hero />
 </BaseLayout>

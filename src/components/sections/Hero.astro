@@ -1,0 +1,90 @@
+---
+// Блок 1 — первый экран главной (ТЗ). Все обещания — заглушки facts.ts до подтверждения владельцем.
+// Телефон: заголовок, выгоды, две кнопки — над нижней панелью; фото ниже во всю ширину.
+import Badge from '../ui/Badge.astro';
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
+import PlaceholderImage from '../ui/PlaceholderImage.astro';
+import { facts } from '../../content/facts';
+import { viberHref } from '../../lib/facts';
+
+const { promises, warranty, flags } = facts;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__inner container-site">
+    <div class="hero__text">
+      {
+        flags.seasonalBadge && (
+          <Badge class="mb-4">
+            <Fact value={facts.seasonalBadgeText} />
+          </Badge>
+        )
+      }
+
+      <h1 id="hero-title" class="text-h1">
+        Кухні на замовлення в Черкасах
+        <span class="hero__tail">— <Fact value={promises.oneTeam} /></span>
+      </h1>
+
+      <ul class="hero__benefits" aria-label="Переваги">
+        <li><span class="hero__num" aria-hidden="true">01</span><span>Замір і 3D за <Fact value={promises.measure3dHours} /> год</span></li>
+        <li><span class="hero__num" aria-hidden="true">02</span><span><Fact value={promises.priceFixedText} /></span></li>
+        <li><span class="hero__num" aria-hidden="true">03</span><span>Гарантія <Fact value={warranty.years} /> р.</span></li>
+      </ul>
+
+      <div class="hero__actions">
+        <Button href="#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+        <Button href={viberHref(facts.contacts.viberPhoneE164)} variant="secondary" icon="viber">
+          Написати у Viber
+        </Button>
+      </div>
+    </div>
+
+    <div class="hero__media">
+      <PlaceholderImage width={1600} height={1200} label="кухня, перший екран" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero__inner {
+    display: grid;
+    gap: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: var(--space-section);
+  }
+  .hero__tail {
+    display: block;
+    margin-top: 0.25em;
+    color: var(--color-ink-muted);
+  }
+  .hero__benefits {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: var(--text-lead);
+    line-height: 1.4;
+  }
+  .hero__benefits li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  /* Номера выгод — моноширинный дуб: деталь «размерной» темы, без жёлтого */
+  .hero__num {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-oak);
+  }
+  .hero__actions {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+  /* Фото на телефоне — во всю ширину экрана */
+  .hero__media {
+    margin-inline: calc(-1 * var(--space-gutter));
+  }
+</style>

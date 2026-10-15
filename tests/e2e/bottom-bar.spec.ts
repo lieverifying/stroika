@@ -15,7 +15,7 @@ test.describe('нижняя панель', () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const lastBottom = await page.locator('main > *').last().evaluate((el) => el.getBoundingClientRect().bottom);
     const barTop = await bar.evaluate((el) => el.getBoundingClientRect().top);
-    expect(lastBottom).toBeLessThanOrEqual(barTop);
+    expect(lastBottom).toBeLessThanOrEqual(barTop + 1); // допуск на субпиксели
   });
 
   test('телефон: прячется при фокусе в поле ввода', async ({ page, isMobile }) => {
