@@ -1,0 +1,107 @@
+---
+// Нижняя панель на телефоне (< 1024 px): «Подзвонити» / «Viber» / «Розрахувати» (ARCHITECTURE.md 6.8).
+// Не перекрывает контент: body получает нижний отступ на высоту панели (global.css).
+// Прячется при фокусе в поле ввода, открытом меню или <dialog>.
+// «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (фаза 3).
+import Icon from '../ui/Icon.astro';
+import { facts } from '../../content/facts';
+import { telHref, viberHref } from '../../lib/facts';
+---
+
+<nav data-bottom-bar aria-label="Швидкий зв'язок" class="bottom-bar">
+  <a href={telHref(facts.contacts.phoneE164)} class="cell">
+    <Icon name="phone" />
+    <span>Подзвонити</span>
+  </a>
+  <a href={viberHref(facts.contacts.viberPhoneE164)} class="cell">
+    <Icon name="viber" />
+    <span>Viber</span>
+  </a>
+  <a
+    href="/#kvyz"
+    class="cell cell--cta"
+    data-cta="primary"
+    data-cta-priority="2"
+    data-cta-deferred
+  >
+    <Icon name="calculator" />
+    <span>Розрахувати</span>
+  </a>
+</nav>
+
+<style>
+  .bottom-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--z-bottom-bar);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+    height: calc(var(--bottom-bar-h) + env(safe-area-inset-bottom));
+    padding: 0.375rem max(0.375rem, env(safe-area-inset-left)) calc(0.375rem + env(safe-area-inset-bottom))
+      max(0.375rem, env(safe-area-inset-right));
+    background: var(--color-white);
+    border-top: 1px solid var(--color-line);
+    box-shadow: 0 -2px 12px rgb(30 33 36 / 0.08);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .bottom-bar[data-hidden] {
+    transform: translateY(110%);
+  }
+  @media (min-width: 64rem) {
+    .bottom-bar {
+      display: none;
+    }
+  }
+  /* Иконка над подписью: подпись 16 px помещается в треть ширины даже на 320 px */
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: 3rem;
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    font-size: var(--text-small);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-graphite);
+  }
+  .cell :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  /* Без JS — вид secondary; жёлтым станет по правилу одного жёлтого (фаза 3) */
+  .cell--cta {
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+</style>
+
+<script>
+  // Скрыть панель, пока открыта клавиатура (фокус в поле), меню или <dialog>
+  const bar = document.querySelector<HTMLElement>('[data-bottom-bar]');
+  if (bar) {
+    const isField = (el: EventTarget | null) =>
+      el instanceof HTMLElement && el.matches('input:not([type=checkbox]):not([type=radio]), textarea, select');
+    let timer: number | undefined;
+    const update = () => {
+      const hide =
+        isField(document.activeElement) ||
+        document.documentElement.hasAttribute('data-menu-open') ||
+        document.querySelector('dialog[open]') !== null;
+      bar.toggleAttribute('data-hidden', hide);
+    };
+    document.addEventListener('focusin', update);
+    document.addEventListener('focusout', () => {
+      clearTimeout(timer);
+      timer = window.setTimeout(update, 150);
+    });
+    new MutationObserver(update).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-menu-open'],
+    });
+  }
+</script>

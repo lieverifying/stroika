@@ -9,10 +9,13 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     scroll-padding-top: var(--header-h);
+    /* Нижняя панель телефона не перекрывает контент и якоря (на ≥ 1024 px высота 0) */
+    scroll-padding-bottom: calc(var(--bottom-bar-h) + env(safe-area-inset-bottom));
   }
 
   body {
     min-height: 100dvh;
+    padding-bottom: calc(var(--bottom-bar-h) + env(safe-area-inset-bottom));
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     overflow-wrap: break-word;

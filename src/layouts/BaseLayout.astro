@@ -5,6 +5,7 @@ import Fonts from '../components/layout/Fonts.astro';
 import SeoHead from '../components/layout/SeoHead.astro';
 import SkipLink from '../components/layout/SkipLink.astro';
 import Header from '../components/layout/Header.astro';
+import MobileBottomBar from '../components/layout/MobileBottomBar.astro';
 
 interface Props {
   title: string;
@@ -33,5 +34,6 @@ const { title, description, noindex } = Astro.props;
       <slot />
     </main>
     <slot name="footer" />
+    <MobileBottomBar />
   </body>
 </html>
