@@ -58,7 +58,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         class="menu-toggle grid size-12 place-items-center rounded-md"
         aria-expanded="false"
         aria-controls="mobile-menu"
-        aria-label="Відкрити меню"
+        aria-label="Меню"
       >
         <Icon name="menu" class="icon-open" />
         <Icon name="close" class="icon-close" />
@@ -104,10 +104,14 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
   onScroll();
 
   if (toggle && menu) {
+    // Пока меню открыто, всё под ним недоступно для Tab и скринридера (фокус-ловушка через inert)
+    const background = () =>
+      document.querySelectorAll<HTMLElement>('main, footer, [data-bottom-bar], [data-skip-link]');
+
     const setOpen = (open: boolean, restoreFocus = true) => {
       toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Закрити меню' : 'Відкрити меню');
       menu.hidden = !open;
+      background().forEach((el) => (el.inert = open));
       document.documentElement.toggleAttribute('data-menu-open', open);
       if (open) menu.querySelector<HTMLElement>('a, button')?.focus();
       else if (restoreFocus) toggle.focus();

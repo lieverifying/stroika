@@ -93,6 +93,7 @@ import { telHref, viberHref } from '../../lib/facts';
         document.documentElement.hasAttribute('data-menu-open') ||
         document.querySelector('dialog[open]') !== null;
       bar.toggleAttribute('data-hidden', hide);
+      bar.inert = hide; // спрятанная панель не попадает в порядок Tab
     };
     document.addEventListener('focusin', update);
     document.addEventListener('focusout', () => {

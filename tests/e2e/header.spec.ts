@@ -22,6 +22,20 @@ test.describe('шапка', () => {
     await expect(menu).toBeHidden();
   });
 
+  test('телефон: при открытом меню Tab не уходит на страницу под ним', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await page.goto('/');
+    await page.locator('[data-menu-toggle]').click();
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press('Tab');
+      // body — переход фокуса на интерфейс браузера после последнего пункта, это нормально
+      const ok = await page.evaluate(
+        () => document.activeElement === document.body || !!document.activeElement?.closest('[data-header]'),
+      );
+      expect(ok).toBe(true);
+    }
+  });
+
   test('десктоп: меню в одну строку, бургера нет', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
     await page.goto('/');

@@ -59,6 +59,11 @@ const { promises, warranty, flags } = facts;
     margin-top: 0.25em;
     color: var(--color-ink-muted);
   }
+  /* Временная плашка-заглушка в H1 не должна спорить с заголовком, но и не меньше 16 px */
+  .hero__tail :global(.fact-ph) {
+    font-size: 1rem;
+    vertical-align: middle;
+  }
   .hero__benefits {
     display: grid;
     gap: 0.5rem;
@@ -86,5 +91,39 @@ const { promises, warranty, flags } = facts;
   /* Фото на телефоне — во всю ширину экрана */
   .hero__media {
     margin-inline: calc(-1 * var(--space-gutter));
+  }
+
+  /* Планшет: фото в пределах контейнера, кнопки в ряд */
+  @media (min-width: 48rem) {
+    .hero__inner {
+      gap: 2.5rem;
+      padding-top: 2.5rem;
+    }
+    .hero__media {
+      margin-inline: 0;
+    }
+    .hero__media :global(.ph) {
+      border-radius: var(--radius-lg);
+    }
+    .hero__actions {
+      grid-auto-flow: column;
+      justify-content: start;
+    }
+  }
+
+  /* Десктоп: текст слева, фото справа */
+  @media (min-width: 64rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      align-items: center;
+      gap: 4rem;
+      padding-top: 3rem;
+    }
+    .hero__benefits {
+      margin-top: 2rem;
+    }
+    .hero__actions {
+      margin-top: 2.5rem;
+    }
   }
 </style>

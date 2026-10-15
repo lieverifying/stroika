@@ -32,7 +32,7 @@ const text = placeholder ? value : format ? format(value as never) : String(valu
     max-width: 100%;
     padding: 0 0.25em;
     font-family: var(--font-mono);
-    font-size: 0.8em;
+    font-size: max(1rem, 0.8em); /* CLAUDE.md: текст на телефоне ≥ 16 px, и у заглушек тоже */
     line-height: 1.4;
     letter-spacing: 0;
     vertical-align: 0.05em;
