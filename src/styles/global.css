@@ -40,6 +40,11 @@
     outline-offset: 2px;
   }
 
+  /* Открыто мобильное меню: страница под ним не прокручивается */
+  html[data-menu-open] {
+    overflow: hidden;
+  }
+
   .on-dark :focus-visible {
     outline-color: var(--color-plaster);
   }

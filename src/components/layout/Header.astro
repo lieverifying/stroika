@@ -1,0 +1,128 @@
+---
+// Блок 0 — шапка (ТЗ). Закреплена при прокрутке.
+// < 1024 px: логотип, звонок, бургер. ≥ 1024 px: меню, телефон, «Безкоштовний замір».
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
+import Icon from '../ui/Icon.astro';
+import MobileMenu from './MobileMenu.astro';
+import { facts } from '../../content/facts';
+import { telHref } from '../../lib/facts';
+import { NAV } from './nav';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<header data-header class="site-header sticky top-0 z-(--z-header) bg-plaster">
+  <div class="container-site flex h-(--header-h) items-center justify-between gap-4">
+    <a href="/" class="-ml-1 flex min-h-12 items-center px-1" aria-label="Вимір — на головну">
+      <img src="/brand/logo.svg" alt="" width="148" height="32" class="h-8 w-auto lg:h-9" />
+    </a>
+
+    <nav aria-label="Головне меню" class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={path === item.href ? 'page' : undefined}
+                class="nav-link flex min-h-12 items-center rounded-md px-3 font-medium"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="hidden items-center gap-4 lg:flex">
+      <a href={telHref(facts.contacts.phoneE164)} class="flex min-h-12 items-center gap-2 font-semibold">
+        <Icon name="phone" size={20} />
+        <Fact value={facts.contacts.phoneDisplay} />
+      </a>
+      <Button href="/#zamir" deferPrimary ctaPriority={1}>Безкоштовний замір</Button>
+    </div>
+
+    <div class="flex items-center lg:hidden">
+      <a
+        href={telHref(facts.contacts.phoneE164)}
+        class="grid size-12 place-items-center rounded-md"
+        aria-label="Подзвонити"
+      >
+        <Icon name="phone" />
+      </a>
+      <button
+        type="button"
+        data-menu-toggle
+        class="menu-toggle grid size-12 place-items-center rounded-md"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Відкрити меню"
+      >
+        <Icon name="menu" class="icon-open" />
+        <Icon name="close" class="icon-close" />
+      </button>
+    </div>
+  </div>
+  <MobileMenu path={path} />
+</header>
+
+<style>
+  .site-header {
+    transition: box-shadow var(--dur-base) var(--ease-out);
+  }
+  .site-header[data-scrolled] {
+    box-shadow: var(--shadow-raised);
+  }
+  .nav-link:hover {
+    background: var(--color-white);
+  }
+  .nav-link[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    text-decoration-thickness: 2px;
+  }
+  /* Иконки рендерит дочерний Icon — scoped-стили до него не доходят, поэтому :global */
+  .menu-toggle :global(.icon-close),
+  .menu-toggle[aria-expanded='true'] :global(.icon-open) {
+    display: none;
+  }
+  .menu-toggle[aria-expanded='true'] :global(.icon-close) {
+    display: block;
+  }
+</style>
+
+<script>
+  // Тень шапки после прокрутки и мобильное меню: aria-expanded, Esc, возврат фокуса
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-menu');
+
+  const onScroll = () => header?.toggleAttribute('data-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if (toggle && menu) {
+    const setOpen = (open: boolean, restoreFocus = true) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Закрити меню' : 'Відкрити меню');
+      menu.hidden = !open;
+      document.documentElement.toggleAttribute('data-menu-open', open);
+      if (open) menu.querySelector<HTMLElement>('a, button')?.focus();
+      else if (restoreFocus) toggle.focus();
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) setOpen(false);
+    });
+    menu.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false, false);
+    });
+    // На десктопе меню не нужно
+    window.matchMedia('(min-width: 64rem)').addEventListener('change', (e) => {
+      if (e.matches && !menu.hidden) setOpen(false, false);
+    });
+  }
+</script>

@@ -1,6 +1,7 @@
 // Скриншоты для docs/screens/.
-// Использование: npm run screens -- --path=/ --name=2-9-hero [--widths=320,375,1280] [--fold]
+// Использование: npm run screens -- --path=/ --name=2-9-hero [--widths=320,375,1280] [--fold] [--click=<css>]
 //   --fold  — только первый экран (без прокрутки), иначе вся страница.
+//   --click — нажать элемент перед снимком.
 // Перед запуском нужен свежий `npm run build`: скрипт сам поднимает astro preview.
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
@@ -59,6 +60,8 @@ try {
     const page = await context.newPage();
     await page.goto(base + path, { waitUntil: 'networkidle' });
     await page.evaluate(() => document.fonts.ready);
+    // --click=<css> — нажать элемент перед снимком (например, открыть меню)
+    if (typeof args.click === 'string') await page.click(args.click);
     const file = `docs/screens/${name}-${width}.png`;
     await page.screenshot({ path: file, fullPage: !fold });
     console.log(`✓ ${file}`);

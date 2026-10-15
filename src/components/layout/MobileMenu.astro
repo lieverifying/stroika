@@ -1,0 +1,55 @@
+---
+// Мобильное меню (< 1024 px). Открывается бургером в Header; скрипт — там же.
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
+import Icon from '../ui/Icon.astro';
+import { facts } from '../../content/facts';
+import { telHref, telegramHref, viberHref } from '../../lib/facts';
+import { NAV } from './nav';
+
+interface Props {
+  path: string;
+}
+const { path } = Astro.props;
+const c = facts.contacts;
+---
+
+<div
+  id="mobile-menu"
+  hidden
+  class="fixed inset-x-0 top-(--header-h) bottom-0 z-(--z-menu) overflow-y-auto overscroll-contain bg-plaster lg:hidden"
+>
+  <div class="container-site flex min-h-full flex-col gap-8 pt-4 pb-10">
+    <nav aria-label="Мобільне меню">
+      <ul class="divide-y divide-line border-y border-line">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={path === item.href ? 'page' : undefined}
+                class="flex min-h-14 items-center justify-between font-display text-h3"
+              >
+                {item.label}
+                <Icon name="arrow-right" class="text-ink-muted" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex flex-col gap-3">
+      <a href={telHref(c.phoneE164)} class="flex min-h-12 items-center gap-3 text-lead font-semibold">
+        <Icon name="phone" />
+        <Fact value={c.phoneDisplay} />
+      </a>
+      <div class="grid grid-cols-2 gap-3">
+        <Button href={viberHref(c.viberPhoneE164)} variant="outline" icon="viber">Viber</Button>
+        <Button href={telegramHref(c.telegramUsername)} variant="outline" icon="telegram">Telegram</Button>
+      </div>
+    </div>
+
+    <Button href="/#zamir" size="lg" fullWidth ctaPriority={3}>Безкоштовний замір</Button>
+  </div>
+</div>

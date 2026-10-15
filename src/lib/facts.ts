@@ -25,6 +25,12 @@ export function formatUAH(n: number): string {
   return `${digits} грн`;
 }
 
+/** Ссылки связи. С заглушкой ссылка нерабочая, но видно, что место ждёт данных (ARCHITECTURE.md 5.3). */
+export const telHref = (e164: Fact<string>) => `tel:${e164}`;
+export const viberHref = (e164: Fact<string>) =>
+  isPlaceholder(e164) ? `viber://chat?number=${e164}` : `viber://chat?number=${encodeURIComponent(e164)}`;
+export const telegramHref = (username: Fact<string>) => `https://t.me/${username}`;
+
 /** '+380671234567' → '+380 67 123 45 67'. Заглушку возвращает как есть. */
 export function formatPhone(e164: Fact<string>): string {
   if (isPlaceholder(e164)) return e164;
