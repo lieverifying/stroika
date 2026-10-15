@@ -1,0 +1,20 @@
+---
+// Минимальный <head> для SEO. OG и JSON-LD добавляются в фазе 7.
+import { SITE_ENV } from 'astro:env/client';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+
+const { title, description, noindex = false } = Astro.props;
+// Всё, что не боевой сайт (локально, технический адрес хостинга), не индексируется
+const robots = noindex || SITE_ENV !== 'production' ? 'noindex, nofollow' : 'index, follow';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="robots" content={robots} />
+<link rel="canonical" href={canonical} />

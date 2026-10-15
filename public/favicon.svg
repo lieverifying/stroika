@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- TODO: временный favicon из знака «Кутник», заменить финальным файлом от владельца. Без текстовых тегов. -->
+  <rect width="48" height="48" rx="10" fill="#1E2124"/>
+  <g transform="translate(6 6) scale(.75)">
+    <path fill="#E3B12C" d="M0 0h10v38h38v10H0z"/>
+    <path fill="none" stroke="#F1F1EE" stroke-width="5" stroke-linejoin="round" d="M19 6v26M19 6h9a6.5 6.5 0 0 1 0 13h-9M19 19h11a6.5 6.5 0 0 1 0 13H19"/>
+  </g>
+</svg>

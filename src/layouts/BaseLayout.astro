@@ -1,0 +1,36 @@
+---
+// Общий шаблон страницы: lang="uk", шрифты, SEO, шапка и нижняя панель (с задач 2.7–2.8).
+import '../styles/global.css';
+import Fonts from '../components/layout/Fonts.astro';
+import SeoHead from '../components/layout/SeoHead.astro';
+import SkipLink from '../components/layout/SkipLink.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+
+const { title, description, noindex } = Astro.props;
+---
+
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Масштабирование не запрещаем (CLAUDE.md) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <SeoHead title={title} description={description} noindex={noindex} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#F1F1EE" />
+    <Fonts />
+  </head>
+  <body>
+    <SkipLink />
+    <slot name="header" />
+    <main id="main">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>
