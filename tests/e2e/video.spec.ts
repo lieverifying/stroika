@@ -10,13 +10,13 @@ test.describe('видео бригады', () => {
     await page.goto('/');
     const facade = page.locator('[data-video-facade]');
     await facade.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
+    await page.waitForLoadState('networkidle'); // все запросы после прокрутки завершены
     await expect(facade.locator('video')).toHaveCount(0);
     expect(videoRequests).toEqual([]);
 
     // Пока видео — заглушка, по клику ничего не грузится
     await facade.getByRole('button', { name: /Дивитися відео/ }).click();
-    await page.waitForTimeout(300);
+    await page.waitForLoadState('networkidle');
     await expect(facade.locator('video')).toHaveCount(0);
     expect(videoRequests).toEqual([]);
 

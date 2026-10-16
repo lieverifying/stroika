@@ -203,6 +203,9 @@ export const facts = {
   flags: {
     quizResultVariant: 'B' as 'A' | 'B',
     seasonalBadge: false as boolean,
+    // Отправка заявок подключена (фаза 6, api/lead.php). Пока false — формы и квиз только проверяют поля,
+    // а боевая сборка (SITE_ENV=production) падает: scripts/check-release.mjs.
+    leadSubmitEnabled: false as boolean,
   },
 } satisfies FactsSchema;
 
@@ -264,5 +267,5 @@ interface FactsSchema {
   seasonalBadgeText: Fact<string>;
   teamTitle: Fact<string>;
   teamSubtitle: Fact<string>;
-  flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean };
+  flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean; leadSubmitEnabled: boolean };
 }

@@ -1,29 +1,16 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { nextFrames, noTransitions, yellowOnScreen } from './helpers';
 
 // Правило «один жёлтый элемент на экран» (ARCHITECTURE.md 6.9).
 // Считаем видимые элементы с жёлтым фоном. Логотип (жёлтый угольник в <img>) не считается — решение владельца.
-const TAPE = 'rgb(227, 177, 44)';
-
-async function yellowOnScreen(page: Page) {
-  return page.evaluate((tape) => {
-    const vh = window.innerHeight;
-    return [...document.querySelectorAll<HTMLElement>('body *')]
-      .filter((el) => getComputedStyle(el).backgroundColor === tape)
-      .filter((el) => {
-        const r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh;
-      })
-      .map((el) => el.textContent?.trim() ?? '');
-  }, TAPE);
-}
-
 test.describe('один жёлтый на экран', () => {
   test('в разных точках прокрутки жёлтых элементов не больше одного', async ({ page }) => {
     await page.goto('/');
+    await noTransitions(page);
     const height = await page.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y < height; y += 400) {
       await page.evaluate((top) => window.scrollTo(0, top), y);
-      await page.waitForTimeout(150); // IntersectionObserver и переход цвета
+      await nextFrames(page); // IntersectionObserver пересчитал правило
       const yellow = await yellowOnScreen(page);
       expect(yellow.length, `y=${y}: ${yellow.join(' | ')}`).toBeLessThanOrEqual(1);
     }
@@ -32,16 +19,16 @@ test.describe('один жёлтый на экран', () => {
   test('десктоп, первый экран: жёлтая — кнопка hero', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
     await page.goto('/');
-    await page.waitForTimeout(200);
-    expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+    await noTransitions(page);
+    await expect.poll(() => yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
   });
 
   test('телефон: когда кнопка hero видна, жёлтая она, а не панель', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
     await page.goto('/');
+    await noTransitions(page);
     await page.locator('.hero__actions [data-cta]').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(200);
-    expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+    await expect.poll(() => yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
   });
 
   test('телефон: ниже hero жёлтой становится «Розрахувати» в панели', async ({ page, isMobile }) => {

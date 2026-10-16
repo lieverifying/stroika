@@ -49,7 +49,7 @@ test.describe('шапка', () => {
   test('шапка остаётся вверху при прокрутке', async ({ page }) => {
     await page.goto('/');
     await page.mouse.wheel(0, 600);
-    await page.waitForTimeout(200);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0); // прокрутка произошла
     const top = await page.locator('[data-header]').evaluate((el) => el.getBoundingClientRect().top);
     expect(top).toBe(0);
   });

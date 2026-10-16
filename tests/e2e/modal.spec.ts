@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { noTransitions, yellowOnScreen } from './helpers';
 
 // Попап замера из шапки (<dialog>)
 test.describe('попап замера', () => {
@@ -58,5 +59,16 @@ test.describe('попап замера', () => {
     const submit = page.locator('[data-zamir-modal] button[type=submit]');
     await submit.scrollIntoViewIfNeeded();
     await expect(submit).toBeInViewport();
+  });
+
+  test('телефон: при открытом попапе на экране один жёлтый — кнопка в окне', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await page.goto('/');
+    await noTransitions(page);
+    await page.locator('[data-menu-toggle]').click();
+    await page.locator('#mobile-menu [data-zamir-open]').click();
+    const submit = page.locator('[data-zamir-modal] button[type=submit]');
+    await expect(submit).toHaveAttribute('data-cta-on', '');
+    await expect.poll(() => yellowOnScreen(page)).toEqual(['Надіслати заявку']);
   });
 });

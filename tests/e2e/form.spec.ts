@@ -31,6 +31,24 @@ test.describe('поля формы', () => {
     expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
   });
 
+  for (const pasted of ['0671234567', '+380671234567', '+38 (067) 123-45-67']) {
+    test(`вставка из буфера «${pasted}» → +380 67 123 45 67`, async ({ page, context, browserName }) => {
+      test.skip(browserName !== 'chromium', 'права на буфер обмена — только Chromium');
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.goto('/');
+      const phone = page.locator('#zamir-phone');
+      await phone.click(); // в поле уже «+380 »
+      await page.evaluate((t) => navigator.clipboard.writeText(t), pasted);
+      await page.keyboard.press('ControlOrMeta+V');
+      await expect(phone).toHaveValue('+380 67 123 45 67');
+    });
+  }
+
+  test('маска привязана к своему полю: у каждого поля телефона своя', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('phone-field input[data-masked]')).toHaveCount(await page.locator('phone-field').count());
+  });
+
   test('поля 48 px и шрифт 16 px (iOS не зумит), согласие не отмечено', async ({ page }) => {
     await page.goto('/');
     for (const sel of ['#zamir-name', '#zamir-phone', '#zamir-time']) {

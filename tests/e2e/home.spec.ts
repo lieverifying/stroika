@@ -12,10 +12,10 @@ test.describe('главная', () => {
   for (const anchor of ['kvyz', 'zamir']) {
     test(`якорь #${anchor}: заголовок блока виден под шапкой`, async ({ page }) => {
       await page.goto(`/#${anchor}`);
-      await page.waitForTimeout(300);
+      const title = page.locator(`#${anchor} h2`);
+      await expect(title).toBeInViewport(); // браузер докрутил до якоря
       const headerBottom = await page.locator('[data-header]').evaluate((el) => el.getBoundingClientRect().bottom);
-      const titleTop = await page.locator(`#${anchor} h2`).evaluate((el) => el.getBoundingClientRect().top);
-      expect(titleTop).toBeGreaterThanOrEqual(headerBottom);
+      await expect.poll(() => title.evaluate((el) => el.getBoundingClientRect().top)).toBeGreaterThanOrEqual(headerBottom);
     });
   }
 });

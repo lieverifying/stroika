@@ -1,6 +1,7 @@
 ---
-// Телефон: маска «+380 XX XXX XX XX» при вводе, inputmode="tel" (цифровая клавиатура).
-// Перед отправкой скрипт формы приводит номер к +380XXXXXXXXX (src/lib/phone.ts).
+// Телефон: маска «+380 XX XXX XX XX» при вводе и вставке, inputmode="tel" (цифровая клавиатура).
+// Каждое поле — свой элемент <phone-field>: маска привязана к своему input, а не ищет поля по странице
+// (в квизе будет второе поле телефона). Перед отправкой номер приводится к +380XXXXXXXXX (src/lib/phone.ts).
 import Input from './Input.astro';
 
 interface Props {
@@ -12,34 +13,56 @@ interface Props {
 const { name = 'phone', label = 'Телефон', id, required = true } = Astro.props;
 ---
 
-<Input
-  name={name}
-  id={id}
-  label={label}
-  type="tel"
-  inputmode="tel"
-  autocomplete="tel"
-  placeholder="+380 __ ___ __ __"
-  required={required}
-  data-phone-mask
-  error="Вкажіть номер у форматі +380 XX XXX XX XX"
-/>
+<phone-field>
+  <Input
+    name={name}
+    id={id}
+    label={label}
+    type="tel"
+    inputmode="tel"
+    autocomplete="tel"
+    placeholder="+380 __ ___ __ __"
+    required={required}
+    error="Вкажіть номер у форматі +380 XX XXX XX XX"
+  />
+</phone-field>
+
+<style>
+  phone-field {
+    display: block;
+  }
+</style>
 
 <script>
   import { maskPhone } from '../../../lib/phone';
 
-  document.querySelectorAll<HTMLInputElement>('input[data-phone-mask]').forEach((input) => {
-    input.addEventListener('input', () => {
-      const atEnd = input.selectionStart === input.value.length;
-      input.value = maskPhone(input.value);
-      if (atEnd) input.setSelectionRange(input.value.length, input.value.length);
-    });
-    // Пустое поле при фокусе — сразу «+380 », чтобы было понятно, что код вводить не надо
-    input.addEventListener('focus', () => {
-      if (!input.value) input.value = '+380 ';
-    });
-    input.addEventListener('blur', () => {
-      if (input.value.trim() === '+380') input.value = '';
-    });
-  });
+  class PhoneField extends HTMLElement {
+    connectedCallback() {
+      const input = this.querySelector<HTMLInputElement>('input[type="tel"]');
+      if (!input || input.dataset.masked) return;
+      input.dataset.masked = '';
+
+      input.addEventListener('input', () => {
+        const atEnd = input.selectionStart === input.value.length;
+        input.value = maskPhone(input.value);
+        if (atEnd) input.setSelectionRange(input.value.length, input.value.length);
+      });
+      // Вставка из буфера заменяет поле целиком: «+380671234567» после подставленного «+380 » иначе склеится
+      input.addEventListener('paste', (e) => {
+        const text = e.clipboardData?.getData('text') ?? '';
+        if (!/\d/.test(text)) return;
+        e.preventDefault();
+        input.value = maskPhone(text);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      // Пустое поле при фокусе — сразу «+380 », чтобы было понятно, что код вводить не надо
+      input.addEventListener('focus', () => {
+        if (!input.value) input.value = '+380 ';
+      });
+      input.addEventListener('blur', () => {
+        if (input.value.trim() === '+380') input.value = '';
+      });
+    }
+  }
+  customElements.define('phone-field', PhoneField);
 </script>

@@ -826,7 +826,7 @@ export const facts = {
 
 | Уровень | Что проверяет | Когда |
 |---|---|---|
-| 1. `check:facts` | Обходит `facts`. Если `SITE_ENV=production` и есть хоть одна заглушка, сборка падает со списком имён | Начало продакшен-сборки |
+| 1. `scripts/check-release.mjs` (`npm run check:release`, первый шаг `npm run build`) | Если `SITE_ENV=production`: сборка падает, когда в `facts` есть хоть одна заглушка (со списком имён) или отправка заявок не подключена (`facts.flags.leadSubmitEnabled = false`, до фазы 6) | Начало каждой сборки |
 | 2. Коллекция | При `SITE_ENV=production` кейсы с `placeholder: true` или `draft: true` исключаются. Кейс без заглушек обязан проходить `superRefine` | Сборка |
 | 3. `scripts/check-placeholders.mjs` | Сканирует `dist/**/*.{html,js,json,xml,txt}` на `{{` и `data-placeholder`. С флагом `--strict` при находке код выхода 1 | После сборки |
 | 4. `scripts/check-words.mjs` | Ищет запрещённое слово из CLAUDE.md, п.3, во всех падежах по-русски и по-украински в `src/` и `dist/`. Слово задано в скрипте в закодированном виде, сам скрипт из проверки исключён | Каждая сборка |
