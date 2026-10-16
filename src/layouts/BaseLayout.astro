@@ -7,6 +7,7 @@ import SkipLink from '../components/layout/SkipLink.astro';
 import Header from '../components/layout/Header.astro';
 import MobileBottomBar from '../components/layout/MobileBottomBar.astro';
 import Footer from '../components/layout/Footer.astro';
+import ZamirModal from '../components/forms/ZamirModal.astro';
 
 interface Props {
   title: string;
@@ -36,6 +37,7 @@ const { title, description, noindex } = Astro.props;
     </main>
     <Footer />
     <MobileBottomBar />
+    <ZamirModal />
     <script>
       import { initCtaArbiter } from '../lib/cta-arbiter';
       initCtaArbiter();

@@ -41,7 +41,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         <Icon name="phone" size={20} />
         <Fact value={facts.contacts.phoneDisplay} />
       </a>
-      <Button href="/#zamir" deferPrimary ctaPriority={1}>Безкоштовний замір</Button>
+      <Button href="/#zamir" deferPrimary ctaPriority={1} data-zamir-open>Безкоштовний замір</Button>
     </div>
 
     <div class="flex items-center lg:hidden">

@@ -90,6 +90,7 @@ import { contactLinks } from '../../lib/contacts';
       const hide =
         isField(document.activeElement) ||
         document.documentElement.hasAttribute('data-menu-open') ||
+        document.documentElement.hasAttribute('data-dialog-open') ||
         document.querySelector('dialog[open]') !== null;
       bar.toggleAttribute('data-hidden', hide);
       bar.inert = hide; // спрятанная панель не попадает в порядок Tab
@@ -101,7 +102,7 @@ import { contactLinks } from '../../lib/contacts';
     });
     new MutationObserver(update).observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['data-menu-open'],
+      attributeFilter: ['data-menu-open', 'data-dialog-open'],
     });
   }
 </script>

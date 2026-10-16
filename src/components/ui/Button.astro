@@ -15,7 +15,7 @@ interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'ty
   size?: 'md' | 'lg';
   icon?: IconName;
   fullWidth?: boolean;
-  /** Приоритет жёлтой кнопки: hero/квиз/форма — 3, панель — 2, шапка — 1 */
+  /** Приоритет жёлтой кнопки: попап — 4, hero/квиз/форма — 3, панель — 2, шапка — 1 */
   ctaPriority?: number;
   deferPrimary?: boolean;
 }

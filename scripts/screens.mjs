@@ -1,7 +1,7 @@
 // Скриншоты для docs/screens/.
 // Использование: npm run screens -- --path=/ --name=2-9-hero [--widths=320,375,1280] [--fold] [--click=<css>]
 //   --fold  — только первый экран (без прокрутки), иначе вся страница.
-//   --click — нажать элемент перед снимком.
+//   --click — нажать элемент перед снимком (несколько — через «||»).
 //   --scroll — прокрутить страницу на N px перед снимком (вместе с --fold).
 //   --to    — прокрутить к элементу (верх элемента под шапку), напр. --to='[data-block="4"]'.
 //   --css   — добавить CSS перед снимком (сравнить вариант, не меняя код), напр. --css='h1{font-weight:600}'.
@@ -67,7 +67,13 @@ try {
     if (cssArg) await page.addStyleTag({ content: cssArg });
     await page.evaluate(() => document.fonts.ready);
     // --click=<css> — нажать элемент перед снимком (например, открыть меню)
-    if (typeof args.click === 'string') await page.click(args.click);
+    if (typeof args.click === 'string') {
+      // несколько кликов подряд — через «||», напр. --click='[data-menu-toggle]||#mobile-menu [data-zamir-open]'
+      for (const sel of args.click.split('||')) {
+        await page.click(sel);
+        await page.waitForTimeout(600); // анимации и IntersectionObserver (правило одного жёлтого)
+      }
+    }
     if (typeof args.to === 'string') {
       await page.locator(args.to).first().evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - (document.querySelector('[data-header]')?.getBoundingClientRect().height ?? 0) - 16));
       await page.waitForTimeout(400);

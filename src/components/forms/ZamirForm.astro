@@ -14,8 +14,10 @@ interface Props {
   idPrefix?: string;
   /** Откуда заявка — уйдёт в заявке (ARCHITECTURE.md 4.8) */
   source?: string;
+  /** Приоритет жёлтой кнопки: в попапе 4 — она важнее всего, что видно под окном */
+  ctaPriority?: number;
 }
-const { idPrefix = 'zamir', source = 'zamir-form' } = Astro.props;
+const { idPrefix = 'zamir', source = 'zamir-form', ctaPriority = 3 } = Astro.props;
 const id = (name: string) => `${idPrefix}-${name}`;
 
 const TIMES = [
@@ -33,7 +35,7 @@ const TIMES = [
   <Select name="time" id={id('time')} label="Зручний час для дзвінка" options={TIMES} />
   <ConsentCheckbox id={id('consent')} />
   <Honeypot id={id('website')} />
-  <Button type="submit" size="lg" fullWidth ctaPriority={3}>Надіслати заявку</Button>
+  <Button type="submit" size="lg" fullWidth ctaPriority={ctaPriority}>Надіслати заявку</Button>
   <p class="zamir-form__status" role="status" aria-live="polite" data-form-status></p>
 </form>
 
