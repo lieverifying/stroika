@@ -6,7 +6,9 @@
  * — ответы сохраняются (без имени и телефона) и восстанавливаются после перезагрузки;
  * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы.
  */
-import { answer, back, isLastStep, progress, start } from '../lib/quiz/machine';
+import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
+import { validateConsent, validateName, validatePhone, validateTask } from '../lib/lead/validate';
+import { answer, back, isLastStep, progress, setTask, start } from '../lib/quiz/machine';
 import { clearState, loadState, saveState } from '../lib/quiz/storage';
 import type { QuizAnswers, QuizState, StepId } from '../lib/quiz/types';
 
@@ -126,6 +128,33 @@ export function initQuiz(root: HTMLElement): void {
     history.replaceState({ ...history.state, quizStep: 'goal' }, '');
     render(true);
   });
+
+  // Шаг 7 и коротка форма: проверка полей (имя 2–50, телефон +380, согласие; задача — для короткой формы)
+  const CONTACT_CHECKS = {
+    name: (f: HTMLInputElement | HTMLTextAreaElement) => validateName(f.value),
+    phone: (f: HTMLInputElement | HTMLTextAreaElement) => validatePhone(f.value),
+    consent: (f: HTMLInputElement | HTMLTextAreaElement) => validateConsent((f as HTMLInputElement).checked),
+  };
+  root.querySelectorAll<HTMLFormElement>('form[data-quiz-form]').forEach((form) => {
+    const short = form.dataset.quizForm === 'short';
+    const checks = short ? { task: (f: HTMLInputElement | HTMLTextAreaElement) => validateTask(f.value), ...CONTACT_CHECKS } : CONTACT_CHECKS;
+    clearErrorsOnFix(form, checks);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validateForm(form, checks)) return;
+      if (short) {
+        state = setTask(state, (form.elements.namedItem('task') as HTMLTextAreaElement).value, Date.now());
+        persist();
+      }
+      onValidSubmit(form);
+    });
+  });
+
+  // Заглушка до задачи 4.8 (отправка и /dyakuyemo)
+  function onValidSubmit(form: HTMLFormElement) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    if (status) status.textContent = 'Перевірку пройдено.';
+  }
 
   history.replaceState({ ...history.state, quizStep: state.stepId }, '');
   root.classList.add('quiz--ready');

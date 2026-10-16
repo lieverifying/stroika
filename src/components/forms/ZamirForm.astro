@@ -55,46 +55,23 @@ const TIMES = [
 </style>
 
 <script>
+  import { clearErrorsOnFix, validateForm } from '../../lib/lead/field-errors';
+  import { validateConsent, validateName, validatePhone } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
 
   // Проверка формы замера. В сеть ничего не отправляем — отправка появится в фазе 6 (api/lead.php).
-  type Check = (field: HTMLInputElement | HTMLSelectElement) => boolean;
-  const CHECKS: Record<string, Check> = {
-    name: (f) => f.value.trim().length > 0,
-    phone: (f) => normalizePhone(f.value) !== null,
-    consent: (f) => (f as HTMLInputElement).checked,
-  };
-
-  // Ошибка: aria-invalid, видимый текст и id ошибки в aria-describedby (только пока ошибка показана)
-  const setError = (field: HTMLElement, invalid: boolean) => {
-    field.setAttribute('aria-invalid', String(invalid));
-    const errorId = `${field.id}-error`;
-    const error = document.getElementById(errorId);
-    if (error) error.hidden = !invalid;
-    const ids = new Set((field.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean));
-    if (invalid) ids.add(errorId);
-    else ids.delete(errorId);
-    if (ids.size) field.setAttribute('aria-describedby', [...ids].join(' '));
-    else field.removeAttribute('aria-describedby');
+  const CHECKS = {
+    name: (f: HTMLInputElement | HTMLTextAreaElement) => validateName(f.value),
+    phone: (f: HTMLInputElement | HTMLTextAreaElement) => validatePhone(f.value),
+    consent: (f: HTMLInputElement | HTMLTextAreaElement) => validateConsent((f as HTMLInputElement).checked),
   };
 
   document.querySelectorAll<HTMLFormElement>('form[data-zamir-form]').forEach((form) => {
     const status = form.querySelector<HTMLElement>('[data-form-status]');
-    const fields = () =>
-      Object.keys(CHECKS)
-        .map((name) => form.elements.namedItem(name))
-        .filter((f): f is HTMLInputElement => f instanceof HTMLInputElement || f instanceof HTMLSelectElement);
-
+    clearErrorsOnFix(form, CHECKS);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      let firstInvalid: HTMLElement | null = null;
-      for (const field of fields()) {
-        const ok = CHECKS[field.name](field);
-        setError(field, !ok);
-        if (!ok && !firstInvalid) firstInvalid = field;
-      }
-      if (firstInvalid) {
-        firstInvalid.focus();
+      if (!validateForm(form, CHECKS)) {
         if (status) status.textContent = '';
         return;
       }
@@ -102,16 +79,6 @@ const TIMES = [
       const phone = form.elements.namedItem('phone') as HTMLInputElement;
       phone.dataset.normalized = normalizePhone(phone.value) ?? '';
       if (status) status.textContent = 'Перевірку пройдено. Надсилання заявки буде підключено пізніше.';
-    });
-
-    // Ошибка снимается, как только поле исправлено
-    form.addEventListener('input', (e) => {
-      const field = e.target as HTMLInputElement;
-      if (field.getAttribute('aria-invalid') === 'true' && CHECKS[field.name]?.(field)) setError(field, false);
-    });
-    form.addEventListener('change', (e) => {
-      const field = e.target as HTMLInputElement;
-      if (field.getAttribute('aria-invalid') === 'true' && CHECKS[field.name]?.(field)) setError(field, false);
     });
   });
 </script>

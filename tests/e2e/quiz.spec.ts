@@ -106,3 +106,58 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(visibleStep(page).locator('h3')).toBeFocused();
   });
 });
+
+test.describe('квиз: шаг контакта и коротка форма', () => {
+  async function toContact(page: Page) {
+    await openQuiz(page);
+    await choose(page, 'Шафа або гардеробна');
+    await choose(page, 'Шафа-купе');
+    await choose(page, 'Не знаю — приїдемо заміряти');
+    await choose(page, 'Пізніше');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'contact');
+  }
+
+  test('пустая отправка, неполный номер, нет согласия — отправка блокируется с понятными ошибками', async ({ page }) => {
+    await toContact(page);
+    const step = visibleStep(page);
+    await expect(step.getByRole('radio', { name: 'Дзвінок' })).toBeChecked(); // способ связи по умолчанию
+    await expect(step.locator('#quiz-consent')).not.toBeChecked();
+    const submit = step.getByRole('button', { name: 'Отримати розрахунок' });
+    await submit.click();
+    await expect(page.locator('#quiz-name')).toBeFocused();
+    await expect(page.locator('#quiz-name-error')).toBeVisible();
+    await expect(page.locator('#quiz-phone-error')).toBeVisible();
+    await expect(page.locator('#quiz-consent-error')).toBeVisible();
+
+    await page.locator('#quiz-name').fill('Олена');
+    await page.locator('#quiz-phone').click();
+    await page.locator('#quiz-phone').pressSequentially('067123');
+    await submit.click();
+    await expect(page.locator('#quiz-name-error')).toBeHidden();
+    await expect(page.locator('#quiz-phone')).toBeFocused();
+    await expect(page.locator('#quiz-phone-error')).toContainText('+380');
+    await expect(page.locator('#quiz-consent-error')).toBeVisible();
+  });
+
+  test('телефон: при фокусе в поле контакта нижняя панель скрыта, кнопка видна', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await toContact(page);
+    await page.locator('#quiz-phone').focus();
+    await expect(page.locator('[data-bottom-bar]')).toHaveAttribute('data-hidden', '');
+    const submit = visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' });
+    await submit.scrollIntoViewIfNeeded();
+    await expect(submit).toBeInViewport();
+  });
+
+  for (const goal of ['Інші меблі', 'Ремонт']) {
+    test(`«${goal}» ведёт на короткую форму 2 из 2, задача обязательна`, async ({ page }) => {
+      await openQuiz(page);
+      await choose(page, goal);
+      await expect(visibleStep(page)).toHaveAttribute('data-step', 'shortForm');
+      await expect(progressText(page)).toHaveText('Крок 2 з 2');
+      await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
+      await expect(page.locator('#quiz-short-task')).toBeFocused();
+      await expect(page.locator('#quiz-short-task-error')).toBeVisible();
+    });
+  }
+});

@@ -1,0 +1,80 @@
+---
+// Общие поля контакта квиза (шаг 7 и коротка форма): ім'я, телефон +380, «Як зв'язатися», согласие, ловушка.
+// Способ связи по умолчанию — «Дзвінок»; согласие по умолчанию НЕ отмечено (ARCHITECTURE.md 4.1).
+import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
+import Honeypot from '../ui/form/Honeypot.astro';
+import Input from '../ui/form/Input.astro';
+import PhoneInput from '../ui/form/PhoneInput.astro';
+
+interface Props {
+  /** префикс id: на странице два набора полей (шаг 7 и коротка форма) */
+  prefix: string;
+}
+const { prefix } = Astro.props;
+const METHODS = [
+  { value: 'call', label: 'Дзвінок' },
+  { value: 'viber', label: 'Viber' },
+  { value: 'telegram', label: 'Telegram' },
+];
+---
+
+<Input name="name" id={`${prefix}-name`} label="Ім’я" autocomplete="given-name" required />
+<PhoneInput id={`${prefix}-phone`} />
+<fieldset class="methods">
+  <legend class="field__label">Як зв’язатися</legend>
+  <div class="methods__list">
+    {
+      METHODS.map((m, i) => (
+        <label class="methods__item">
+          <input type="radio" name="method" value={m.value} checked={i === 0} />
+          <span>{m.label}</span>
+        </label>
+      ))
+    }
+  </div>
+</fieldset>
+<ConsentCheckbox id={`${prefix}-consent`} />
+<Honeypot id={`${prefix}-website`} />
+
+<style>
+  .methods {
+    display: grid;
+    gap: 0.375rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .methods__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .methods__item {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: var(--control-h);
+    padding-inline: 0.5rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  /* Радиокнопка невидима, но доступна с клавиатуры и скринридеру; выбор — графитовая рамка */
+  .methods__item input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .methods__item:has(input:checked) {
+    border: 2px solid var(--color-graphite);
+    background: var(--color-plaster);
+  }
+  .methods__item:has(input:focus-visible) {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+</style>

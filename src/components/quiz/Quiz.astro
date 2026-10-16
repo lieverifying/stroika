@@ -2,15 +2,23 @@
 // Квиз-калькулятор (ТЗ, блок 5; ARCHITECTURE.md 4): все шаги в разметке, виден один.
 // Логика (переходы, «Назад», сохранение) — src/scripts/quiz.ts, грузится, когда квиз близко к экрану.
 // Без JS виден шаг 1 и ссылка на форму замера.
-// Шаги контакта и короткой формы — задача 4.6.
 import QuizProgress from './QuizProgress.astro';
 import QuizStep from './QuizStep.astro';
+import QuizContact from './QuizContact.astro';
+import QuizShortForm from './QuizShortForm.astro';
 import { STEPS } from '../../lib/quiz/config';
 ---
 
 <div class="quiz" data-quiz>
   <QuizProgress />
-  {Object.values(STEPS).map((step) => <QuizStep step={step} hidden={step.id !== 'goal'} />)}
+  {
+    Object.values(STEPS).map((step) => (
+      <QuizStep step={step} hidden={step.id !== 'goal'}>
+        {step.kind === 'contact' && <QuizContact />}
+        {step.kind === 'short-form' && <QuizShortForm />}
+      </QuizStep>
+    ))
+  }
   <div class="quiz__nav">
     <button type="button" class="quiz__back" data-quiz-back hidden>
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>

@@ -1,0 +1,23 @@
+---
+// Шаг 7 квиза «Куди надіслати розрахунок?» (кухня, шафа): поля контакта и «Отримати розрахунок».
+// Проверка — src/lib/lead/validate.ts в скрипте квиза; отправки в сеть нет до фазы 6.
+import ContactFields from './ContactFields.astro';
+import Button from '../ui/Button.astro';
+---
+
+<form class="quiz-form" novalidate data-quiz-form="contact">
+  <ContactFields prefix="quiz" />
+  <Button type="submit" size="lg" fullWidth ctaPriority={3}>Отримати розрахунок</Button>
+  <p class="quiz-form__status" role="status" aria-live="polite" data-form-status></p>
+</form>
+
+<style>
+  .quiz-form {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .quiz-form__status:empty {
+    display: none;
+  }
+</style>
