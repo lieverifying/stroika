@@ -1,21 +1,55 @@
 ---
 // Блок 13 — «Фінальний заклик» (ТЗ): форма замера + карта зоны выезда. Якорь #zamir — сюда ведёт кнопка шапки.
-// Задача 3.13: форма из полей; проверка, карта зоны — задача 3.14.
+// Форма — только интерфейс (отправка — фаза 6). Зона выезда и карта — заглушки facts.serviceArea.
 import ZamirForm from '../forms/ZamirForm.astro';
+import Fact from '../ui/Fact.astro';
+import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
+import { facts } from '../../content/facts';
 ---
 
 <section id="zamir" data-block="13" class="section-pad" aria-labelledby="final-title">
-  <div class="container-site">
-    <SectionTitle id="final-title" title="Безкоштовний замір" />
+  <div class="container-site final">
     <div class="final__form">
+      <SectionTitle id="final-title" title="Безкоштовний замір" subtitle="Залиште номер — передзвонимо й домовимося про час." />
       <ZamirForm />
+    </div>
+    <div class="final__map">
+      <h3 class="final__map-title">Зона виїзду</h3>
+      <p class="final__area"><Fact value={facts.serviceArea.text} /></p>
+      <PlaceholderImage width={1200} height={1200} label="карта зони виїзду" />
     </div>
   </div>
 </section>
 
 <style>
-  .final__form {
-    max-width: 32rem;
+  .final {
+    display: grid;
+    gap: var(--space-stack);
+  }
+  .final__map {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .final__map-title {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  .final__area {
+    color: var(--color-ink-muted);
+  }
+  .final__map :global(.ph) {
+    border-radius: var(--radius-lg);
+  }
+  @media (min-width: 64rem) {
+    .final {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 4rem;
+      align-items: start;
+    }
   }
 </style>
