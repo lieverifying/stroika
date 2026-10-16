@@ -1,7 +1,19 @@
 ---
-// Главная — лендинг кухонь (14 блоков по ТЗ). Фаза 2: шапка, блок 1, нижняя панель; остальные блоки — фаза 3.
+// Главная — лендинг кухонь: блоки 1–13 строго в порядке ТЗ, блок 0 (шапка) и 14 (футер) — в BaseLayout.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
+import TrustNumbers from '../components/sections/TrustNumbers.astro';
+import Portfolio from '../components/sections/Portfolio.astro';
+import BeforeAfterSection from '../components/sections/BeforeAfterSection.astro';
+import QuizSection from '../components/sections/QuizSection.astro';
+import Team from '../components/sections/Team.astro';
+import Process from '../components/sections/Process.astro';
+import Prices from '../components/sections/Prices.astro';
+import Materials from '../components/sections/Materials.astro';
+import Reviews from '../components/sections/Reviews.astro';
+import WarrantyPayment from '../components/sections/WarrantyPayment.astro';
+import Faq from '../components/sections/Faq.astro';
+import FinalCta from '../components/sections/FinalCta.astro';
 ---
 
 <BaseLayout
@@ -9,4 +21,16 @@ import Hero from '../components/sections/Hero.astro';
   description="Кухні та меблі на замовлення в Черкасах. Безкоштовний замір і розрахунок вартості."
 >
   <Hero />
+  <TrustNumbers />
+  <Portfolio />
+  <BeforeAfterSection />
+  <QuizSection />
+  <Team />
+  <Process />
+  <Prices />
+  <Materials />
+  <Reviews />
+  <WarrantyPayment />
+  <Faq />
+  <FinalCta />
 </BaseLayout>

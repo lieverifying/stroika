@@ -1,0 +1,48 @@
+---
+// Заголовок блока: надзаголовок (необязательно), h2, подзаголовок ≤ 65ch.
+// id нужен секции для aria-labelledby. dark — вариант на тёмном фоне.
+interface Props {
+  id: string;
+  title: string;
+  eyebrow?: string;
+  subtitle?: string;
+  dark?: boolean;
+  class?: string;
+}
+
+const { id, title, eyebrow, subtitle, dark = false, class: className } = Astro.props;
+---
+
+<div class:list={['section-title', { 'section-title--dark': dark }, className]}>
+  {eyebrow && <p class="section-title__eyebrow">{eyebrow}</p>}
+  <h2 id={id} class="text-h2">{title}</h2>
+  {subtitle && <p class="section-title__subtitle">{subtitle}</p>}
+</div>
+
+<style>
+  .section-title {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: var(--space-stack);
+  }
+  /* Надзаголовок — моно, как подпись на чертеже */
+  .section-title__eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-oak);
+    hyphens: none;
+  }
+  .section-title__subtitle {
+    max-width: var(--container-prose);
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-ink-muted);
+  }
+  .section-title--dark {
+    color: var(--color-plaster);
+  }
+  .section-title--dark .section-title__eyebrow,
+  .section-title--dark .section-title__subtitle {
+    color: var(--color-ink-muted-dark);
+  }
+</style>

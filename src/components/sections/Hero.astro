@@ -18,7 +18,7 @@ const photo = portrait
   : { width: 1600, height: 1200, label: 'кухня, перший екран, горизонтальне 4:3' };
 ---
 
-<section class="hero" aria-labelledby="hero-title">
+<section data-block="1" class="hero" aria-labelledby="hero-title">
   <div class:list={['hero__inner container-site', { 'hero__inner--portrait': portrait }]}>
     {
       flags.seasonalBadge && (
@@ -43,7 +43,7 @@ const photo = portrait
       </ul>
 
       <div class="hero__actions">
-        <Button href="#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+        <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
         <Button href={contactLinks.viber} variant="secondary" icon="viber">
           Написати у Viber
         </Button>

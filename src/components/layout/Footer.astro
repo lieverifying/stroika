@@ -1,0 +1,24 @@
+---
+// Блок 14 — футер (ТЗ). Заготовка: логотип и дескриптор; контакты, ФОП и политика — задача 3.16.
+import SectionStub from '../ui/SectionStub.astro';
+import { facts } from '../../content/facts';
+---
+
+<footer data-block="14" class="site-footer on-dark">
+  <div class="container-site grid gap-6 py-12">
+    <img src="/brand/logo-dark.svg" alt="Вимір" width="148" height="32" class="h-8 w-auto" />
+    <p class="text-small text-ink-muted-dark">{facts.brand.descriptor}</p>
+    <SectionStub task="3.16" minHeight="6rem" />
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .site-footer :global(.stub) {
+    border-color: var(--color-ink-muted-dark);
+    color: var(--color-ink-muted-dark);
+  }
+</style>

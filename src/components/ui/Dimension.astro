@@ -1,0 +1,43 @@
+---
+// Мотив замера: размерная линия с засечками и подписью (ARCHITECTURE.md 6.3–6.4, text-dim).
+// Только декор: aria-hidden, подпись мельче 16 px допустима. Цвет — от родителя (графит или дуб), не жёлтый.
+// Ставим как деталь в отдельных местах, не на каждом блоке (CLAUDE.md, «Стиль»).
+interface Props {
+  /** Подпись над линией, например «600 мм» */
+  label?: string;
+  class?: string;
+}
+
+const { label, class: className } = Astro.props;
+---
+
+<div class:list={['dim', className]} aria-hidden="true">
+  {label && <span class="dim__label">{label}</span>}
+  <svg class="dim__line" viewBox="0 0 100 8" preserveAspectRatio="none">
+    <path d="M0.5 0v8M99.5 0v8M0 4h100" vector-effect="non-scaling-stroke" />
+  </svg>
+</div>
+
+<style>
+  .dim {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: center;
+    width: 100%;
+    color: inherit;
+  }
+  .dim__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-dim);
+    line-height: var(--text-dim--line-height);
+    opacity: 0.8;
+  }
+  .dim__line {
+    width: 100%;
+    height: 0.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    opacity: 0.6;
+  }
+</style>

@@ -71,3 +71,8 @@
   margin-inline: auto;
   padding-inline: var(--space-gutter);
 }
+
+/* Вертикальные отступы блока главной: 64 / 96 / 128 px (ARCHITECTURE.md 6.5) */
+@utility section-pad {
+  padding-block: var(--space-section);
+}
