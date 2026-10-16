@@ -1,12 +1,117 @@
 ---
-// Блок 11 — «Гарантія і оплата» (ТЗ). Заготовка: наполнение — задача 3.12 (PLAN.md).
+// Блок 11 — «Гарантія і оплата» (ТЗ): срок гарантии и порядок оплаты (передоплата / остаток).
+// Все условия — только заглушки facts.warranty и facts.payment до подтверждения владельцем.
+// Остаток в процентах считаем сами, только когда передоплата — настоящее число.
+import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { facts } from '../../content/facts';
+import { num, pluralUk } from '../../lib/facts';
+
+const { warranty, payment } = facts;
+const prepay = num(payment.prepayPercent);
 ---
 
 <section data-block="11" class="section-pad" aria-labelledby="warranty-title">
   <div class="container-site">
     <SectionTitle id="warranty-title" title="Гарантія і оплата" />
-    <SectionStub task="3.12" />
+    <div class="wp">
+      <div class="wp__card">
+        <h3 class="wp__title">Гарантія</h3>
+        <p class="wp__big">
+          <Fact value={warranty.years} class="wp__num" />
+          <span>{pluralUk(warranty.years, ['рік', 'роки', 'років'])}</span>
+        </p>
+        <p class="wp__text">
+          <Fact value={warranty.terms} />
+        </p>
+      </div>
+      <div class="wp__card">
+        <h3 class="wp__title">Оплата</h3>
+        <dl class="wp__list">
+          <div>
+            <dt>Передоплата</dt>
+            <dd><Fact value={payment.prepayPercent} class="wp__num" /> %</dd>
+          </div>
+          {
+            prepay !== null && (
+              <div>
+                <dt>Решта</dt>
+                <dd>
+                  <span class="wp__num">{100 - prepay}</span> %
+                </dd>
+              </div>
+            )
+          }
+          <div>
+            <dt>Порядок оплати</dt>
+            <dd><Fact value={payment.schedule} /></dd>
+          </div>
+          <div>
+            <dt>Способи оплати</dt>
+            <dd><Fact value={payment.methods} /></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
   </div>
 </section>
+
+<style>
+  .wp {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .wp__card {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.5rem;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+  }
+  .wp__title {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  .wp__big {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: var(--text-lead);
+  }
+  .wp__big :global(.wp__num) {
+    font-size: var(--text-number);
+    line-height: var(--text-number--line-height);
+  }
+  .wp__card :global(.wp__num) {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Заглушки — 16 px, не крупным числом */
+  .wp__card :global(.fact-ph) {
+    font-size: 1rem;
+  }
+  .wp__text {
+    color: var(--color-ink-muted);
+  }
+  .wp__list {
+    display: grid;
+    gap: 1rem;
+  }
+  .wp__list dt {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 64rem) {
+    .wp {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .wp__card {
+      padding: 2rem;
+    }
+  }
+</style>

@@ -31,3 +31,13 @@ test('блок 10: отзывы и рейтинг — только заглуш�
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', /noopener/);
 });
+
+test('блок 11: гарантия и оплата — только заглушки, остаток не выдуман', async ({ page }) => {
+  await page.goto('/');
+  const block = page.locator('[data-block="11"]');
+  for (const name of ['WARRANTY_YEARS', 'WARRANTY_TERMS', 'PAYMENT_PREPAY_PERCENT', 'PAYMENT_SCHEDULE', 'PAYMENT_METHODS']) {
+    await expect(block.locator(`[data-placeholder="${name}"]`)).toHaveCount(1);
+  }
+  // пока передоплата — заглушка, строки «Решта» нет
+  await expect(block.getByText('Решта')).toHaveCount(0);
+});
