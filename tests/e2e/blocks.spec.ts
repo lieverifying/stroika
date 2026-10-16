@@ -11,3 +11,12 @@ test.describe('блоки 8–11', () => {
     await expect(block.locator('[data-cta="primary"]')).toHaveCount(1);
   });
 });
+
+test('блок 9: бренды — только заглушки, места под логотипы скрыты от скринридера', async ({ page }) => {
+  await page.goto('/');
+  const block = page.locator('[data-block="9"]');
+  await expect(block.locator('[data-placeholder="HARDWARE_BRANDS"]')).toHaveCount(1);
+  await expect(block.locator('[data-placeholder="MATERIAL_BRANDS"]')).toHaveCount(1);
+  await expect(block.locator('img')).toHaveCount(0);
+  for (const list of await block.locator('.materials__logos').all()) await expect(list).toHaveAttribute('aria-hidden', 'true');
+});

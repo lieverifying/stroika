@@ -1,12 +1,98 @@
 ---
-// Блок 9 — «Матеріали і фурнітура» (ТЗ). Заготовка: наполнение — задача 3.11 (PLAN.md).
+// Блок 9 — «Матеріали та фурнітура» (ТЗ): логотипы только реально используемых брендов (facts.materials).
+// Пока владелец не прислал список — заглушка-плашка и серые места под логотипы (не выдуманные бренды).
+import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { facts, type Brand, type Fact as FactValue } from '../../content/facts';
+import { isPlaceholder } from '../../lib/facts';
+
+const groups: { title: string; brands: FactValue<Brand[]> }[] = [
+  { title: 'Фурнітура', brands: facts.materials.hardwareBrands },
+  { title: 'Матеріали', brands: facts.materials.materialBrands },
+];
+// Сколько серых мест под логотипы показать, пока брендов нет (только вёрстка)
+const SLOTS = 4;
 ---
 
 <section data-block="9" class="section-pad" aria-labelledby="materials-title">
   <div class="container-site">
     <SectionTitle id="materials-title" title="Матеріали та фурнітура" />
-    <SectionStub task="3.11" />
+    <div class="materials">
+      {
+        groups.map((g) => (
+          <div class="materials__group">
+            <h3 class="materials__title">{g.title}</h3>
+            {isPlaceholder(g.brands) ? (
+              <>
+                <p class="materials__pending">
+                  <Fact value={g.brands} />
+                </p>
+                <ul class="materials__logos" aria-hidden="true">
+                  {Array.from({ length: SLOTS }, () => (
+                    <li class="materials__logo materials__logo--ph">логотип</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <ul class="materials__logos">
+                {g.brands.map((b) => (
+                  <li class="materials__logo">
+                    <img src={b.logo} alt={b.name} loading="lazy" decoding="async" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))
+      }
+    </div>
   </div>
 </section>
+
+<style>
+  .materials {
+    display: grid;
+    gap: var(--space-stack);
+  }
+  .materials__group {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .materials__title {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  .materials__logos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gap);
+  }
+  .materials__logo {
+    display: grid;
+    place-items: center;
+    min-height: 5rem;
+    padding: 1rem;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+  }
+  .materials__logo img {
+    max-width: 100%;
+    max-height: 3rem;
+    object-fit: contain;
+  }
+  .materials__logo--ph {
+    background: var(--color-placeholder);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-graphite);
+  }
+  @media (min-width: 64rem) {
+    .materials {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+</style>
