@@ -42,8 +42,9 @@ export function formatPhone(e164: Fact<string>): string {
  * Форма слова после числа: pluralUk(2, ['рік', 'роки', 'років']) → 'роки'.
  * Для заглушки — форма «багато» (5–20), её ж выводим и до подтверждения числа.
  */
-export function pluralUk(value: Fact<number>, forms: [one: string, few: string, many: string]): string {
-  const n = num(value);
+export function pluralUk(value: Fact<number> | string, forms: [one: string, few: string, many: string]): string {
+  // string — заглушка из файла кейса (схема Zod даёт string, а не шаблонный тип)
+  const n = typeof value === 'number' ? num(value) : null;
   if (n === null) return forms[2];
   const mod10 = n % 10;
   const mod100 = n % 100;

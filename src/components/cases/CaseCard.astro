@@ -1,0 +1,139 @@
+---
+// Карточка кейса: обложка 4:3, форма кухни и район, название, срок и цена «від».
+// Кликабельна вся карточка: ссылка в заголовке растянута на карточку (::after), фокус — рамкой карточки.
+// data-shape / data-category — для фильтра портфолио.
+import { Image } from 'astro:assets';
+import Fact from '../ui/Fact.astro';
+import PlaceholderImage from '../ui/PlaceholderImage.astro';
+import { buildAlt, KITCHEN_SHAPES, type Case } from '../../lib/cases';
+import { formatUAH, pluralUk } from '../../lib/facts';
+
+interface Props {
+  item: Case;
+  /** Заголовок карточки: h3 в блоке с h2, h2 на странице без него */
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { item, headingLevel = 'h3' } = Astro.props;
+const { data } = item;
+const Heading = headingLevel;
+const kind = data.kitchenShape ? KITCHEN_SHAPES[data.kitchenShape] : null;
+---
+
+<article class="case-card" data-shape={data.kitchenShape} data-category={data.category}>
+  <div class="case-card__media">
+    {
+      data.cover ? (
+        <Image
+          src={data.cover}
+          alt={buildAlt(item)}
+          widths={[400, 800, 1200]}
+          sizes="(min-width: 64rem) 380px, (min-width: 48rem) 50vw, 100vw"
+          class="case-card__img"
+        />
+      ) : (
+        <PlaceholderImage width={1200} height={900} label="обкладинка кейсу" />
+      )
+    }
+  </div>
+  <div class="case-card__body">
+    <p class="case-card__meta">
+      {kind && <span>{kind}</span>}
+      {kind && <span aria-hidden="true">·</span>}
+      <Fact value={data.district} />
+    </p>
+    <Heading class="case-card__title">
+      <a href={`/roboty/${item.id}`} class="case-card__link">
+        <Fact value={data.title} />
+      </a>
+    </Heading>
+    <dl class="case-card__facts">
+      <div>
+        <dt>Термін</dt>
+        <dd><Fact value={data.durationDays} class="case-card__num" /> {pluralUk(data.durationDays, ['день', 'дні', 'днів'])}</dd>
+      </div>
+      {
+        data.priceFrom !== undefined && (
+          <div>
+            <dt>Ціна</dt>
+            <dd>
+              від <Fact value={data.priceFrom} format={formatUAH} class="case-card__num" />
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+  </div>
+</article>
+
+<style>
+  .case-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    transition: box-shadow var(--dur-base) var(--ease-out);
+  }
+  .case-card:focus-within {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  @media (hover: hover) {
+    .case-card:hover {
+      box-shadow: var(--shadow-card);
+    }
+  }
+  .case-card__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .case-card__body {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+  .case-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+    hyphens: none;
+  }
+  .case-card__title {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  /* Вся карточка — зона нажатия ссылки */
+  .case-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  /* Фокус показываем рамкой карточки (focus-within), не обводкой текста */
+  .case-card__link:focus-visible {
+    outline: none;
+  }
+  .case-card__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-size: var(--text-small);
+  }
+  .case-card__facts dt {
+    color: var(--color-ink-muted);
+  }
+  /* Числа — моно (ARCHITECTURE 6.3), подписи «від», «днів» — обычным шрифтом */
+  .case-card__facts :global(.case-card__num) {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

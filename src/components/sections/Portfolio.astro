@@ -1,12 +1,15 @@
 ---
-// Блок 3 — «Портфоліо» (ТЗ). Заготовка: наполнение — задача 3.4–3.6 (PLAN.md).
+// Блок 3 — «Портфоліо» (ТЗ). Задача 3.5: сетка featured-кейсов; фильтр и «Всі роботи» — задача 3.6.
+import CaseGrid from '../cases/CaseGrid.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { getFeaturedCases } from '../../lib/cases';
+
+const items = await getFeaturedCases(8);
 ---
 
 <section data-block="3" class="section-pad" aria-labelledby="portfolio-title">
   <div class="container-site">
     <SectionTitle id="portfolio-title" title="Наші кухні" />
-    <SectionStub task="3.4–3.6" />
+    <CaseGrid items={items} />
   </div>
 </section>

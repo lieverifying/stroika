@@ -1,0 +1,42 @@
+---
+// Сетка карточек кейсов: 1 колонка на телефоне, 2 на планшете, 3 на десктопе.
+import CaseCard from './CaseCard.astro';
+import type { Case } from '../../lib/cases';
+
+interface Props {
+  items: Case[];
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { items, headingLevel } = Astro.props;
+---
+
+<ul class="case-grid" data-case-grid>
+  {
+    items.map((item) => (
+      <li data-shape={item.data.kitchenShape} data-category={item.data.category}>
+        <CaseCard item={item} headingLevel={headingLevel} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .case-grid {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .case-grid > li {
+    display: grid;
+  }
+  @media (min-width: 48rem) {
+    .case-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .case-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
