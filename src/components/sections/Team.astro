@@ -1,10 +1,12 @@
 ---
 // Блок 6 — «Своя бригада» (ТЗ): главный козырь, поэтому блок крупный и тёмный, не в конце страницы.
 // Мастера — facts.team (2–6 человек); имена, роли, стаж, фразы и фото — только реальные, до этого заглушки.
+// Видео бригады — фасад, грузится только по клику (facts.teamVideo).
 // Телефон — лента со scroll-snap, десктоп — сетка (2 / 3 / 4 колонки в зависимости от числа мастеров).
 import Fact from '../ui/Fact.astro';
 import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
+import VideoFacade from '../ui/VideoFacade.astro';
 import { facts } from '../../content/facts';
 import { pluralUk } from '../../lib/facts';
 
@@ -36,7 +38,9 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
         ))
       }
     </ul>
-    <slot />
+    <div class="team__video">
+      <VideoFacade src={facts.teamVideo} title="Бригада «Вимір» за роботою" />
+    </div>
   </div>
 </section>
 
@@ -94,6 +98,9 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
     margin-top: 0.5rem;
     font-size: var(--text-lead);
     line-height: var(--text-lead--line-height);
+  }
+  .team__video {
+    margin-top: var(--space-stack);
   }
   @media (min-width: 48rem) {
     .team__card {

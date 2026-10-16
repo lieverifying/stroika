@@ -69,7 +69,7 @@ try {
     // --click=<css> — нажать элемент перед снимком (например, открыть меню)
     if (typeof args.click === 'string') await page.click(args.click);
     if (typeof args.to === 'string') {
-      await page.locator(args.to).first().evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 16));
+      await page.locator(args.to).first().evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - (document.querySelector('[data-header]')?.getBoundingClientRect().height ?? 0) - 16));
       await page.waitForTimeout(400);
     }
     if (typeof args.scroll === 'string') {

@@ -1,0 +1,93 @@
+---
+// Фасад видео: до клика только постер и кнопка, ни одного запроса к видео.
+// По клику на место постера встаёт <video preload="none"> и сразу запускается.
+// Пока видео нет (заглушка {{TEAM_VIDEO}}), постер — плейсхолдер, а src остаётся заглушкой.
+import PlaceholderImage from './PlaceholderImage.astro';
+
+interface Props {
+  src: string;
+  /** Название видео: подпись кнопки для скринридера и title у <video> */
+  title: string;
+  label?: string;
+}
+const { src, title, label = 'Дивитися відео' } = Astro.props;
+---
+
+<div class="video-facade" data-video-facade data-src={src} data-title={title}>
+  <PlaceholderImage width={1920} height={1080} label="постер відео" />
+  <button type="button" class="video-facade__play" aria-label={`${label}: ${title}`}>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+    <span>{label}</span>
+  </button>
+</div>
+
+<style>
+  .video-facade {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-graphite-2);
+  }
+  /* Плейсхолдер постера — тёмный (фасад стоит на тёмном блоке), подпись сверху, чтобы не пряталась под кнопкой */
+  .video-facade :global(.ph) {
+    place-items: start center;
+    padding-top: 1.25rem;
+    background: var(--color-graphite-2);
+    color: var(--color-ink-muted-dark);
+  }
+  .video-facade :global(.ph__dim) {
+    stroke: var(--color-ink-muted-dark);
+  }
+  .video-facade :global(video) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+  .video-facade__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--control-h);
+    padding-inline: var(--control-px);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-white);
+    color: var(--color-graphite);
+    font-size: var(--text-button);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    box-shadow: var(--shadow-raised);
+  }
+  .video-facade__play svg {
+    fill: currentColor;
+  }
+  .video-facade__play:focus-visible {
+    outline: 2px solid var(--color-plaster);
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-facade]').forEach((box) => {
+    const button = box.querySelector('button');
+    button?.addEventListener('click', () => {
+      const video = document.createElement('video');
+      video.src = box.dataset.src ?? '';
+      video.title = box.dataset.title ?? '';
+      video.preload = 'none';
+      video.controls = true;
+      video.playsInline = true;
+      box.replaceChildren(video);
+      video.focus();
+      video.play().catch(() => {
+        // автозапуск запрещён браузером — остаются кнопки управления
+      });
+    });
+  });
+</script>
