@@ -72,9 +72,13 @@
   padding-inline: var(--space-gutter);
 }
 
-/* Вертикальные отступы блока главной: 64 / 96 / 128 px (ARCHITECTURE.md 6.5) */
+/* Отступ между блоками главной: 64 / 96 / 128 px (ARCHITECTURE.md 6.5).
+   Только сверху, чтобы между соседними блоками не было двойного отступа; у последнего блока — и снизу. */
 @utility section-pad {
-  padding-block: var(--space-section);
+  padding-top: var(--space-section);
+  &:last-child {
+    padding-bottom: var(--space-section);
+  }
 }
 
 /*

@@ -1,11 +1,75 @@
 ---
-// Блок 2 — «Цифри довіри» (ТЗ). Заготовка: наполнение — задача 3.3 (PLAN.md).
-import SectionStub from '../ui/SectionStub.astro';
+// Блок 2 — «Цифри довіри» (ТЗ): 4 числа, только реальные — до подтверждения владельцем заглушки facts.ts.
+// Телефон — 2 × 2, десктоп — 4 в ряд. Размерная линия под числом — мотив замера, только здесь как деталь.
+import Dimension from '../ui/Dimension.astro';
+import Fact from '../ui/Fact.astro';
+import { facts } from '../../content/facts';
+import { pluralUk } from '../../lib/facts';
+
+const items = [
+  { value: facts.trust.kitchensDone, label: `${pluralUk(facts.trust.kitchensDone, ['кухня', 'кухні', 'кухонь'])} зроблено` },
+  { value: facts.trust.years, label: `${pluralUk(facts.trust.years, ['рік', 'роки', 'років'])} досвіду` },
+  { value: facts.warranty.years, label: `${pluralUk(facts.warranty.years, ['рік', 'роки', 'років'])} гарантії` },
+  { value: facts.terms.productionDaysTotal, label: `${pluralUk(facts.terms.productionDaysTotal, ['день', 'дні', 'днів'])} на виготовлення` },
+];
 ---
 
-<section data-block="2" class="section-pad" aria-labelledby="trust-title">
+<section data-block="2" class="trust" aria-labelledby="trust-title">
   <div class="container-site">
     <h2 id="trust-title" class="sr-only">Вимір у цифрах</h2>
-    <SectionStub task="3.3" />
+    <ul class="trust__grid">
+      {
+        items.map((item) => (
+          <li class="trust__item">
+            <span class="trust__num">
+              <Fact value={item.value} />
+            </span>
+            <Dimension class="trust__dim" />
+            <span class="trust__label">{item.label}</span>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
+
+<style>
+  .trust__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gap);
+    padding-top: var(--space-stack);
+    border-top: 1px solid var(--color-line);
+  }
+  .trust__item {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .trust__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-number);
+    line-height: var(--text-number--line-height);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Длинная заглушка не должна распирать колонку: в числе она 16 px и переносится */
+  .trust__num :global(.fact-ph) {
+    font-size: 1rem;
+  }
+  .trust__dim {
+    color: var(--color-oak);
+  }
+  .trust__label {
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 64rem) {
+    .trust__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+</style>
