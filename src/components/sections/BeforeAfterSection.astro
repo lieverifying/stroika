@@ -1,12 +1,59 @@
 ---
-// Блок 4 — «Було / стало» (ТЗ). Заготовка: наполнение — задача 3.7 (PLAN.md).
+// Блок 4 — «Було / стало» (ТЗ): 2–3 пары фото со слайдером сравнения.
+// Телефон — лента со scroll-snap (страница вбок не едет), десктоп — сетка.
+// Пары фото — facts.media.beforeAfterPairs; пока их нет — 3 пары плейсхолдеров.
+import BeforeAfter from '../ui/BeforeAfter.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+
+const pairs = [1, 2, 3];
 ---
 
 <section data-block="4" class="section-pad" aria-labelledby="before-after-title">
   <div class="container-site">
-    <SectionTitle id="before-after-title" title="Було / стало" />
-    <SectionStub task="3.7" />
+    <SectionTitle id="before-after-title" title="Було / стало" subtitle="Потягніть ручку, щоб порівняти." />
+    <ul class="ba-list">
+      {
+        pairs.map((n) => (
+          <li>
+            <BeforeAfter index={n} />
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
+
+<style>
+  .ba-list {
+    display: flex;
+    gap: var(--grid-gap);
+    margin-inline: calc(-1 * var(--space-gutter));
+    padding-inline: var(--space-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-gutter);
+    scrollbar-width: none;
+  }
+  .ba-list::-webkit-scrollbar {
+    display: none;
+  }
+  .ba-list > li {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 48rem) {
+    .ba-list > li {
+      flex-basis: 60%;
+    }
+  }
+  @media (min-width: 64rem) {
+    .ba-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+  }
+</style>

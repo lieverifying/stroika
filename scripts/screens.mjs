@@ -3,6 +3,7 @@
 //   --fold  — только первый экран (без прокрутки), иначе вся страница.
 //   --click — нажать элемент перед снимком.
 //   --scroll — прокрутить страницу на N px перед снимком (вместе с --fold).
+//   --to    — прокрутить к элементу (верх элемента под шапку), напр. --to='[data-block="4"]'.
 //   --css   — добавить CSS перед снимком (сравнить вариант, не меняя код), напр. --css='h1{font-weight:600}'.
 // Перед запуском нужен свежий `npm run build`: скрипт сам поднимает astro preview.
 import { spawn } from 'node:child_process';
@@ -67,6 +68,10 @@ try {
     await page.evaluate(() => document.fonts.ready);
     // --click=<css> — нажать элемент перед снимком (например, открыть меню)
     if (typeof args.click === 'string') await page.click(args.click);
+    if (typeof args.to === 'string') {
+      await page.locator(args.to).first().evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 16));
+      await page.waitForTimeout(400);
+    }
     if (typeof args.scroll === 'string') {
       await page.evaluate((y) => window.scrollTo(0, y), Number(args.scroll));
       await page.waitForTimeout(400); // IntersectionObserver и переходы

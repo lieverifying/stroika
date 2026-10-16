@@ -1,0 +1,168 @@
+---
+// Сравнение «було / стало» (ТЗ, блок 4): <input type="range"> + clip-path, без библиотек.
+// Ползунок тянется только за ручку (48 px): свайп по фото листает ленту на телефоне, а не двигает сравнение.
+// С клавиатуры — стрелки, Home/End. Без JS — статичное сравнение на середине.
+// Пока фото нет — два плейсхолдера разного тона.
+import PlaceholderImage from './PlaceholderImage.astro';
+
+interface Props {
+  /** Номер пары — для подписи плейсхолдера и aria-label */
+  index: number;
+  width?: number;
+  height?: number;
+}
+const { index, width = 1200, height = 900 } = Astro.props;
+---
+
+<figure class="ba" data-before-after style="--pos: 50%">
+  <div class="ba__frame">
+    <div class="ba__layer ba__layer--after">
+      <PlaceholderImage width={width} height={height} label={`стало, пара ${index}`} />
+    </div>
+    <div class="ba__layer ba__layer--before">
+      <PlaceholderImage width={width} height={height} label={`було, пара ${index}`} />
+    </div>
+    <span class="ba__tag ba__tag--before" aria-hidden="true">Було</span>
+    <span class="ba__tag ba__tag--after" aria-hidden="true">Стало</span>
+    <span class="ba__handle" aria-hidden="true">
+      <span class="ba__knob">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" /></svg>
+      </span>
+    </span>
+    <input
+      class="ba__range"
+      type="range"
+      min="0"
+      max="100"
+      step="1"
+      value="50"
+      aria-label={`Порівняння «було / стало», пара ${index}`}
+      aria-valuetext="50 % — було ліворуч, стало праворуч"
+    />
+  </div>
+</figure>
+
+<style>
+  .ba {
+    min-width: 0;
+  }
+  .ba__frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    isolation: isolate;
+  }
+  .ba__layer--before {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+  /* «Було» темнее «стало», чтобы граница сравнения читалась и на плейсхолдерах */
+  .ba__layer--before :global(.ph) {
+    height: 100%;
+    background: var(--color-ink-muted); /* белый текст на нём — 6,3 : 1 */
+    color: var(--color-white);
+  }
+  .ba__layer--before :global(.ph__dim) {
+    stroke: var(--color-white);
+  }
+  .ba__layer--after :global(.ph) {
+    background: var(--color-line);
+  }
+  .ba__tag {
+    position: absolute;
+    top: 0.75rem;
+    z-index: var(--z-raised);
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+    font-size: var(--text-small);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .ba__tag--before {
+    left: 0.75rem;
+  }
+  .ba__tag--after {
+    right: 0.75rem;
+  }
+  .ba__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    z-index: var(--z-raised);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--color-white);
+    pointer-events: none;
+  }
+  .ba__knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full);
+    background: var(--color-white);
+    color: var(--color-graphite);
+    box-shadow: var(--shadow-raised);
+    transform: translate(-50%, -50%);
+  }
+  .ba__knob svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* Ползунок на всю рамку, но ловит касания только ручка (thumb): фото остаётся для свайпа ленты */
+  .ba__range {
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z-raised) + 1);
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: pan-y;
+  }
+  .ba__range::-webkit-slider-thumb {
+    width: 3rem;
+    height: 100vh;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .ba__range::-moz-range-thumb {
+    width: 3rem;
+    height: 100vh;
+    border: 0;
+    pointer-events: auto;
+  }
+  /* Фокус с клавиатуры — кольцо на ручке */
+  .ba__frame:has(.ba__range:focus-visible) .ba__knob {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-before-after]').forEach((fig) => {
+    const range = fig.querySelector<HTMLInputElement>('.ba__range');
+    if (!range) return;
+    const update = () => {
+      fig.style.setProperty('--pos', `${range.value}%`);
+      range.setAttribute('aria-valuetext', `${range.value} % — було ліворуч, стало праворуч`);
+    };
+    range.addEventListener('input', update);
+    update();
+  });
+</script>
