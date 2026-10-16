@@ -1,0 +1,42 @@
+---
+// Схема формы кухни, вид сверху (ТЗ, шаг 2): графитовые линии, без жёлтого. Декор — aria-hidden.
+// Стены — тонкая линия, корпуса кухни — заливка с обводкой.
+import type { KitchenShape } from '../../lib/quiz/types';
+
+interface Props {
+  shape: KitchenShape;
+}
+const { shape } = Astro.props;
+---
+
+<svg class="shape-icon" viewBox="0 0 64 48" aria-hidden="true">
+  <path class="shape-icon__wall" d="M4 4h56v40" />
+  <path class="shape-icon__wall" d="M4 4v40" />
+  {shape === 'pryama' && <rect x="8" y="8" width="48" height="9" />}
+  {shape === 'kutova' && <path d="M8 8h48v9H17v23H8z" />}
+  {shape === 'p-podibna' && <path d="M8 8h48v32h-9V17H17v23H8z" />}
+  {
+    shape === 'ostriv' && (
+      <>
+        <rect x="8" y="8" width="48" height="9" />
+        <rect x="20" y="27" width="24" height="10" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .shape-icon {
+    width: 4rem;
+    height: 3rem;
+    fill: var(--color-placeholder);
+    stroke: var(--color-graphite);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+  .shape-icon__wall {
+    fill: none;
+    stroke: var(--color-line-strong);
+    stroke-width: 1;
+  }
+</style>

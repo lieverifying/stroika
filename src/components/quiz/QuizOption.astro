@@ -1,0 +1,68 @@
+---
+// Вариант ответа: карточка-кнопка с role="radio" внутри role="radiogroup" (QuizStep).
+// Высота ≥ 64 px, на 375 px по 2 в ряд. Нажатие сразу переводит на следующий шаг (скрипт квиза).
+// Фокус — «перемещаемый» (tabindex 0 у одного варианта, стрелки двигают фокус, Enter / пробел выбирают).
+import Fact from '../ui/Fact.astro';
+import KitchenShapeIcon from './KitchenShapeIcon.astro';
+import type { OptionDef } from '../../lib/quiz/types';
+
+interface Props {
+  option: OptionDef;
+  first?: boolean;
+}
+const { option, first = false } = Astro.props;
+---
+
+<button
+  type="button"
+  role="radio"
+  aria-checked="false"
+  tabindex={first ? 0 : -1}
+  class:list={['quiz-option', { 'quiz-option--icon': option.icon }]}
+  data-value={option.value}
+>
+  {option.icon && <KitchenShapeIcon shape={option.icon} />}
+  <span class="quiz-option__label"><Fact value={option.label} /></span>
+</button>
+
+<style>
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 4rem;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    color: var(--color-graphite);
+    font-size: var(--text-body);
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .quiz-option--icon {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  .quiz-option__label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  @media (hover: hover) {
+    .quiz-option:hover {
+      border-color: var(--color-graphite);
+    }
+  }
+  /* Выбранный вариант — графит (не жёлтый: жёлтый только у кнопки заявки) */
+  .quiz-option[aria-checked='true'] {
+    border: 2px solid var(--color-graphite);
+    background: var(--color-plaster);
+  }
+</style>

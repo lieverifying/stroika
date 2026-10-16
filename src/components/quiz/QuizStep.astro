@@ -1,0 +1,64 @@
+---
+// Шаг квиза: заголовок-вопрос (на нём фокус при смене шага) и группа вариантов role="radiogroup".
+// Все шаги рендерятся на сервере, виден один (hidden у остальных) — переключает скрипт квиза.
+import QuizOption from './QuizOption.astro';
+import type { StepDef } from '../../lib/quiz/types';
+
+interface Props {
+  step: StepDef;
+  hidden?: boolean;
+}
+const { step, hidden = false } = Astro.props;
+const titleId = `quiz-q-${step.id}`;
+---
+
+<section class="quiz-step" data-step={step.id} data-tz={step.tzNumber} hidden={hidden} aria-labelledby={titleId}>
+  <h3 id={titleId} class="quiz-step__title" tabindex="-1">{step.title}</h3>
+  {
+    step.options ? (
+      <div
+        class:list={['quiz-step__options', { 'quiz-step__options--four': step.options.length === 4 }]}
+        role="radiogroup"
+        aria-labelledby={titleId}
+      >
+        {step.options.map((o, i) => (
+          <QuizOption option={o} first={i === 0} />
+        ))}
+      </div>
+    ) : (
+      <slot />
+    )
+  }
+</section>
+
+<style>
+  .quiz-step {
+    display: grid;
+    gap: 1rem;
+  }
+  .quiz-step__title {
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+  .quiz-step__title:focus {
+    outline: none;
+  }
+  .quiz-step__title:focus-visible {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 4px;
+  }
+  .quiz-step__options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  @media (min-width: 64rem) {
+    .quiz-step__options {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    /* 4 варианта — в один ряд, без «сироты» во втором */
+    .quiz-step__options--four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

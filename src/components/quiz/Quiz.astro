@@ -1,0 +1,65 @@
+---
+// Квиз-калькулятор (ТЗ, блок 5; ARCHITECTURE.md 4): все шаги в разметке, виден один.
+// Логика (переходы, «Назад», сохранение) — скрипт квиза (задача 4.5). Без JS виден шаг 1 и ссылка на форму замера.
+// Шаги контакта и короткой формы — задача 4.6.
+import QuizProgress from './QuizProgress.astro';
+import QuizStep from './QuizStep.astro';
+import { STEPS } from '../../lib/quiz/config';
+---
+
+<div class="quiz" data-quiz>
+  <QuizProgress />
+  {Object.values(STEPS).map((step) => <QuizStep step={step} hidden={step.id !== 'goal'} />)}
+  <div class="quiz__nav">
+    <button type="button" class="quiz__back" data-quiz-back hidden>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+      Назад
+    </button>
+  </div>
+  <noscript>
+    <p class="quiz__fallback">Квіз працює з увімкненим JavaScript. Або <a href="#zamir">залиште заявку на безкоштовний замір</a>.</p>
+  </noscript>
+</div>
+
+<style>
+  .quiz {
+    display: grid;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .quiz__nav:has(.quiz__back[hidden]) {
+    display: none;
+  }
+  .quiz__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: var(--control-h);
+    padding-inline: 1rem 1.25rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-graphite);
+    font-size: var(--text-button);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .quiz__back svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .quiz__fallback a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  @media (min-width: 48rem) {
+    .quiz {
+      padding: 2rem;
+    }
+  }
+</style>

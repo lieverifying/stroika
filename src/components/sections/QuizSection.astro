@@ -1,35 +1,18 @@
 ---
-// Блок 5 — квиз (ТЗ). Фаза 3: заголовок и место с зарезервированной высотой, чтобы вёрстка не прыгнула,
-// когда в фазе 4 сюда встанет квиз. Якорь #kvyz — сюда ведут «Розрахувати вартість» и кнопка панели.
+// Блок 5 — квиз (ТЗ). Якорь #kvyz — сюда ведут «Розрахувати вартість» и кнопка панели.
+import Quiz from '../quiz/Quiz.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 ---
 
 <section id="kvyz" data-block="5" class="section-pad" aria-labelledby="quiz-title">
-  <div class="container-site">
+  <div class="container-site quiz-section">
     <SectionTitle id="quiz-title" title="Дізнайтесь вартість вашої кухні за 1 хвилину" />
-    <div class="quiz-slot" data-quiz-slot aria-hidden="true">
-      <span>Квіз-калькулятор · фаза 4</span>
-    </div>
+    <Quiz />
   </div>
 </section>
 
 <style>
-  /* Высота под самый длинный шаг квиза: 6 вариантов по 64 px + прогресс и кнопки */
-  .quiz-slot {
-    display: grid;
-    place-items: center;
-    min-height: 36rem;
-    padding: 1rem;
-    border-radius: var(--radius-lg);
-    background: var(--color-white);
-    border: 1px dashed var(--color-line-strong);
-    font-family: var(--font-mono);
-    font-size: var(--text-small);
-    color: var(--color-ink-muted);
-  }
-  @media (min-width: 64rem) {
-    .quiz-slot {
-      min-height: 32rem;
-    }
+  .quiz-section {
+    max-width: calc(56rem + 2 * var(--space-gutter));
   }
 </style>
