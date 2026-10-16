@@ -1,14 +1,62 @@
 ---
-// Блок 14 — футер (ТЗ). Заготовка: логотип и дескриптор; контакты, ФОП и политика — задача 3.16.
-import SectionStub from '../ui/SectionStub.astro';
+// Блок 14 — футер (ТЗ): контакты, график, соцсети, ФОП, ссылка на политику. Все данные — заглушки facts.ts.
+// Тёмный фон; все ссылки — зоны нажатия ≥ 48 px. Нижнюю панель телефона футер не прячет: body уже с отступом под неё.
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
+import Icon from '../ui/Icon.astro';
 import { facts } from '../../content/facts';
+import { contactLinks } from '../../lib/contacts';
+
+const { contacts: c, legal, brand } = facts;
+const year = new Date().getFullYear();
 ---
 
 <footer data-block="14" class="site-footer on-dark">
-  <div class="container-site grid gap-6 py-12">
-    <img src="/brand/logo-dark.svg" alt="Вимір" width="148" height="32" class="h-8 w-auto" />
-    <p class="text-small text-ink-muted-dark">{facts.brand.descriptor}</p>
-    <SectionStub task="3.16" minHeight="6rem" />
+  <div class="container-site site-footer__grid">
+    <div class="site-footer__brand">
+      <img src="/brand/logo-dark.svg" alt="Вимір" width="148" height="32" class="site-footer__logo" />
+      <p class="site-footer__muted">{brand.descriptor}</p>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__title">Контакти</h2>
+      <ul class="site-footer__list">
+        <li>
+          <a href={contactLinks.tel} class="site-footer__link site-footer__phone">
+            <Icon name="phone" size={20} />
+            <Fact value={c.phoneDisplay} />
+          </a>
+        </li>
+        <li>
+          <a href={contactLinks.email} class="site-footer__link"><Fact value={c.emailPublic} /></a>
+        </li>
+        <li class="site-footer__muted"><Fact value={c.scheduleText} /></li>
+        <li class="site-footer__muted"><Fact value={c.address} /></li>
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__title">Месенджери і соцмережі</h2>
+      <div class="site-footer__social">
+        <Button href={contactLinks.viber} variant="outline" icon="viber">Viber</Button>
+        <Button href={contactLinks.telegram} variant="outline" icon="telegram">Telegram</Button>
+        <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">Instagram</Button>
+      </div>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__title">Реквізити</h2>
+      <ul class="site-footer__list site-footer__muted">
+        <li><Fact value={legal.fopName} /></li>
+        <li>ІПН <Fact value={legal.fopTaxId} /></li>
+        <li>
+          <a href="/polityka" class="site-footer__link">Політика конфіденційності</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="container-site site-footer__bottom">
+    <p class="site-footer__muted">© {year} {brand.name}</p>
   </div>
 </footer>
 
@@ -17,8 +65,81 @@ import { facts } from '../../content/facts';
     background: var(--color-graphite);
     color: var(--color-plaster);
   }
-  .site-footer :global(.stub) {
-    border-color: var(--color-ink-muted-dark);
+  .site-footer__grid {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: 3.5rem 2.5rem;
+  }
+  .site-footer__logo {
+    height: 2rem;
+    width: auto;
+  }
+  .site-footer__brand {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .site-footer__col {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    min-width: 0;
+  }
+  .site-footer__title {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: var(--color-ink-muted-dark);
+  }
+  .site-footer__list {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .site-footer__list > li {
+    min-width: 0;
+  }
+  .site-footer__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--control-h);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .site-footer__phone {
+    font-size: var(--text-lead);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .site-footer__muted {
+    color: var(--color-ink-muted-dark);
+  }
+  .site-footer__list > .site-footer__muted,
+  .site-footer__list.site-footer__muted > li:not(:has(a)) {
+    padding-block: 0.5rem;
+  }
+  .site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .site-footer__bottom {
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--color-graphite-2);
+    font-size: var(--text-small);
+  }
+  @media (min-width: 48rem) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .site-footer__grid {
+      grid-template-columns: 1fr 1.2fr 1.2fr 1fr;
+      gap: 2rem;
+      padding-block: 4.5rem 3rem;
+    }
   }
 </style>

@@ -1,0 +1,27 @@
+import { expect, test } from '@playwright/test';
+
+// Блок 14 — футер
+test.describe('футер', () => {
+  test('ссылки с правильной схемой, зоны нажатия ≥ 48 px', async ({ page }) => {
+    await page.goto('/');
+    const f = page.locator('footer[data-block="14"]');
+    await expect(f.locator('a[href^="tel:"]')).toHaveCount(1);
+    await expect(f.locator('a[href^="mailto:"]')).toHaveCount(1);
+    await expect(f.locator('a[href^="viber://"]')).toHaveCount(1);
+    await expect(f.locator('a[href^="https://t.me/"]')).toHaveCount(1);
+    await expect(f.locator('a[href^="https://instagram.com/"]')).toHaveCount(1);
+    await expect(f.locator('a[href="/polityka"]')).toHaveCount(1);
+    for (const a of await f.locator('a').all()) {
+      expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+    }
+  });
+
+  test('телефон: низ футера не перекрыт нижней панелью', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await page.goto('/');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const footerBottom = await page.locator('footer[data-block="14"]').evaluate((el) => el.getBoundingClientRect().bottom);
+    const barTop = await page.locator('[data-bottom-bar]').evaluate((el) => el.getBoundingClientRect().top);
+    expect(footerBottom).toBeLessThanOrEqual(barTop + 1);
+  });
+});

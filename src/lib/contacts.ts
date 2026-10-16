@@ -11,4 +11,6 @@ export const contactLinks = {
   tel: telHref(c.phoneE164),
   viber: viberHref(c.viberPhoneE164),
   telegram: telegramHref(c.telegramUsername),
+  instagram: `https://instagram.com/${c.instagramHandle}`,
+  email: `mailto:${c.emailPublic}`,
 } as const;
