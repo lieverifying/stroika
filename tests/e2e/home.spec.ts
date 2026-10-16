@@ -32,9 +32,10 @@ test.describe('блоки 6 и 7', () => {
     expect(role.y + role.height).toBeLessThanOrEqual(vh - barH);
   });
 
-  test('заголовок блока 6 без слова «своя»: значение по умолчанию «Наші майстри»', async ({ page }) => {
+  test('заголовок блока 6 — «Своя бригада», подзаголовок «Без субпідрядників» (подтверждено владельцем)', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#team-title')).toHaveText('Наші майстри');
+    await expect(page.locator('#team-title')).toHaveText('Своя бригада');
+    await expect(page.locator('[data-block="6"]')).toContainText('Без субпідрядників');
   });
 
   test('десктоп: описания всех пяти шагов начинаются на одной линии', async ({ page, isMobile }) => {

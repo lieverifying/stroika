@@ -161,9 +161,9 @@ export const facts = {
       photo: `{{MASTER_${n}_PHOTO}}`,
     }),
   ),
-  // Заголовок блока 6. Пока заглушка — на сайте значение по умолчанию (factDefaults ниже).
-  // «Своя бригада» не пишем, пока владелец не подтвердит, что мастера — его сотрудники, а не субподрядчики.
-  teamTitle: '{{TEAM_TITLE}}',
+  // Заголовок и подзаголовок блока 6. Владелец подтвердил: мастера — штатные сотрудники (2026-10-16).
+  teamTitle: 'Своя бригада',
+  teamSubtitle: 'Без субпідрядників.',
   teamVideo: '{{TEAM_VIDEO}}',
 
   materials: {
@@ -210,9 +210,7 @@ export const facts = {
  * Значения по умолчанию для заглушек, которые нельзя показывать серой плашкой (например, заголовок блока).
  * Пока заглушка не заменена, на сайте — это значение; check-placeholders всё равно напоминает о нём.
  */
-export const factDefaults: Record<string, string> = {
-  TEAM_TITLE: 'Наші майстри',
-};
+export const factDefaults: Record<string, string> = {};
 
 interface FactsSchema {
   brand: { name: string; nameUpper: string; descriptor: string };
@@ -265,5 +263,6 @@ interface FactsSchema {
   media: { hero: Fact<string>; heroOrientation: HeroOrientation; heroFocus: string; beforeAfterPairs: Fact<string[]>; ogImage: Fact<string> };
   seasonalBadgeText: Fact<string>;
   teamTitle: Fact<string>;
+  teamSubtitle: Fact<string>;
   flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean };
 }
