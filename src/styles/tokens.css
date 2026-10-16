@@ -25,8 +25,8 @@
 
   /* 6.3. Шрифты (@font-face — в components/layout/Fonts.astro) */
   --font-*: initial;
-  --font-display: 'Unbounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Unbounded', 'Unbounded Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Manrope', 'Manrope Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* 6.4. Шкала шрифта: плавно от 375 до 1280 px */

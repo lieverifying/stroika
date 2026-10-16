@@ -31,8 +31,22 @@ const css = faces
     ),
   )
   .join('');
+
+/*
+ * Fallback-метрики (ARCHITECTURE.md 6.3): пока грузится шрифт, Arial подгоняется под его ширину и высоту строки,
+ * и при подмене текст не прыгает (CLS). Значения измерены в браузере на украинской строке (фаза 3, задача 3.18):
+ * size-adjust = ширина шрифта / ширина Arial; ascent/descent = метрика шрифта (hhea / unitsPerEm) / size-adjust.
+ *   Unbounded 500: hhea 995 / −245 из 1000, к Arial Bold — 6160 / 4784 px → 128,77 %.
+ *   Manrope 400–500: hhea 2132 / −600 из 2000, к Arial — 4552 / 4478 px → 101,65 %.
+ *   Manrope 600–800 (кнопки, подписи): к Arial Bold — 4706 / 4784 px → 98,38 %.
+ * На Android Arial нет — local() не найдётся, браузер возьмёт следующий шрифт стека без подгонки.
+ */
+const fallbacks =
+  "@font-face{font-family:'Unbounded Fallback';src:local('Arial Bold'),local('Arial-BoldMT');size-adjust:128.77%;ascent-override:77.27%;descent-override:19.03%;line-gap-override:0%;}" +
+  "@font-face{font-family:'Manrope Fallback';font-weight:200 500;src:local('Arial'),local('ArialMT');size-adjust:101.65%;ascent-override:104.87%;descent-override:29.51%;line-gap-override:0%;}" +
+  "@font-face{font-family:'Manrope Fallback';font-weight:600 800;src:local('Arial Bold'),local('Arial-BoldMT');size-adjust:98.38%;ascent-override:108.36%;descent-override:30.49%;line-gap-override:0%;}";
 ---
 
 <link rel="preload" href={manropeCyr} as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={unbounded500Cyr} as="font" type="font/woff2" crossorigin />
-<style is:inline set:html={css} />
+<style is:inline set:html={css + fallbacks} />

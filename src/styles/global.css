@@ -60,11 +60,13 @@
   }
 }
 
+/* Контейнер: поля не уже выреза iPhone в горизонтальной ориентации (viewport-fit=cover в BaseLayout) */
 @utility container-site {
   width: 100%;
   max-width: calc(var(--container-site) + 2 * var(--space-gutter));
   margin-inline: auto;
-  padding-inline: var(--space-gutter);
+  padding-left: max(var(--space-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--space-gutter), env(safe-area-inset-right));
 }
 
 /* Отступ между блоками главной: 64 / 96 / 128 px (ARCHITECTURE.md 6.5).
