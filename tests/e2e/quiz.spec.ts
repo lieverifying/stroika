@@ -196,3 +196,37 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await expect(page.locator('[data-result="A"]')).toContainText('грн');
   });
 });
+
+test('события: ветка шафы — ровно quiz_start, quiz_step_1/2/3/6/7; «Назад» не дублирует; без имени и телефона', async ({ page }) => {
+  // dataLayer пропадает при переходе на /dyakuyemo — копируем события в sessionStorage
+  await page.addInitScript(() => {
+    const w = window as unknown as { dataLayer: unknown[] };
+    const saved = JSON.parse(sessionStorage.getItem('test.dl') ?? '[]');
+    w.dataLayer = [];
+    const push = w.dataLayer.push.bind(w.dataLayer);
+    w.dataLayer.push = (...items: unknown[]) => {
+      saved.push(...items);
+      sessionStorage.setItem('test.dl', JSON.stringify(saved));
+      return push(...items);
+    };
+  });
+  await openQuiz(page);
+  await choose(page, 'Шафа або гардеробна');
+  await choose(page, 'Розпашна шафа');
+  await quiz(page).locator('[data-quiz-back]').click();
+  await choose(page, 'Шафа-купе'); // повторный выбор шага 2 — без нового quiz_step_2
+  await choose(page, 'Не знаю — приїдемо заміряти');
+  await choose(page, 'Пізніше');
+  await page.locator('#quiz-name').fill('Олена');
+  await page.locator('#quiz-phone').click();
+  await page.locator('#quiz-phone').pressSequentially('0671234567');
+  await page.locator('#quiz-consent').check();
+  await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+  await expect(page).toHaveURL(/\/dyakuyemo$/);
+  const events = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.dl') ?? '[]') as { event: string }[]);
+  expect(events.map((e) => e.event)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_3', 'quiz_step_6', 'quiz_step_7']);
+  const dump = JSON.stringify(events);
+  expect(dump).not.toContain('Олена');
+  expect(dump).not.toMatch(/671234567|phone|name/);
+  expect(events.every((e) => (e as Record<string, unknown>).quiz_branch === 'wardrobe')).toBe(true);
+});

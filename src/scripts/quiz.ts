@@ -7,10 +7,12 @@
  * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы.
  */
 import { facts } from '../content/facts';
+import { quizStepEvents, track } from '../lib/analytics';
 import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
 import { saveResult } from '../lib/lead/result-store';
 import { submitLead } from '../lib/lead/submit';
 import { normalizePhone } from '../lib/phone';
+import { branchOf } from '../lib/quiz/config';
 import { computeResult, factsToPriceInput } from '../lib/quiz/price';
 import { validateConsent, validateName, validatePhone, validateTask } from '../lib/lead/validate';
 import { answer, back, isLastStep, progress, setTask, start } from '../lib/quiz/machine';
@@ -39,6 +41,15 @@ export function initQuiz(root: HTMLElement): void {
   if (preset && !state.started && state.stepId === 'goal') state = start(Date.now(), preset);
 
   const persist = () => saveState(state);
+
+  // quiz_start и quiz_step_N в dataLayer — без повторов (started / firedSteps в состоянии), без имени и телефона
+  function fireStepEvents(completed: StepId) {
+    const branch = branchOf(state.answers.goal);
+    if (!branch) return;
+    const res = quizStepEvents(state, completed, branch);
+    state = res.state;
+    res.events.forEach((ev) => track(ev.name, ev.params));
+  }
 
   function render(focus: boolean) {
     for (const [id, el] of steps) el.hidden = id !== state.stepId;
@@ -83,7 +94,10 @@ export function initQuiz(root: HTMLElement): void {
   root.addEventListener('click', (e) => {
     const option = (e.target as HTMLElement).closest<HTMLElement>('[role="radio"][data-value]');
     if (!option || !root.contains(option)) return;
-    go(answer(state, option.dataset.value ?? '', Date.now()));
+    const completed = state.stepId;
+    state = answer(state, option.dataset.value ?? '', Date.now());
+    fireStepEvents(completed);
+    go(state);
   });
 
   // Стрелки двигают фокус внутри группы вариантов, Home / End — к краям; выбор — Enter или пробел
@@ -147,10 +161,9 @@ export function initQuiz(root: HTMLElement): void {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!validateForm(form, checks)) return;
-      if (short) {
-        state = setTask(state, (form.elements.namedItem('task') as HTMLTextAreaElement).value, Date.now());
-        persist();
-      }
+      if (short) state = setTask(state, (form.elements.namedItem('task') as HTMLTextAreaElement).value, Date.now());
+      fireStepEvents(state.stepId); // шаг 7 (контакт / коротка форма) пройден
+      persist();
       onValidSubmit(form);
     });
   });
