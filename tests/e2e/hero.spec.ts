@@ -1,15 +1,28 @@
 import { expect, test } from '@playwright/test';
 
-// Блок 1 — правки по ревью дизайна фазы 2
+// Блок 1 — правки владельца по ревью фазы 2 и скриншотам фазы 3
 test.describe('первый экран', () => {
-  test('десктоп: верх фото на уровне верха H1, фото целиком в первом экране', async ({ page, isMobile }) => {
+  test('телефон: фото первым над H1, 16:10, во всю ширину; заявка доступна из нижней панели', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await page.goto('/');
+    const media = (await page.locator('.hero__media').boundingBox())!;
+    const h1 = (await page.locator('h1').boundingBox())!;
+    expect(media.y + media.height).toBeLessThanOrEqual(h1.y);
+    expect(media.width).toBe(375);
+    expect(media.width / media.height).toBeCloseTo(1.6, 1);
+    // Кнопки hero могут уйти ниже первого экрана — «Розрахувати» в панели видна всегда
+    await expect(page.locator('[data-bottom-bar] [data-cta]')).toBeInViewport();
+  });
+
+  test('десктоп: текст по центру фото по вертикали, фото под шапкой и целиком в первом экране', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
     await page.goto('/');
-    const h1 = await page.locator('h1').boundingBox();
-    const media = await page.locator('.hero__media').boundingBox();
-    expect(h1 && media).toBeTruthy();
-    expect(Math.abs(h1!.y - media!.y)).toBeLessThanOrEqual(1);
-    expect(media!.y + media!.height).toBeLessThanOrEqual(800);
+    const text = (await page.locator('.hero__text').boundingBox())!;
+    const media = (await page.locator('.hero__media').boundingBox())!;
+    const header = (await page.locator('[data-header]').boundingBox())!;
+    expect(Math.abs(text.y + text.height / 2 - (media.y + media.height / 2))).toBeLessThanOrEqual(1);
+    expect(media.y).toBeGreaterThanOrEqual(header.y + header.height);
+    expect(media.y + media.height).toBeLessThanOrEqual(800);
   });
 
   test('H1 — Unbounded 500', async ({ page }) => {

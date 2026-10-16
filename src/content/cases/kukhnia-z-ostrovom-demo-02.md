@@ -1,6 +1,6 @@
 ---
 # Демо-кейс (фазы 2–4): все факты — заглушки, в боевую сборку не попадает.
-title: "Кухня з островом {{CASE_FACADE_DESCRIPTION}}"
+title: "Кухня з островом"
 category: kitchen
 kitchenShape: ostriv
 district: "{{CASE_DISTRICT}}"

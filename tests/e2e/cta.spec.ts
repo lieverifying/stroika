@@ -29,8 +29,17 @@ test.describe('один жёлтый на экран', () => {
     }
   });
 
-  test('первый экран: жёлтая — кнопка hero', async ({ page }) => {
+  test('десктоп, первый экран: жёлтая — кнопка hero', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'только десктоп');
     await page.goto('/');
+    await page.waitForTimeout(200);
+    expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+  });
+
+  test('телефон: когда кнопка hero видна, жёлтая она, а не панель', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'только телефон');
+    await page.goto('/');
+    await page.locator('.hero__actions [data-cta]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
     expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
   });
@@ -53,6 +62,7 @@ test.describe('один жёлтый на экран', () => {
     const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 812 } });
     const page = await ctx.newPage();
     await page.goto('/');
+    await page.locator('.hero__actions [data-cta]').scrollIntoViewIfNeeded();
     expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
     await ctx.close();
   });

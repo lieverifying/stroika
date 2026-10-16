@@ -1,6 +1,6 @@
 ---
 # Демо-кейс (фазы 2–4): все факты — заглушки, в боевую сборку не попадает.
-title: "П-подібна кухня {{CASE_FACADE_DESCRIPTION}}"
+title: "П-подібна кухня"
 category: kitchen
 kitchenShape: p-podibna
 district: "{{CASE_DISTRICT}}"

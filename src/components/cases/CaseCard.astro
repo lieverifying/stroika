@@ -1,12 +1,13 @@
 ---
-// Карточка кейса: обложка 4:3, форма кухни и район, название, срок и цена «від».
+// Карточка кейса на главной: обложка 4:3, название, район, цена «від» — и всё (правки владельца, фаза 3).
+// Тип кухни — в самом названии, отдельной подписью не дублируем. Срок и материалы — только на странице кейса.
 // Кликабельна вся карточка: ссылка в заголовке растянута на карточку (::after), фокус — рамкой карточки.
 // data-shape / data-category — для фильтра портфолио.
 import { Image } from 'astro:assets';
 import Fact from '../ui/Fact.astro';
 import PlaceholderImage from '../ui/PlaceholderImage.astro';
-import { buildAlt, KITCHEN_SHAPES, type Case } from '../../lib/cases';
-import { formatUAH, pluralUk } from '../../lib/facts';
+import { buildAlt, type Case } from '../../lib/cases';
+import { formatUAH } from '../../lib/facts';
 
 interface Props {
   item: Case;
@@ -17,7 +18,6 @@ interface Props {
 const { item, headingLevel = 'h3' } = Astro.props;
 const { data } = item;
 const Heading = headingLevel;
-const kind = data.kitchenShape ? KITCHEN_SHAPES[data.kitchenShape] : null;
 ---
 
 <article class="case-card" data-shape={data.kitchenShape} data-category={data.category}>
@@ -37,32 +37,19 @@ const kind = data.kitchenShape ? KITCHEN_SHAPES[data.kitchenShape] : null;
     }
   </div>
   <div class="case-card__body">
-    <p class="case-card__meta">
-      {kind && <span>{kind}</span>}
-      {kind && <span aria-hidden="true">·</span>}
-      <Fact value={data.district} />
-    </p>
     <Heading class="case-card__title">
       <a href={`/roboty/${item.id}`} class="case-card__link">
         <Fact value={data.title} />
       </a>
     </Heading>
-    <dl class="case-card__facts">
-      <div>
-        <dt>Термін</dt>
-        <dd><Fact value={data.durationDays} class="case-card__num" /> {pluralUk(data.durationDays, ['день', 'дні', 'днів'])}</dd>
-      </div>
-      {
-        data.priceFrom !== undefined && (
-          <div>
-            <dt>Ціна</dt>
-            <dd>
-              від <Fact value={data.priceFrom} format={formatUAH} class="case-card__num" />
-            </dd>
-          </div>
-        )
-      }
-    </dl>
+    <p class="case-card__meta"><Fact value={data.district} /></p>
+    {
+      data.priceFrom !== undefined && (
+        <p class="case-card__price">
+          Ціна від <Fact value={data.priceFrom} format={formatUAH} class="case-card__num" />
+        </p>
+      )
+    }
   </div>
 </article>
 
@@ -95,13 +82,10 @@ const kind = data.kitchenShape ? KITCHEN_SHAPES[data.kitchenShape] : null;
   }
   .case-card__body {
     display: grid;
-    gap: 0.75rem;
+    gap: 0.5rem;
     padding: 1.25rem;
   }
   .case-card__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
     font-size: var(--text-small);
     color: var(--color-ink-muted);
     hyphens: none;
@@ -122,17 +106,12 @@ const kind = data.kitchenShape ? KITCHEN_SHAPES[data.kitchenShape] : null;
   .case-card__link:focus-visible {
     outline: none;
   }
-  .case-card__facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
+  .case-card__price {
+    margin-top: 0.25rem;
     font-size: var(--text-small);
   }
-  .case-card__facts dt {
-    color: var(--color-ink-muted);
-  }
-  /* Числа — моно (ARCHITECTURE 6.3), подписи «від», «днів» — обычным шрифтом */
-  .case-card__facts :global(.case-card__num) {
+  /* Числа — моно (ARCHITECTURE 6.3), подпись «Ціна від» — обычным шрифтом */
+  .case-card__price :global(.case-card__num) {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }

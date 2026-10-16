@@ -1,8 +1,9 @@
 ---
 // Блок 1 — первый экран главной (ТЗ). Все обещания — заглушки facts.ts до подтверждения владельцем.
-// Телефон: заголовок, выгоды, две кнопки — над нижней панелью; фото ниже во всю ширину, 4:3.
-// Десктоп: фото справа, верх фото = верх H1; рамка по facts.media.heroOrientation (4:5 или 4:3).
-// Сезонный бейдж — отдельной строкой над H1, включается facts.flags.seasonalBadge.
+// < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → выгоды → кнопки (кнопки могут уйти ниже
+//   первого экрана: «Розрахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
+// ≥ 1024 px: фото справа (рамка по facts.media.heroOrientation: 4:5 или 4:3), текст слева по центру фото.
+// Обрезка фото — по facts.media.heroFocus (object-position). Бейдж — facts.flags.seasonalBadge.
 import Badge from '../ui/Badge.astro';
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
@@ -18,19 +19,24 @@ const photo = portrait
   : { width: 1600, height: 1200, label: 'кухня, перший екран, горизонтальне 4:3' };
 ---
 
-<section data-block="1" class="hero" aria-labelledby="hero-title">
+<section
+  data-block="1"
+  class="hero"
+  aria-labelledby="hero-title"
+  style={`--hero-focus: ${facts.media.heroFocus}`}
+>
   <div class:list={['hero__inner container-site', { 'hero__inner--portrait': portrait }]}>
-    {
-      flags.seasonalBadge && (
-        <div class="hero__badge">
-          <Badge>
-            <Fact value={facts.seasonalBadgeText} />
-          </Badge>
-        </div>
-      )
-    }
-
     <div class="hero__text">
+      {
+        flags.seasonalBadge && (
+          <div class="hero__badge">
+            <Badge>
+              <Fact value={facts.seasonalBadgeText} />
+            </Badge>
+          </div>
+        )
+      }
+
       <h1 id="hero-title" class="text-h1">
         Кухні на замовлення в Черкасах
         <span class="hero__tail">— <Fact value={promises.oneTeam} /></span>
@@ -59,14 +65,22 @@ const photo = portrait
 <style>
   .hero__inner {
     display: grid;
-    gap: 2rem;
-    padding-top: 1.5rem;
-    /* Ниже сразу «Цифри довіри» со своей линией сверху — полный отступ блока здесь не нужен */
+    gap: 1.5rem;
     padding-bottom: var(--space-stack);
   }
-  /* Бейдж — своя строка сетки: на десктопе он не сдвигает H1 относительно фото */
+  /* Фото первым и во всю ширину экрана, 16:10 */
+  .hero__media {
+    order: -1;
+    margin-inline: calc(-1 * var(--space-gutter));
+  }
+  .hero__media :global(.ph),
+  .hero__media :global(img) {
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: var(--hero-focus);
+  }
   .hero__badge {
-    margin-bottom: -1rem;
+    margin-bottom: 1rem;
   }
   .hero__tail {
     display: block;
@@ -102,24 +116,18 @@ const photo = portrait
     gap: 0.75rem;
     margin-top: 1.75rem;
   }
-  /* Фото на телефоне — во всю ширину экрана; до десктопа всегда 4:3, вертикальное фото обрезается */
-  .hero__media {
-    margin-inline: calc(-1 * var(--space-gutter));
-  }
-  .hero__media :global(.ph) {
-    aspect-ratio: 4 / 3;
-  }
 
-  /* Планшет: фото в пределах контейнера, кнопки в ряд */
+  /* Планшет: фото в пределах контейнера со скруглением, кнопки в ряд */
   @media (min-width: 48rem) {
     .hero__inner {
       gap: 2.5rem;
-      padding-top: 2.5rem;
+      padding-top: 2rem;
     }
     .hero__media {
       margin-inline: 0;
     }
-    .hero__media :global(.ph) {
+    .hero__media :global(.ph),
+    .hero__media :global(img) {
       border-radius: var(--radius-lg);
     }
     .hero__actions {
@@ -128,11 +136,11 @@ const photo = portrait
     }
   }
 
-  /* Десктоп: текст слева, фото справа; верх фото на уровне верха H1 */
+  /* Десктоп: текст слева по центру фото, фото справа под шапкой */
   @media (min-width: 64rem) {
     .hero__inner {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      align-items: start;
+      align-items: center;
       column-gap: 4rem;
       padding-top: 3rem;
     }
@@ -140,21 +148,12 @@ const photo = portrait
     .hero__inner--portrait {
       grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     }
-    .hero__badge {
-      grid-column: 1;
-    }
-    .hero__text {
-      grid-column: 1;
-    }
     .hero__media {
-      grid-column: 2;
+      order: 0;
     }
-    .hero__badge ~ .hero__text,
-    .hero__badge ~ .hero__media {
-      grid-row: 2;
-    }
-    .hero__media :global(.ph) {
-      aspect-ratio: var(--ph-ratio);
+    .hero__media :global(.ph),
+    .hero__media :global(img) {
+      aspect-ratio: var(--ph-ratio, 4 / 5);
     }
     .hero__benefits {
       margin-top: 2rem;

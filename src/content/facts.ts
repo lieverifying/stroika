@@ -187,6 +187,9 @@ export const facts = {
     // Не заглушка, а настройка: рамка фото первого экрана на десктопе.
     // 'portrait' — 4:5 (реальные фото кухонь в основном вертикальные), 'landscape' — 4:3.
     heroOrientation: 'portrait' as HeroOrientation,
+    // Не заглушка, а настройка: точка кадра, которая остаётся видна при обрезке фото (CSS object-position).
+    // На телефоне фото обрезается до 16:10 — сюда ставим, где на фото главное, например '50% 60%'.
+    heroFocus: '50% 50%',
     beforeAfterPairs: '{{BEFORE_AFTER_PAIRS}}',
     ogImage: '{{OG_IMAGE}}',
   },
@@ -248,7 +251,7 @@ interface FactsSchema {
   materials: { hardwareBrands: Fact<Brand[]>; materialBrands: Fact<Brand[]> };
   faq: { appliances: Fact<string> };
   reviews: Review[];
-  media: { hero: Fact<string>; heroOrientation: HeroOrientation; beforeAfterPairs: Fact<string[]>; ogImage: Fact<string> };
+  media: { hero: Fact<string>; heroOrientation: HeroOrientation; heroFocus: string; beforeAfterPairs: Fact<string[]>; ogImage: Fact<string> };
   seasonalBadgeText: Fact<string>;
   flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean };
 }
