@@ -1,0 +1,28 @@
+---
+// Выпадающий список с подписью и местом под ошибку. Высота 48 px, шрифт 16 px.
+import './field.css';
+
+interface Props {
+  name: string;
+  label: string;
+  options: { value: string; label: string }[];
+  id?: string;
+  required?: boolean;
+  /** Первая пустая строка («Оберіть…») */
+  placeholder?: string;
+  error?: string;
+}
+const { name, label, options, id = `f-${name}`, required, placeholder, error = 'Оберіть варіант' } = Astro.props;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+    {!required && <span class="field__optional"> (необов’язково)</span>}
+  </label>
+  <select class="field__control" id={id} name={name} required={required} aria-describedby={`${id}-error`}>
+    {placeholder && <option value="">{placeholder}</option>}
+    {options.map((o) => <option value={o.value}>{o.label}</option>)}
+  </select>
+  <p class="field__error" id={`${id}-error`} data-error={error} hidden>{error}</p>
+</div>

@@ -1,12 +1,21 @@
 ---
-// Блок 13 — «Фінальний заклик» (ТЗ). Заготовка: наполнение — задача 3.14 (PLAN.md).
+// Блок 13 — «Фінальний заклик» (ТЗ): форма замера + карта зоны выезда. Якорь #zamir — сюда ведёт кнопка шапки.
+// Задача 3.13: форма из полей; проверка, карта зоны — задача 3.14.
+import ZamirForm from '../forms/ZamirForm.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
 ---
 
 <section id="zamir" data-block="13" class="section-pad" aria-labelledby="final-title">
   <div class="container-site">
     <SectionTitle id="final-title" title="Безкоштовний замір" />
-    <SectionStub task="3.14" />
+    <div class="final__form">
+      <ZamirForm />
+    </div>
   </div>
 </section>
+
+<style>
+  .final__form {
+    max-width: 32rem;
+  }
+</style>

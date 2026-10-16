@@ -14,7 +14,8 @@
     "astro": "astro",
     "test:e2e": "playwright test",
     "screens": "node scripts/screens.mjs",
-    "check:placeholders": "node scripts/check-placeholders.mjs"
+    "check:placeholders": "node scripts/check-placeholders.mjs",
+    "test:unit": "node --test tests/unit/*.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",

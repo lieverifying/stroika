@@ -1,0 +1,24 @@
+---
+// Многострочное поле с подписью и местом под ошибку.
+import './field.css';
+
+interface Props {
+  name: string;
+  label: string;
+  id?: string;
+  required?: boolean;
+  rows?: number;
+  placeholder?: string;
+  error?: string;
+}
+const { name, label, id = `f-${name}`, required, rows = 4, placeholder, error = 'Заповніть це поле' } = Astro.props;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+    {!required && <span class="field__optional"> (необов’язково)</span>}
+  </label>
+  <textarea class="field__control" id={id} name={name} rows={rows} required={required} placeholder={placeholder} aria-describedby={`${id}-error`}></textarea>
+  <p class="field__error" id={`${id}-error`} data-error={error} hidden>{error}</p>
+</div>

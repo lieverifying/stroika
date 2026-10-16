@@ -1,0 +1,53 @@
+---
+// Форма замера (блок 13 и попап из шапки): ім'я, телефон, зручний час, согласие, поле-ловушка.
+// Только интерфейс: скрипт проверяет поля и показывает ошибки, в сеть НЕ отправляет (отправка — фаза 6, api/lead.php).
+// Без JS форма уйдёт обычным POST на action — бэкенд появится в фазе 6.
+import Button from '../ui/Button.astro';
+import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
+import Honeypot from '../ui/form/Honeypot.astro';
+import Input from '../ui/form/Input.astro';
+import PhoneInput from '../ui/form/PhoneInput.astro';
+import Select from '../ui/form/Select.astro';
+
+interface Props {
+  /** Префикс id полей: на странице может быть две формы (блок 13 и попап) */
+  idPrefix?: string;
+  /** Откуда заявка — уйдёт в заявке (ARCHITECTURE.md 4.8) */
+  source?: string;
+}
+const { idPrefix = 'zamir', source = 'zamir-form' } = Astro.props;
+const id = (name: string) => `${idPrefix}-${name}`;
+
+const TIMES = [
+  { value: 'soon', label: 'Найближчим часом' },
+  { value: 'morning', label: 'Зранку' },
+  { value: 'day', label: 'Вдень' },
+  { value: 'evening', label: 'Увечері' },
+];
+---
+
+<form class="zamir-form" action="/api/lead.php" method="post" novalidate data-zamir-form>
+  <input type="hidden" name="source" value={source} />
+  <Input name="name" id={id('name')} label="Ім’я" autocomplete="given-name" required error="Вкажіть, як до вас звертатися" />
+  <PhoneInput id={id('phone')} />
+  <Select name="time" id={id('time')} label="Зручний час для дзвінка" options={TIMES} />
+  <ConsentCheckbox id={id('consent')} />
+  <Honeypot id={id('website')} />
+  <Button type="submit" size="lg" fullWidth ctaPriority={3}>Надіслати заявку</Button>
+  <p class="zamir-form__status" role="status" aria-live="polite" data-form-status></p>
+</form>
+
+<style>
+  .zamir-form {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .zamir-form__status:empty {
+    display: none;
+  }
+  .zamir-form__status {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+</style>

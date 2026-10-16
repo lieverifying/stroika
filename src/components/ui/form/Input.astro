@@ -1,0 +1,28 @@
+---
+// Текстовое поле с подписью, подсказкой и местом под ошибку (aria-describedby → подсказка и ошибка).
+// Ошибку показывает скрипт формы: снимает hidden у .field__error и ставит aria-invalid.
+import type { HTMLAttributes } from 'astro/types';
+import './field.css';
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'id' | 'name'> {
+  name: string;
+  label: string;
+  id?: string;
+  hint?: string;
+  /** Текст ошибки, который покажет скрипт формы */
+  error?: string;
+}
+
+const { name, label, id = `f-${name}`, hint, error = 'Заповніть це поле', required, class: className, ...rest } = Astro.props;
+const describedBy = [hint && `${id}-hint`, `${id}-error`].filter(Boolean).join(' ');
+---
+
+<div class:list={['field', className]}>
+  <label class="field__label" for={id}>
+    {label}
+    {!required && <span class="field__optional"> (необов’язково)</span>}
+  </label>
+  <input class="field__control" id={id} name={name} required={required} aria-describedby={describedBy} {...rest} />
+  {hint && <p class="field__hint" id={`${id}-hint`}>{hint}</p>}
+  <p class="field__error" id={`${id}-error`} data-error={error} hidden>{error}</p>
+</div>

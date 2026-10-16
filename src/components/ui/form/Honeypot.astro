@@ -1,0 +1,23 @@
+---
+interface Props {
+  id?: string;
+}
+const { id = 'f-website' } = Astro.props;
+// Поле-ловушка от ботов (ARCHITECTURE.md 7): человек его не видит и не заполняет, бот — заполняет.
+// Не display:none (боты это распознают) — уводим за экран; недоступно для Tab и скринридера.
+---
+
+<div class="hp" aria-hidden="true">
+  <label for={id}>Website</label>
+  <input type="text" id={id} name="website" tabindex="-1" autocomplete="off" />
+</div>
+
+<style>
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
