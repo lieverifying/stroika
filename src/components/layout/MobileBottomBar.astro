@@ -2,7 +2,7 @@
 // Нижняя панель на телефоне (< 1024 px): «Подзвонити» / «Viber» / «Розрахувати» (ARCHITECTURE.md 6.8).
 // Не перекрывает контент: body получает нижний отступ на высоту панели (global.css).
 // Прячется при фокусе в поле ввода, открытом меню или <dialog>.
-// «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (фаза 3).
+// «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (src/lib/cta-arbiter.ts).
 import Icon from '../ui/Icon.astro';
 import { contactLinks } from '../../lib/contacts';
 ---
@@ -72,7 +72,7 @@ import { contactLinks } from '../../lib/contacts';
     width: 1.25rem;
     height: 1.25rem;
   }
-  /* Без JS — вид secondary; жёлтым станет по правилу одного жёлтого (фаза 3) */
+  /* Без JS — вид secondary; жёлтым делает cta-arbiter */
   .cell--cta {
     background: var(--color-graphite);
     color: var(--color-plaster);

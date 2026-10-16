@@ -36,5 +36,9 @@ const { title, description, noindex } = Astro.props;
     </main>
     <Footer />
     <MobileBottomBar />
+    <script>
+      import { initCtaArbiter } from '../lib/cta-arbiter';
+      initCtaArbiter();
+    </script>
   </body>
 </html>

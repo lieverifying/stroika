@@ -76,3 +76,23 @@
 @utility section-pad {
   padding-block: var(--space-section);
 }
+
+/*
+ * Правило одного жёлтого (ARCHITECTURE.md 6.9, src/lib/cta-arbiter.ts).
+ * Когда скрипт запущен, все кнопки заявки графитовые, жёлтая — только с data-cta-on.
+ * Вне @layer и с html[...] — чтобы перебить scoped-стили Button и нижней панели (они тоже вне слоёв).
+ */
+html[data-cta-ready] [data-cta='primary'] {
+  background: var(--color-graphite);
+  color: var(--color-plaster);
+}
+html[data-cta-ready] [data-cta='primary']:not([data-cta-on]):hover {
+  background: var(--color-graphite-2);
+}
+html[data-cta-ready] [data-cta='primary'][data-cta-on] {
+  background: var(--color-tape);
+  color: var(--color-graphite);
+}
+html[data-cta-ready] [data-cta='primary'][data-cta-on]:hover {
+  background: var(--color-tape-hover);
+}

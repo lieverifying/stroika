@@ -2,6 +2,7 @@
 // Использование: npm run screens -- --path=/ --name=2-9-hero [--widths=320,375,1280] [--fold] [--click=<css>]
 //   --fold  — только первый экран (без прокрутки), иначе вся страница.
 //   --click — нажать элемент перед снимком.
+//   --scroll — прокрутить страницу на N px перед снимком (вместе с --fold).
 //   --css   — добавить CSS перед снимком (сравнить вариант, не меняя код), напр. --css='h1{font-weight:600}'.
 // Перед запуском нужен свежий `npm run build`: скрипт сам поднимает astro preview.
 import { spawn } from 'node:child_process';
@@ -66,6 +67,10 @@ try {
     await page.evaluate(() => document.fonts.ready);
     // --click=<css> — нажать элемент перед снимком (например, открыть меню)
     if (typeof args.click === 'string') await page.click(args.click);
+    if (typeof args.scroll === 'string') {
+      await page.evaluate((y) => window.scrollTo(0, y), Number(args.scroll));
+      await page.waitForTimeout(400); // IntersectionObserver и переходы
+    }
     const file = `docs/screens/${name}-${width}.png`;
     await page.screenshot({ path: file, fullPage: !fold });
     console.log(`✓ ${file}`);
