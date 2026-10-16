@@ -4,6 +4,7 @@
 //   --click — нажать элемент перед снимком (несколько — через «||»).
 //   --scroll — прокрутить страницу на N px перед снимком (вместе с --fold).
 //   --to    — прокрутить к элементу (верх элемента под шапку), напр. --to='[data-block="4"]'.
+//   --reload — после кликов перезагрузить страницу (проверка восстановления квиза).
 //   --css   — добавить CSS перед снимком (сравнить вариант, не меняя код), напр. --css='h1{font-weight:600}'.
 // Перед запуском нужен свежий `npm run build`: скрипт сам поднимает astro preview.
 import { spawn } from 'node:child_process';
@@ -73,6 +74,10 @@ try {
         await page.click(sel);
         await page.waitForTimeout(600); // анимации и IntersectionObserver (правило одного жёлтого)
       }
+    }
+    if (args.reload) {
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(600);
     }
     if (typeof args.to === 'string') {
       await page.locator(args.to).first().evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - (document.querySelector('[data-header]')?.getBoundingClientRect().height ?? 0) - 16));

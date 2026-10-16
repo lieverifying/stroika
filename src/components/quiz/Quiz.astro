@@ -1,6 +1,7 @@
 ---
 // Квиз-калькулятор (ТЗ, блок 5; ARCHITECTURE.md 4): все шаги в разметке, виден один.
-// Логика (переходы, «Назад», сохранение) — скрипт квиза (задача 4.5). Без JS виден шаг 1 и ссылка на форму замера.
+// Логика (переходы, «Назад», сохранение) — src/scripts/quiz.ts, грузится, когда квиз близко к экрану.
+// Без JS виден шаг 1 и ссылка на форму замера.
 // Шаги контакта и короткой формы — задача 4.6.
 import QuizProgress from './QuizProgress.astro';
 import QuizStep from './QuizStep.astro';
@@ -15,11 +16,33 @@ import { STEPS } from '../../lib/quiz/config';
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
       Назад
     </button>
+    <button type="button" class="quiz__restart" data-quiz-restart hidden>Почати заново</button>
   </div>
   <noscript>
     <p class="quiz__fallback">Квіз працює з увімкненим JavaScript. Або <a href="#zamir">залиште заявку на безкоштовний замір</a>.</p>
   </noscript>
 </div>
+
+<script>
+  // Островок квиза грузится, когда квиз подъезжает к экрану (или сразу, если пришли по #kvyz)
+  const root = document.querySelector<HTMLElement>('[data-quiz]');
+  if (root) {
+    const load = () => import('../../scripts/quiz').then((m) => m.initQuiz(root));
+    if (location.hash === '#kvyz' || !('IntersectionObserver' in window)) load();
+    else {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            load();
+          }
+        },
+        { rootMargin: '400px 0px' },
+      );
+      io.observe(root);
+    }
+  }
+</script>
 
 <style>
   .quiz {
@@ -29,8 +52,26 @@ import { STEPS } from '../../lib/quiz/config';
     border-radius: var(--radius-lg);
     background: var(--color-white);
   }
-  .quiz__nav:has(.quiz__back[hidden]) {
+  .quiz__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .quiz__nav:has(.quiz__back[hidden]):has(.quiz__restart[hidden]) {
     display: none;
+  }
+  .quiz__restart {
+    min-height: var(--control-h);
+    padding-inline: 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-ink-muted);
+    font-size: var(--text-small);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
   }
   .quiz__back {
     display: inline-flex;
