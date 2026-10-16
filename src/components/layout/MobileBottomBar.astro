@@ -4,16 +4,15 @@
 // Прячется при фокусе в поле ввода, открытом меню или <dialog>.
 // «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (фаза 3).
 import Icon from '../ui/Icon.astro';
-import { facts } from '../../content/facts';
-import { telHref, viberHref } from '../../lib/facts';
+import { contactLinks } from '../../lib/contacts';
 ---
 
 <nav data-bottom-bar aria-label="Швидкий зв'язок" class="bottom-bar">
-  <a href={telHref(facts.contacts.phoneE164)} class="cell">
+  <a href={contactLinks.tel} class="cell">
     <Icon name="phone" />
     <span>Подзвонити</span>
   </a>
-  <a href={viberHref(facts.contacts.viberPhoneE164)} class="cell">
+  <a href={contactLinks.viber} class="cell">
     <Icon name="viber" />
     <span>Viber</span>
   </a>

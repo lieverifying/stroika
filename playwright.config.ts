@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// E2E против собранного сайта (astro preview). Ширины — из CLAUDE.md: 375 и 1280 px.
+// E2E всегда против свежей production-сборки: webServer сначала делает `astro build`, потом поднимает preview.
+// Свой порт 4398 и reuseExistingServer: false — тесты не попадут на dev-сервер (4321) или старый dist.
+// Ширины — из CLAUDE.md: 375 и 1280 px.
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -8,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: 'http://localhost:4398',
     locale: 'uk-UA',
   },
   projects: [
@@ -26,9 +28,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx astro preview --port 4321 --ignore-lock',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    command: 'npx astro build && npx astro preview --port 4398 --ignore-lock',
+    url: 'http://localhost:4398',
+    reuseExistingServer: false,
+    timeout: 180_000,
   },
 });

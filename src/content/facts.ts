@@ -30,6 +30,8 @@ export interface WidthBand {
   max: number;
 }
 
+export type HeroOrientation = 'portrait' | 'landscape';
+
 export interface Brand {
   name: string;
   logo: string;
@@ -182,6 +184,9 @@ export const facts = {
 
   media: {
     hero: '{{HERO_MEDIA}}',
+    // Не заглушка, а настройка: рамка фото первого экрана на десктопе.
+    // 'portrait' — 4:5 (реальные фото кухонь в основном вертикальные), 'landscape' — 4:3.
+    heroOrientation: 'portrait' as HeroOrientation,
     beforeAfterPairs: '{{BEFORE_AFTER_PAIRS}}',
     ogImage: '{{OG_IMAGE}}',
   },
@@ -243,7 +248,7 @@ interface FactsSchema {
   materials: { hardwareBrands: Fact<Brand[]>; materialBrands: Fact<Brand[]> };
   faq: { appliances: Fact<string> };
   reviews: Review[];
-  media: { hero: Fact<string>; beforeAfterPairs: Fact<string[]>; ogImage: Fact<string> };
+  media: { hero: Fact<string>; heroOrientation: HeroOrientation; beforeAfterPairs: Fact<string[]>; ogImage: Fact<string> };
   seasonalBadgeText: Fact<string>;
   flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean };
 }

@@ -2,6 +2,8 @@
 // Серый плейсхолдер вместо фото (CLAUDE.md, п.4: никаких стоков).
 // Подпись — размер будущего фото и место; размерная линия — мотив замера (декор).
 // aspect-ratio задан сразу, поэтому при замене на фото вёрстка не прыгает.
+// Пропорция — через --ph-ratio: секция может переопределить её на своей ширине.
+// Скрыт от скринридера: это временная серая плашка, а не содержимое (alt появится у настоящего фото).
 interface Props {
   width: number;
   height: number;
@@ -12,14 +14,9 @@ interface Props {
 const { width, height, label, class: className } = Astro.props;
 ---
 
-<div
-  role="img"
-  aria-label={`Місце для фото: ${label}`}
-  class:list={['ph', className]}
-  style={`aspect-ratio: ${width} / ${height}`}
->
+<div aria-hidden="true" class:list={['ph', className]} style={`--ph-ratio: ${width} / ${height}`}>
   <span class="ph__label">{width} × {height} · {label}</span>
-  <svg class="ph__dim" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+  <svg class="ph__dim" viewBox="0 0 100 8" preserveAspectRatio="none">
     <path d="M0.5 0v8M99.5 0v8M0 4h100" vector-effect="non-scaling-stroke" />
   </svg>
 </div>
@@ -30,6 +27,7 @@ const { width, height, label, class: className } = Astro.props;
     display: grid;
     place-items: center;
     width: 100%;
+    aspect-ratio: var(--ph-ratio);
     overflow: hidden;
     background: var(--color-placeholder);
     color: var(--color-graphite);

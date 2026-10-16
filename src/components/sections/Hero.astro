@@ -1,27 +1,36 @@
 ---
 // Блок 1 — первый экран главной (ТЗ). Все обещания — заглушки facts.ts до подтверждения владельцем.
-// Телефон: заголовок, выгоды, две кнопки — над нижней панелью; фото ниже во всю ширину.
+// Телефон: заголовок, выгоды, две кнопки — над нижней панелью; фото ниже во всю ширину, 4:3.
+// Десктоп: фото справа, верх фото = верх H1; рамка по facts.media.heroOrientation (4:5 или 4:3).
+// Сезонный бейдж — отдельной строкой над H1, включается facts.flags.seasonalBadge.
 import Badge from '../ui/Badge.astro';
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import { facts } from '../../content/facts';
-import { viberHref } from '../../lib/facts';
+import { contactLinks } from '../../lib/contacts';
 
 const { promises, warranty, flags } = facts;
+const portrait = facts.media.heroOrientation === 'portrait';
+// Размер фото, которое нужно прислать: вертикальное 4:5 или горизонтальное 4:3
+const photo = portrait
+  ? { width: 1200, height: 1500, label: 'кухня, перший екран, вертикальне 4:5' }
+  : { width: 1600, height: 1200, label: 'кухня, перший екран, горизонтальне 4:3' };
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <div class="hero__inner container-site">
-    <div class="hero__text">
-      {
-        flags.seasonalBadge && (
-          <Badge class="mb-4">
+  <div class:list={['hero__inner container-site', { 'hero__inner--portrait': portrait }]}>
+    {
+      flags.seasonalBadge && (
+        <div class="hero__badge">
+          <Badge>
             <Fact value={facts.seasonalBadgeText} />
           </Badge>
-        )
-      }
+        </div>
+      )
+    }
 
+    <div class="hero__text">
       <h1 id="hero-title" class="text-h1">
         Кухні на замовлення в Черкасах
         <span class="hero__tail">— <Fact value={promises.oneTeam} /></span>
@@ -35,14 +44,14 @@ const { promises, warranty, flags } = facts;
 
       <div class="hero__actions">
         <Button href="#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
-        <Button href={viberHref(facts.contacts.viberPhoneE164)} variant="secondary" icon="viber">
+        <Button href={contactLinks.viber} variant="secondary" icon="viber">
           Написати у Viber
         </Button>
       </div>
     </div>
 
     <div class="hero__media">
-      <PlaceholderImage width={1600} height={1200} label="кухня, перший екран" />
+      <PlaceholderImage {...photo} />
     </div>
   </div>
 </section>
@@ -53,6 +62,10 @@ const { promises, warranty, flags } = facts;
     gap: 2rem;
     padding-top: 1.5rem;
     padding-bottom: var(--space-section);
+  }
+  /* Бейдж — своя строка сетки: на десктопе он не сдвигает H1 относительно фото */
+  .hero__badge {
+    margin-bottom: -1rem;
   }
   .hero__tail {
     display: block;
@@ -88,9 +101,12 @@ const { promises, warranty, flags } = facts;
     gap: 0.75rem;
     margin-top: 1.75rem;
   }
-  /* Фото на телефоне — во всю ширину экрана */
+  /* Фото на телефоне — во всю ширину экрана; до десктопа всегда 4:3, вертикальное фото обрезается */
   .hero__media {
     margin-inline: calc(-1 * var(--space-gutter));
+  }
+  .hero__media :global(.ph) {
+    aspect-ratio: 4 / 3;
   }
 
   /* Планшет: фото в пределах контейнера, кнопки в ряд */
@@ -111,13 +127,33 @@ const { promises, warranty, flags } = facts;
     }
   }
 
-  /* Десктоп: текст слева, фото справа */
+  /* Десктоп: текст слева, фото справа; верх фото на уровне верха H1 */
   @media (min-width: 64rem) {
     .hero__inner {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      align-items: center;
-      gap: 4rem;
+      align-items: start;
+      column-gap: 4rem;
       padding-top: 3rem;
+    }
+    /* Вертикальная рамка выше: колонку фото сужаем, чтобы фото целиком помещалось в первый экран 1280 × 800 */
+    .hero__inner--portrait {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+    .hero__badge {
+      grid-column: 1;
+    }
+    .hero__text {
+      grid-column: 1;
+    }
+    .hero__media {
+      grid-column: 2;
+    }
+    .hero__badge ~ .hero__text,
+    .hero__badge ~ .hero__media {
+      grid-row: 2;
+    }
+    .hero__media :global(.ph) {
+      aspect-ratio: var(--ph-ratio);
     }
     .hero__benefits {
       margin-top: 2rem;

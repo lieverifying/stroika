@@ -31,7 +31,8 @@
 
   /* 6.4. Шкала шрифта: плавно от 375 до 1280 px */
   --text-*: initial;
-  --text-h1: clamp(1.75rem, 1.0249rem + 3.0939vw, 3.5rem);
+  /* 28 → 46 px: на десктопе на 18 % тише прежних 56 px (ревью фазы 2) */
+  --text-h1: clamp(1.75rem, 1.2838rem + 1.989vw, 2.875rem);
   --text-h1--line-height: 1.15;
   --text-h1--letter-spacing: -0.01em;
   --text-h2: clamp(1.5rem, 1.0856rem + 1.768vw, 2.5rem);
@@ -83,6 +84,8 @@
 
 /* Семантические токены, зависящие от ширины (6.5, 6.7, 6.8, 6.10) */
 :root {
+  --h1-weight: 500; /* Unbounded 500; вариант 600 — для сравнения на скриншотах */
+
   --space-section: 4rem;
   --space-stack: 2rem;
   --space-gutter: 1.25rem;

@@ -1,7 +1,10 @@
 ---
 // Шрифты с нашего домена (@fontsource), только подмножества cyrillic + latin.
 // unicode-range задаём сами: готовые CSS подмножеств его не содержат, и браузер скачал бы оба файла.
-// Preload — только два файла первого экрана: Manrope cyrillic и Unbounded cyrillic 600.
+// Preload — только два файла первого экрана: Manrope cyrillic и Unbounded cyrillic 500 (H1).
+// Unbounded 600 — для H2–H3, ниже первого экрана, без preload.
+import unbounded500Cyr from '@fontsource/unbounded/files/unbounded-cyrillic-500-normal.woff2?url';
+import unbounded500Lat from '@fontsource/unbounded/files/unbounded-latin-500-normal.woff2?url';
 import unboundedCyr from '@fontsource/unbounded/files/unbounded-cyrillic-600-normal.woff2?url';
 import unboundedLat from '@fontsource/unbounded/files/unbounded-latin-600-normal.woff2?url';
 import manropeCyr from '@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2?url';
@@ -14,6 +17,7 @@ const LAT =
   'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 
 const faces = [
+  { family: 'Unbounded', weight: '500', cyr: unbounded500Cyr, lat: unbounded500Lat },
   { family: 'Unbounded', weight: '600', cyr: unboundedCyr, lat: unboundedLat },
   { family: 'Manrope', weight: '200 800', cyr: manropeCyr, lat: manropeLat },
   { family: 'JetBrains Mono', weight: '500', cyr: monoCyr, lat: monoLat },
@@ -33,5 +37,5 @@ const css = faces
 ---
 
 <link rel="preload" href={manropeCyr} as="font" type="font/woff2" crossorigin />
-<link rel="preload" href={unboundedCyr} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={unbounded500Cyr} as="font" type="font/woff2" crossorigin />
 <style is:inline set:html={css} />

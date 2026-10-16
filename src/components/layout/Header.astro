@@ -6,7 +6,7 @@ import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
 import MobileMenu from './MobileMenu.astro';
 import { facts } from '../../content/facts';
-import { telHref } from '../../lib/facts';
+import { contactLinks } from '../../lib/contacts';
 import { NAV } from './nav';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -37,7 +37,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
     </nav>
 
     <div class="hidden items-center gap-4 lg:flex">
-      <a href={telHref(facts.contacts.phoneE164)} class="flex min-h-12 items-center gap-2 font-semibold">
+      <a href={contactLinks.tel} class="flex min-h-12 items-center gap-2 font-semibold">
         <Icon name="phone" size={20} />
         <Fact value={facts.contacts.phoneDisplay} />
       </a>
@@ -46,7 +46,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
     <div class="flex items-center lg:hidden">
       <a
-        href={telHref(facts.contacts.phoneE164)}
+        href={contactLinks.tel}
         class="grid size-12 place-items-center rounded-md"
         aria-label="Подзвонити"
       >

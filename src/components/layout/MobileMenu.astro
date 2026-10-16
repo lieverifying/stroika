@@ -4,7 +4,7 @@ import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
 import { facts } from '../../content/facts';
-import { telHref, telegramHref, viberHref } from '../../lib/facts';
+import { contactLinks } from '../../lib/contacts';
 import { NAV } from './nav';
 
 interface Props {
@@ -40,13 +40,13 @@ const c = facts.contacts;
     </nav>
 
     <div class="flex flex-col gap-3">
-      <a href={telHref(c.phoneE164)} class="flex min-h-12 items-center gap-3 text-lead font-semibold">
+      <a href={contactLinks.tel} class="flex min-h-12 items-center gap-3 text-lead font-semibold">
         <Icon name="phone" />
         <Fact value={c.phoneDisplay} />
       </a>
       <div class="grid grid-cols-2 gap-3">
-        <Button href={viberHref(c.viberPhoneE164)} variant="outline" icon="viber">Viber</Button>
-        <Button href={telegramHref(c.telegramUsername)} variant="outline" icon="telegram">Telegram</Button>
+        <Button href={contactLinks.viber} variant="outline" icon="viber">Viber</Button>
+        <Button href={contactLinks.telegram} variant="outline" icon="telegram">Telegram</Button>
       </div>
     </div>
 

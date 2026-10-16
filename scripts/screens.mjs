@@ -2,6 +2,7 @@
 // Использование: npm run screens -- --path=/ --name=2-9-hero [--widths=320,375,1280] [--fold] [--click=<css>]
 //   --fold  — только первый экран (без прокрутки), иначе вся страница.
 //   --click — нажать элемент перед снимком.
+//   --css   — добавить CSS перед снимком (сравнить вариант, не меняя код), напр. --css='h1{font-weight:600}'.
 // Перед запуском нужен свежий `npm run build`: скрипт сам поднимает astro preview.
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
@@ -18,6 +19,8 @@ const path = typeof args.path === 'string' ? args.path : '/';
 const name = typeof args.name === 'string' ? args.name : 'screen';
 const widths = (typeof args.widths === 'string' ? args.widths : '375,1280').split(',').map(Number);
 const fold = Boolean(args.fold);
+// --css может содержать «=», поэтому берём всё после первого
+const cssArg = process.argv.find((a) => a.startsWith('--css='))?.slice('--css='.length);
 const PORT = 4399;
 const base = `http://localhost:${PORT}`;
 
@@ -59,6 +62,7 @@ try {
     });
     const page = await context.newPage();
     await page.goto(base + path, { waitUntil: 'networkidle' });
+    if (cssArg) await page.addStyleTag({ content: cssArg });
     await page.evaluate(() => document.fonts.ready);
     // --click=<css> — нажать элемент перед снимком (например, открыть меню)
     if (typeof args.click === 'string') await page.click(args.click);
