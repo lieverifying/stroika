@@ -52,3 +52,25 @@ test('телефон: цены сеткой 2 × 2, логотипы по 3 в �
   expect(boxes.filter((b) => b.top === boxes[0].top)).toHaveLength(3);
   for (const b of boxes) expect(b.h).toBeLessThanOrEqual(48);
 });
+
+test('блок 12: 8 вопросов, аккордеон открывается мышью и клавиатурой, работает без JS', async ({ page, browser }) => {
+  await page.goto('/');
+  const items = page.locator('[data-block="12"] details');
+  await expect(items).toHaveCount(8);
+  const first = items.first();
+  const summary = first.locator('summary');
+  expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  await summary.click();
+  await expect(first).toHaveAttribute('open', '');
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  await expect(first).not.toHaveAttribute('open', '');
+
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const noJs = await ctx.newPage();
+  await noJs.goto('/');
+  const d = noJs.locator('[data-block="12"] details').nth(1);
+  await d.locator('summary').click();
+  await expect(d).toHaveAttribute('open', '');
+  await ctx.close();
+});

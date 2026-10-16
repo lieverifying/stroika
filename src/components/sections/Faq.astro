@@ -1,12 +1,37 @@
 ---
-// Блок 12 — «Питання і відповіді» (ТЗ). Заготовка: наполнение — задача 3.12 (PLAN.md).
+// Блок 12 — «Питання і відповіді» (ТЗ): 8 вопросов, аккордеон на <details> (работает без JS).
+// Ответы — из src/content/faq.ts, факты в них — только заглушки facts.ts. FAQPage-разметка — фаза 7.
+import Accordion from '../ui/Accordion.astro';
+import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { FAQ } from '../../content/faq';
 ---
 
 <section data-block="12" class="section-pad" aria-labelledby="faq-title">
-  <div class="container-site">
+  <div class="container-site faq">
     <SectionTitle id="faq-title" title="Питання і відповіді" />
-    <SectionStub task="3.12" />
+    <div class="faq__list">
+      {
+        FAQ.map((item) => (
+          <Accordion summary={item.q} name="faq">
+            <p>{item.a.map((part) => (typeof part === 'string' ? part : <Fact value={part.fact} format={part.format} />))}</p>
+          </Accordion>
+        ))
+      }
+    </div>
   </div>
 </section>
+
+<style>
+  .faq__list {
+    border-top: 1px solid var(--color-line);
+  }
+  @media (min-width: 64rem) {
+    .faq {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+</style>

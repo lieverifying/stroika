@@ -1,0 +1,59 @@
+---
+// Пункт аккордеона на <details>/<summary>: работает без JS, с клавиатуры и скринридером.
+// Зона нажатия заголовка ≥ 48 px. Значок «+» поворачивается в «×» при открытии.
+interface Props {
+  summary: string;
+  open?: boolean;
+  /** name — только один открытый пункт в группе (поддержка браузерами; без неё открываются независимо) */
+  name?: string;
+}
+const { summary, open = false, name } = Astro.props;
+---
+
+<details class="acc" open={open} name={name}>
+  <summary class="acc__summary">
+    <span>{summary}</span>
+    <svg class="acc__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+  </summary>
+  <div class="acc__body">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .acc {
+    border-bottom: 1px solid var(--color-line);
+  }
+  .acc__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3.5rem;
+    padding-block: 0.75rem;
+    font-size: var(--text-lead);
+    line-height: 1.4;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .acc__summary::-webkit-details-marker {
+    display: none;
+  }
+  .acc__icon {
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .acc[open] .acc__icon {
+    transform: rotate(45deg);
+  }
+  .acc__body {
+    max-width: var(--container-prose);
+    padding-bottom: 1.25rem;
+    color: var(--color-ink-muted);
+  }
+</style>
