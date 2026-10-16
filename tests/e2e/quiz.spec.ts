@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { noTransitions, yellowOnScreen } from './helpers';
 
 // Квиз (блок 5). Варианты выбираются нажатием, без кнопки «Далі».
 
@@ -229,4 +230,65 @@ test('события: ветка шафы — ровно quiz_start, quiz_step_1
   expect(dump).not.toContain('Олена');
   expect(dump).not.toMatch(/671234567|phone|name/);
   expect(events.every((e) => (e as Record<string, unknown>).quiz_branch === 'wardrobe')).toBe(true);
+});
+
+test.describe('квиз за 60 секунд (критерий фазы 4)', () => {
+  // Человек думает над вопросом 2–3 с — это имитация пользователя, а не ожидание загрузки страницы.
+  const THINK_MS = 2500;
+  const think = (page: Page) => page.waitForTimeout(THINK_MS);
+
+  test('ветка кухни от первого нажатия до /dyakuyemo ≤ 60 с; на каждом шаге ≤ 1 жёлтого и нет скролла вбок', async ({ page }, info) => {
+    test.setTimeout(120_000);
+    await openQuiz(page);
+    await noTransitions(page);
+
+    const checkScreen = async () => {
+      const yellow = await yellowOnScreen(page);
+      expect(yellow.length, `жёлтые: ${yellow.join(' | ')}`).toBeLessThanOrEqual(1);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow).toBeLessThanOrEqual(0);
+    };
+
+    const t0 = Date.now();
+    for (const label of ['Кухня', 'Кутова', '3–4 м', 'Фарбований МДФ', 'Кварц або акрил', 'Через 1–3 місяці']) {
+      await checkScreen();
+      await think(page);
+      await choose(page, label);
+    }
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'contact');
+    await checkScreen();
+    await think(page);
+    await page.locator('#quiz-name').pressSequentially('Олена', { delay: 150 });
+    await page.locator('#quiz-phone').click();
+    await page.locator('#quiz-phone').pressSequentially('0671234567', { delay: 150 });
+    await page.locator('#quiz-consent').check();
+    await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+    await expect(page).toHaveURL(/\/dyakuyemo$/);
+    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'B');
+    const seconds = (Date.now() - t0) / 1000;
+
+    info.annotations.push({ type: 'Время прохождения ветки кухни', description: `${seconds.toFixed(1)} с (пауза на шаг ${THINK_MS / 1000} с)` });
+    console.log(`⏱ [${info.project.name}] ветка кухни: ${seconds.toFixed(1)} с`);
+    expect(seconds).toBeLessThanOrEqual(60);
+  });
+});
+
+test('320 px: ни на одном шаге квиза страница не едет вбок', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'только телефон');
+  await page.setViewportSize({ width: 320, height: 640 });
+  const noOverflow = async () =>
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  await openQuiz(page);
+  for (const label of ['Кухня', 'З островом', 'Не знаю — приїдемо заміряти', 'Порадьте', 'Ще не вирішили', 'Пізніше']) {
+    await noOverflow();
+    await choose(page, label);
+  }
+  await noOverflow(); // шаг контакта
+  await quiz(page).locator('[data-quiz-restart]').click();
+  await choose(page, 'Шафа або гардеробна');
+  await choose(page, 'Гардеробна');
+  await noOverflow(); // ширина с заглушками
+  await quiz(page).locator('[data-quiz-restart]').click();
+  await choose(page, 'Ремонт');
+  await noOverflow(); // коротка форма
 });
