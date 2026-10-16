@@ -29,10 +29,9 @@
     text-wrap: balance;
   }
 
-  /* Текст переносим по слогам; в заголовках переносы некрасивы — там спасает overflow-wrap */
-  p,
-  li {
-    hyphens: auto;
+  /* Автопереносов по слогам нет нигде (решение владельца, фаза 3); длинные слова спасает overflow-wrap на body */
+  html {
+    hyphens: none;
   }
 
   :focus-visible {

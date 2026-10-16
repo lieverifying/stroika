@@ -1,4 +1,4 @@
-import type { Fact, Placeholder } from '../content/facts';
+import { factDefaults, type Fact, type Placeholder } from '../content/facts';
 
 /** Значение — незаменённая заглушка вида '{{NAME}}'. */
 export function isPlaceholder(value: unknown): value is Placeholder {
@@ -8,6 +8,16 @@ export function isPlaceholder(value: unknown): value is Placeholder {
 /** Имя заглушки без скобок: '{{WARRANTY_YEARS}}' → 'WARRANTY_YEARS'. */
 export function placeholderName(value: Placeholder): string {
   return value.slice(2, -2);
+}
+
+/**
+ * Текст факта или значение по умолчанию из factDefaults, если факт — заглушка.
+ * pending — имя заглушки (для data-fact-default и отчёта check-placeholders) или null.
+ */
+export function withDefault(value: Fact<string>): { text: string; pending: string | null } {
+  if (!isPlaceholder(value)) return { text: value, pending: null };
+  const name = placeholderName(value);
+  return { text: factDefaults[name] ?? value, pending: name };
 }
 
 /** Число или null, если вместо числа заглушка (тогда расчёт откатывается). */

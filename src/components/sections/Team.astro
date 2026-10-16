@@ -1,5 +1,5 @@
 ---
-// Блок 6 — «Своя бригада» (ТЗ): главный козырь, поэтому блок крупный и тёмный, не в конце страницы.
+// Блок 6 — «Своя бригада» по ТЗ; заголовок — facts.teamTitle (по умолчанию «Наші майстри»). Главный козырь, поэтому блок крупный и тёмный, не в конце страницы.
 // Мастера — facts.team (2–6 человек); имена, роли, стаж, фразы и фото — только реальные, до этого заглушки.
 // Видео бригады — фасад, грузится только по клику (facts.teamVideo).
 // Телефон — лента со scroll-snap, десктоп — сетка (2 / 3 / 4 колонки в зависимости от числа мастеров).
@@ -8,21 +8,22 @@ import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import VideoFacade from '../ui/VideoFacade.astro';
 import { facts } from '../../content/facts';
-import { pluralUk } from '../../lib/facts';
+import { pluralUk, withDefault } from '../../lib/facts';
 
 const team = facts.team;
+const heading = withDefault(facts.teamTitle);
 // 4 мастера — в ряд, 2 — по два, остальное — по три в ряд
 const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
 ---
 
 <section data-block="6" class="team on-dark" aria-labelledby="team-title">
   <div class="container-site">
-    <SectionTitle id="team-title" title="Своя бригада" dark />
+    <SectionTitle id="team-title" title={heading.text} pendingFact={heading.pending} dark />
     <ul class="team__list" style={`--team-cols: ${cols}`}>
       {
         team.map((m, i) => (
           <li class="team__card">
-            <PlaceholderImage width={1200} height={1500} label={`майстер ${i + 1}, вертикальне 4:5`} />
+            <PlaceholderImage width={1200} height={1600} label={`майстер ${i + 1}, вертикальне 3:4`} />
             <div class="team__body">
               <p class="team__name">
                 <Fact value={m.name} />
@@ -71,7 +72,9 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
     min-width: 0;
     scroll-snap-align: start;
   }
+  /* Фото мастера: 4:5 на телефоне, 3:4 на десктопе — фото, имя и роль помещаются в один экран */
   .team__card :global(.ph) {
+    aspect-ratio: 4 / 5;
     border-radius: var(--radius-lg);
     background: var(--color-graphite-2);
     color: var(--color-ink-muted-dark);
@@ -116,6 +119,9 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
       margin-inline: 0;
       padding-inline: 0;
       overflow: visible;
+    }
+    .team__card :global(.ph) {
+      aspect-ratio: 3 / 4;
     }
   }
 </style>

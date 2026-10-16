@@ -1,11 +1,12 @@
 // Отчёт по незаменённым заглушкам {{NAME}} в собранном сайте (dist/).
 // Без флагов — только отчёт. С --strict (боевая сборка) — код выхода 1, если заглушки есть.
+// Заглушки со значением по умолчанию (factDefaults) в HTML видны как data-fact-default="NAME" — их тоже считаем.
 import { readdir, readFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 
 const strict = process.argv.includes('--strict');
 const EXT = new Set(['.html', '.js', '.json', '.xml', '.txt']);
-const RE = /\{\{([A-Z0-9_]+)\}\}/g;
+const RE = /\{\{([A-Z0-9_]+)\}\}|data-fact-default="([A-Z0-9_]+)"/g;
 
 async function* walk(dir) {
   for (const e of await readdir(dir, { withFileTypes: true })) {
@@ -19,7 +20,8 @@ const byName = new Map();
 try {
   for await (const file of walk('dist')) {
     const text = await readFile(file, 'utf8');
-    for (const [, name] of text.matchAll(RE)) {
+    for (const [, plain, withDefault] of text.matchAll(RE)) {
+      const name = plain ?? `${withDefault} (на сайте значение по умолчанию)`;
       if (!byName.has(name)) byName.set(name, new Set());
       byName.get(name).add(file);
     }

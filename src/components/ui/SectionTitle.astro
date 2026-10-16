@@ -7,15 +7,17 @@ interface Props {
   eyebrow?: string;
   subtitle?: string;
   dark?: boolean;
+  /** Заголовок взят из заглушки со значением по умолчанию — имя заглушки для отчёта check-placeholders */
+  pendingFact?: string | null;
   class?: string;
 }
 
-const { id, title, eyebrow, subtitle, dark = false, class: className } = Astro.props;
+const { id, title, eyebrow, subtitle, dark = false, pendingFact, class: className } = Astro.props;
 ---
 
 <div class:list={['section-title', { 'section-title--dark': dark }, className]}>
   {eyebrow && <p class="section-title__eyebrow">{eyebrow}</p>}
-  <h2 id={id} class="text-h2">{title}</h2>
+  <h2 id={id} class="text-h2" data-fact-default={pendingFact ?? undefined}>{title}</h2>
   {subtitle && <p class="section-title__subtitle">{subtitle}</p>}
 </div>
 

@@ -131,5 +131,9 @@ const steps = [
     .process__body {
       padding-top: 0;
     }
+    /* Под заголовок шага — две строки, чтобы описания всех пяти шагов начинались на одной линии */
+    .process__title {
+      min-height: calc(2 * var(--text-h4) * var(--text-h4--line-height));
+    }
   }
 </style>
