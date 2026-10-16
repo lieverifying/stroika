@@ -11,8 +11,9 @@ import { chromium } from '@playwright/test';
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => {
-    const [k, v] = a.replace(/^--/, '').split('=');
-    return [k, v ?? true];
+    // делим только по первому «=»: в --click и --css значение само может содержать «=»
+    const [k, ...rest] = a.replace(/^--/, '').split('=');
+    return [k, rest.length ? rest.join('=') : true];
   }),
 );
 
@@ -20,8 +21,7 @@ const path = typeof args.path === 'string' ? args.path : '/';
 const name = typeof args.name === 'string' ? args.name : 'screen';
 const widths = (typeof args.widths === 'string' ? args.widths : '375,1280').split(',').map(Number);
 const fold = Boolean(args.fold);
-// --css может содержать «=», поэтому берём всё после первого
-const cssArg = process.argv.find((a) => a.startsWith('--css='))?.slice('--css='.length);
+const cssArg = typeof args.css === 'string' ? args.css : undefined;
 const PORT = 4399;
 const base = `http://localhost:${PORT}`;
 

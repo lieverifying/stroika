@@ -1,0 +1,82 @@
+---
+// Фильтр портфолио по форме кухни: «Усі / Пряма / Кутова / П-подібна / З островом».
+// На телефоне — лента со своим горизонтальным скроллом (страница вбок не едет).
+// Без JS фильтр скрыт (hidden) и видны все карточки; скрипт показывает фильтр и фильтрует по data-shape.
+import Chip from '../ui/Chip.astro';
+import { KITCHEN_SHAPES } from '../../lib/cases';
+
+interface Props {
+  /** id сетки, которую фильтруем */
+  target: string;
+}
+const { target } = Astro.props;
+const options = [{ value: 'all', label: 'Усі' }, ...Object.entries(KITCHEN_SHAPES).map(([value, label]) => ({ value, label }))];
+---
+
+<div class="case-filter" data-case-filter data-target={target} hidden>
+  <div class="case-filter__track" role="group" aria-label="Форма кухні">
+    {
+      options.map((o) => (
+        <Chip value={o.value} pressed={o.value === 'all'}>
+          {o.label}
+        </Chip>
+      ))
+    }
+  </div>
+  <p class="sr-only" aria-live="polite" data-case-filter-status></p>
+</div>
+
+<style>
+  .case-filter {
+    margin-bottom: var(--space-stack);
+    /* На телефоне лента до краёв экрана, со своим скроллом */
+    margin-inline: calc(-1 * var(--space-gutter));
+  }
+  .case-filter__track {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding: 2px var(--space-gutter); /* 2 px — чтобы не обрезалась рамка фокуса */
+  }
+  .case-filter__track::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 64rem) {
+    .case-filter {
+      margin-inline: 0;
+    }
+    .case-filter__track {
+      flex-wrap: wrap;
+      overflow: visible;
+      padding-inline: 0;
+    }
+  }
+</style>
+
+<script>
+  import { pluralUk } from '../../lib/facts';
+
+  document.querySelectorAll<HTMLElement>('[data-case-filter]').forEach((filter) => {
+    const grid = document.getElementById(filter.dataset.target ?? '');
+    if (!grid) return;
+    const chips = [...filter.querySelectorAll<HTMLButtonElement>('button[data-value]')];
+    const items = [...grid.querySelectorAll<HTMLElement>(':scope > li')];
+    const status = filter.querySelector<HTMLElement>('[data-case-filter-status]');
+
+    const apply = (value: string) => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.value === value)));
+      let shown = 0;
+      items.forEach((li) => {
+        const visible = value === 'all' || li.dataset.shape === value;
+        li.hidden = !visible;
+        if (visible) shown++;
+      });
+      if (status) status.textContent = `Показано ${shown} ${pluralUk(shown, ['роботу', 'роботи', 'робіт'])}`;
+    };
+
+    chips.forEach((chip) => chip.addEventListener('click', () => apply(chip.dataset.value ?? 'all')));
+    filter.hidden = false;
+  });
+</script>

@@ -1,15 +1,36 @@
 ---
-// Блок 3 — «Портфоліо» (ТЗ). Задача 3.5: сетка featured-кейсов; фильтр и «Всі роботи» — задача 3.6.
+// Блок 3 — «Портфоліо» (ТЗ): 6–8 featured-кейсов, фильтр по форме кухни, кнопка «Всі роботи».
+// Клик по карточке — страница кейса /roboty/<slug> (фаза 5). Если кейсов нет (боевая сборка без реальных), блок скрыт.
+import CaseFilter from '../cases/CaseFilter.astro';
 import CaseGrid from '../cases/CaseGrid.astro';
+import Button from '../ui/Button.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import { getFeaturedCases } from '../../lib/cases';
 
 const items = await getFeaturedCases(8);
 ---
 
-<section data-block="3" class="section-pad" aria-labelledby="portfolio-title">
-  <div class="container-site">
-    <SectionTitle id="portfolio-title" title="Наші кухні" />
-    <CaseGrid items={items} />
-  </div>
-</section>
+{
+  items.length > 0 && (
+    <section data-block="3" class="section-pad" aria-labelledby="portfolio-title">
+      <div class="container-site">
+        <SectionTitle id="portfolio-title" title="Наші кухні" />
+        <CaseFilter target="portfolio-grid" />
+        <CaseGrid id="portfolio-grid" items={items} />
+        <div class="portfolio__more">
+          <Button href="/roboty" variant="secondary" icon="arrow-right">
+            Всі роботи
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .portfolio__more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-stack);
+  }
+</style>

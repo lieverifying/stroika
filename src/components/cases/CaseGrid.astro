@@ -4,14 +4,15 @@ import CaseCard from './CaseCard.astro';
 import type { Case } from '../../lib/cases';
 
 interface Props {
+  id?: string;
   items: Case[];
   headingLevel?: 'h2' | 'h3';
 }
 
-const { items, headingLevel } = Astro.props;
+const { id, items, headingLevel } = Astro.props;
 ---
 
-<ul class="case-grid" data-case-grid>
+<ul id={id} class="case-grid" data-case-grid>
   {
     items.map((item) => (
       <li data-shape={item.data.kitchenShape} data-category={item.data.category}>
@@ -28,6 +29,9 @@ const { items, headingLevel } = Astro.props;
   }
   .case-grid > li {
     display: grid;
+  }
+  .case-grid > li[hidden] {
+    display: none;
   }
   @media (min-width: 48rem) {
     .case-grid {
