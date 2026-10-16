@@ -1,12 +1,114 @@
 ---
-// Блок 6 — «Своя бригада» (ТЗ). Заготовка: наполнение — задача 3.8–3.9 (PLAN.md).
+// Блок 6 — «Своя бригада» (ТЗ): главный козырь, поэтому блок крупный и тёмный, не в конце страницы.
+// Мастера — facts.team (2–6 человек); имена, роли, стаж, фразы и фото — только реальные, до этого заглушки.
+// Телефон — лента со scroll-snap, десктоп — сетка (2 / 3 / 4 колонки в зависимости от числа мастеров).
+import Fact from '../ui/Fact.astro';
+import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { facts } from '../../content/facts';
+import { pluralUk } from '../../lib/facts';
+
+const team = facts.team;
+// 4 мастера — в ряд, 2 — по два, остальное — по три в ряд
+const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
 ---
 
-<section data-block="6" class="section-pad" aria-labelledby="team-title">
+<section data-block="6" class="team on-dark" aria-labelledby="team-title">
   <div class="container-site">
-    <SectionTitle id="team-title" title="Своя бригада" />
-    <SectionStub task="3.8–3.9" />
+    <SectionTitle id="team-title" title="Своя бригада" dark />
+    <ul class="team__list" style={`--team-cols: ${cols}`}>
+      {
+        team.map((m, i) => (
+          <li class="team__card">
+            <PlaceholderImage width={1200} height={1500} label={`майстер ${i + 1}, вертикальне 4:5`} />
+            <div class="team__body">
+              <p class="team__name">
+                <Fact value={m.name} />
+              </p>
+              <p class="team__role">
+                <Fact value={m.role} /> · стаж <Fact value={m.years} /> {pluralUk(m.years, ['рік', 'роки', 'років'])}
+              </p>
+              <blockquote class="team__quote">
+                <Fact value={m.quote} />
+              </blockquote>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <slot />
   </div>
 </section>
+
+<style>
+  /* Крупнее соседей: больше воздуха сверху и снизу, тёмный фон */
+  .team {
+    margin-top: var(--space-section);
+    padding-block: calc(var(--space-section) * 1.25);
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .team__list {
+    display: flex;
+    gap: var(--grid-gap);
+    margin-inline: calc(-1 * var(--space-gutter));
+    padding-inline: var(--space-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-gutter);
+    scrollbar-width: none;
+  }
+  .team__list::-webkit-scrollbar {
+    display: none;
+  }
+  .team__card {
+    flex: 0 0 80%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .team__card :global(.ph) {
+    border-radius: var(--radius-lg);
+    background: var(--color-graphite-2);
+    color: var(--color-ink-muted-dark);
+  }
+  .team__card :global(.ph__dim) {
+    stroke: var(--color-ink-muted-dark);
+  }
+  .team__body {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1.25rem;
+  }
+  .team__name {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    font-weight: 600;
+  }
+  .team__role {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted-dark);
+  }
+  .team__quote {
+    margin-top: 0.5rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  @media (min-width: 48rem) {
+    .team__card {
+      flex-basis: 45%;
+    }
+  }
+  @media (min-width: 64rem) {
+    .team__list {
+      display: grid;
+      /* колонка не шире 24rem: при 2 мастерах фото 4:5 не растягиваются на пол-экрана */
+      grid-template-columns: repeat(var(--team-cols), minmax(0, 24rem));
+      gap: 2.5rem var(--grid-gap);
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+  }
+</style>
