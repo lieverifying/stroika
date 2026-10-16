@@ -41,3 +41,14 @@ test('блок 11: гарантия и оплата — только заглу�
   // пока передоплата — заглушка, строки «Решта» нет
   await expect(block.getByText('Решта')).toHaveCount(0);
 });
+
+test('телефон: цены сеткой 2 × 2, логотипы по 3 в ряд не выше 48 px', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'только телефон');
+  await page.goto('/');
+  const tops = await page.locator('.prices__card').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(2);
+  const logos = page.locator('[data-block="9"] .materials__logos').first().locator('li');
+  const boxes = await logos.evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ top: Math.round(r.top), h: r.height })));
+  expect(boxes.filter((b) => b.top === boxes[0].top)).toHaveLength(3);
+  for (const b of boxes) expect(b.h).toBeLessThanOrEqual(48);
+});

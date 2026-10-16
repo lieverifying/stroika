@@ -39,22 +39,24 @@ const cards = [
 </section>
 
 <style>
+  /* Телефон — сетка 2 × 2 (решение владельца), кнопка в квиз под сеткой */
   .prices {
     display: grid;
-    gap: var(--grid-gap);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
   }
   .prices__card {
     display: grid;
     align-content: space-between;
     gap: 1rem;
     min-width: 0;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem;
     background: var(--color-white);
     border-radius: var(--radius-md);
   }
   .prices__name {
     font-family: var(--font-body);
-    font-size: var(--text-h4);
+    font-size: var(--text-body);
     line-height: var(--text-h4--line-height);
     font-weight: 600;
   }
@@ -84,7 +86,10 @@ const cards = [
   }
   @media (min-width: 48rem) {
     .prices {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--grid-gap);
+    }
+    .prices__card {
+      padding: 1.25rem 1.5rem;
     }
     .prices__cta {
       justify-content: start;
@@ -93,6 +98,9 @@ const cards = [
   @media (min-width: 64rem) {
     .prices {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .prices__name {
+      font-size: var(--text-h4);
     }
     .prices__card {
       min-height: 12rem;

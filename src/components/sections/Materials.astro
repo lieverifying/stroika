@@ -10,8 +10,8 @@ const groups: { title: string; brands: FactValue<Brand[]> }[] = [
   { title: 'Фурнітура', brands: facts.materials.hardwareBrands },
   { title: 'Матеріали', brands: facts.materials.materialBrands },
 ];
-// Сколько серых мест под логотипы показать, пока брендов нет (только вёрстка)
-const SLOTS = 4;
+// Сколько серых мест под логотипы показать, пока брендов нет (только вёрстка: 3 × 2 на телефоне, 6 в ряд на десктопе)
+const SLOTS = 6;
 ---
 
 <section data-block="9" class="section-pad" aria-labelledby="materials-title">
@@ -65,22 +65,23 @@ const SLOTS = 4;
     line-height: var(--text-h4--line-height);
     font-weight: 600;
   }
+  /* Логотипы — компактной строкой: 3 в ряд на телефоне, место не выше 48 px */
   .materials__logos {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--grid-gap);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
   }
   .materials__logo {
     display: grid;
     place-items: center;
-    min-height: 5rem;
-    padding: 1rem;
+    height: 3rem;
+    padding: 0.5rem;
     background: var(--color-white);
     border-radius: var(--radius-md);
   }
   .materials__logo img {
     max-width: 100%;
-    max-height: 3rem;
+    max-height: 100%;
     object-fit: contain;
   }
   .materials__logo--ph {
@@ -93,6 +94,12 @@ const SLOTS = 4;
     .materials {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 2.5rem;
+    }
+    .materials__logos {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .materials__logo {
+      height: 4rem;
     }
   }
 </style>
