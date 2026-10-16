@@ -39,7 +39,7 @@ test('телефон: ручка тянется пальцем (touch-событ
   const x = Math.round(knob.x + knob.width / 2);
   const y = Math.round(knob.y + knob.height / 2);
   const cdp = await page.context().newCDPSession(page);
-  const touch = (type: string, px: number) =>
+  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', px: number) =>
     cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: px, y }] });
   await touch('touchStart', x);
   for (let i = 1; i <= 8; i++) await touch('touchMove', x + i * 10);
