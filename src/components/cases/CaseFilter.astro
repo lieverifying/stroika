@@ -65,14 +65,20 @@ const options = [{ value: 'all', label: 'Усі' }, ...Object.entries(KITCHEN_SH
     const items = [...grid.querySelectorAll<HTMLElement>(':scope > li')];
     const status = filter.querySelector<HTMLElement>('[data-case-filter-status]');
 
+    // На телефоне сетка показывает не больше mobileLimit карточек — считаем лимит среди отфильтрованных
+    const limit = grid.dataset.mobileLimit ? Number(grid.dataset.mobileLimit) : Infinity;
+    const isPhone = window.matchMedia('(max-width: 47.99rem)');
+
     const apply = (value: string) => {
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.value === value)));
-      let shown = 0;
+      let matched = 0;
       items.forEach((li) => {
         const visible = value === 'all' || li.dataset.shape === value;
         li.hidden = !visible;
-        if (visible) shown++;
+        li.toggleAttribute('data-extra', visible && matched >= limit);
+        if (visible) matched++;
       });
+      const shown = isPhone.matches ? Math.min(matched, limit) : matched;
       if (status) status.textContent = `Показано ${shown} ${pluralUk(shown, ['роботу', 'роботи', 'робіт'])}`;
     };
 

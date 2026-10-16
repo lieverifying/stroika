@@ -22,16 +22,15 @@ test.describe('карточки кейсов', () => {
     await expect(page.locator('.case-card').first()).toHaveCSS('outline-style', 'solid');
   });
 
-  test('на главной 6–8 кейсов', async ({ page }) => {
+  test('на главной 6 кейсов, на телефоне видно 4', async ({ page, isMobile }) => {
     await page.goto('/');
-    const n = await page.locator('[data-block="3"] .case-card').count();
-    expect(n).toBeGreaterThanOrEqual(6);
-    expect(n).toBeLessThanOrEqual(8);
+    await expect(page.locator('[data-block="3"] .case-card')).toHaveCount(6);
+    await expect(page.locator('#portfolio-grid > li:visible')).toHaveCount(isMobile ? 4 : 6);
   });
 });
 
 test.describe('фильтр портфолио', () => {
-  test('«Кутова» оставляет только кутові, «Усі» возвращает все', async ({ page }) => {
+  test('«Кутова» оставляет только кутові, «Усі» возвращает все', async ({ page, isMobile }) => {
     await page.goto('/');
     const cards = page.locator('#portfolio-grid > li');
     const total = await cards.count();
@@ -42,15 +41,15 @@ test.describe('фильтр портфолио', () => {
     await expect(visible).toHaveCount(2);
     expect(await visible.evaluateAll((els) => els.every((e) => e.getAttribute('data-shape') === 'kutova'))).toBe(true);
     await page.getByRole('button', { name: 'Усі' }).click();
-    await expect(visible).toHaveCount(total);
+    await expect(visible).toHaveCount(isMobile ? 4 : total); // на телефоне лимит 4
   });
 
-  test('без JS фильтр скрыт, видны все карточки', async ({ browser }) => {
-    const ctx = await browser.newContext({ javaScriptEnabled: false });
+  test('без JS фильтр скрыт, видны все карточки (на телефоне — первые 4)', async ({ browser }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 812 } });
     const page = await ctx.newPage();
     await page.goto('/');
     await expect(page.locator('[data-case-filter]')).toBeHidden();
-    await expect(page.locator('#portfolio-grid > li:visible')).toHaveCount(8);
+    await expect(page.locator('#portfolio-grid > li:visible')).toHaveCount(4); // окно 375 px — лимит телефона
     await ctx.close();
   });
 

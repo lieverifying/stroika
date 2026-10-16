@@ -1,5 +1,5 @@
 ---
-// Блок 3 — «Портфоліо» (ТЗ): 6–8 featured-кейсов, фильтр по форме кухни, кнопка «Всі роботи».
+// Блок 3 — «Портфоліо» (ТЗ): 6 featured-кейсов (на телефоне видно 4 — решение владельца), фильтр, «Всі роботи».
 // Клик по карточке — страница кейса /roboty/<slug> (фаза 5). Если кейсов нет (боевая сборка без реальных), блок скрыт.
 import CaseFilter from '../cases/CaseFilter.astro';
 import CaseGrid from '../cases/CaseGrid.astro';
@@ -7,7 +7,7 @@ import Button from '../ui/Button.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import { getFeaturedCases } from '../../lib/cases';
 
-const items = await getFeaturedCases(8);
+const items = await getFeaturedCases(6);
 ---
 
 {
@@ -16,7 +16,7 @@ const items = await getFeaturedCases(8);
       <div class="container-site">
         <SectionTitle id="portfolio-title" title="Наші кухні" />
         <CaseFilter target="portfolio-grid" />
-        <CaseGrid id="portfolio-grid" items={items} />
+        <CaseGrid id="portfolio-grid" items={items} mobileLimit={4} />
         <div class="portfolio__more">
           <Button href="/roboty" variant="secondary" icon="arrow-right">
             Всі роботи

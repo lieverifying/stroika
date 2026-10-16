@@ -27,7 +27,7 @@ export async function getVisibleCases(): Promise<Case[]> {
 }
 
 /** Кейсы для главной (блок 3): featured, по featuredOrder, затем по дате */
-export async function getFeaturedCases(limit = 8): Promise<Case[]> {
+export async function getFeaturedCases(limit = 6): Promise<Case[]> {
   const featured = (await getVisibleCases()).filter((c) => c.data.featured);
   return featured
     .sort((a, b) => (a.data.featuredOrder ?? Infinity) - (b.data.featuredOrder ?? Infinity))

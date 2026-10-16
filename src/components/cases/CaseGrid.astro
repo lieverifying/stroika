@@ -1,5 +1,7 @@
 ---
 // Сетка карточек кейсов: 1 колонка на телефоне, 2 на планшете, 3 на десктопе.
+// mobileLimit: на телефоне (< 768 px) видно только первые N карточек — лишние помечены data-extra.
+// Фильтр (CaseFilter) пересчитывает data-extra среди оставшихся карточек.
 import CaseCard from './CaseCard.astro';
 import type { Case } from '../../lib/cases';
 
@@ -7,15 +9,20 @@ interface Props {
   id?: string;
   items: Case[];
   headingLevel?: 'h2' | 'h3';
+  mobileLimit?: number;
 }
 
-const { id, items, headingLevel } = Astro.props;
+const { id, items, headingLevel, mobileLimit } = Astro.props;
 ---
 
-<ul id={id} class="case-grid" data-case-grid>
+<ul id={id} class="case-grid" data-case-grid data-mobile-limit={mobileLimit}>
   {
-    items.map((item) => (
-      <li data-shape={item.data.kitchenShape} data-category={item.data.category}>
+    items.map((item, i) => (
+      <li
+        data-shape={item.data.kitchenShape}
+        data-category={item.data.category}
+        data-extra={mobileLimit !== undefined && i >= mobileLimit ? '' : undefined}
+      >
         <CaseCard item={item} headingLevel={headingLevel} />
       </li>
     ))
@@ -32,6 +39,11 @@ const { id, items, headingLevel } = Astro.props;
   }
   .case-grid > li[hidden] {
     display: none;
+  }
+  @media (max-width: 47.99rem) {
+    .case-grid > li[data-extra] {
+      display: none;
+    }
   }
   @media (min-width: 48rem) {
     .case-grid {

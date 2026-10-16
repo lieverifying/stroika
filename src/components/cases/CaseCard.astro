@@ -30,6 +30,7 @@ const Heading = headingLevel;
           widths={[400, 800, 1200]}
           sizes="(min-width: 64rem) 380px, (min-width: 48rem) 50vw, 100vw"
           class="case-card__img"
+          style={`object-position: ${data.coverFocus}`}
         />
       ) : (
         <PlaceholderImage width={1200} height={900} label="обкладинка кейсу" />

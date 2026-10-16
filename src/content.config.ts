@@ -33,6 +33,11 @@ const cases = defineCollection({
         district: z.string(),
         altBase: z.string(),
         cover: image().optional(),
+        // Точка кадра обложки при обрезке до 4:3 (CSS object-position), как facts.media.heroFocus
+        coverFocus: z
+          .string()
+          .regex(/^\d{1,3}% \d{1,3}%$/, 'coverFocus — два відсотки через пробіл, напр. "50% 60%"')
+          .default('50% 50%'),
         gallery: z
           .array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() }))
           .max(15)

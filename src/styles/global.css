@@ -25,12 +25,8 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: var(--font-display-weight);
     text-wrap: balance;
-  }
-  /* H1 спокойнее остальных заголовков — решение владельца (ревью фазы 2) */
-  h1 {
-    font-weight: var(--h1-weight);
   }
 
   /* Текст переносим по слогам; в заголовках переносы некрасивы — там спасает overflow-wrap */

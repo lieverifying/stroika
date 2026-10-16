@@ -41,7 +41,7 @@
 | Нативные элементы вместо библиотек | `<details>` для FAQ, `<dialog>` для попапа замера и галереи, `<input type="range">` для слайдера «було / стало», CSS scroll-snap для галереи | Ноль КБ JS или почти ноль, доступность из коробки, на телефоне работают пальцем | Swiper, lightbox-библиотеки |
 | Кейсы | **Astro Content Collections** (Content Layer, `glob` loader), Markdown с frontmatter в `src/content/cases/` | Схема Zod проверяет каждый кейс при сборке: если не хватает поля или фото, сборка падает и выдаёт понятную ошибку. Кейс добавляется одним файлом и папкой фото | Headless CMS с базой: лишняя зависимость и платный тариф |
 | Кейсы: как добавлять | **Markdown-файлы** в `src/content/cases/` + папка фото, без админки (решение владельца) | Достаточно для 15–25 кейсов; схема Zod ловит ошибки при сборке. Админку можно добавить позже поверх тех же файлов | Git-based CMS — отложено |
-| Шрифты | **Self-host через `@fontsource`**: `@fontsource/unbounded` (600), `@fontsource-variable/manrope` (ось 400–600), `@fontsource/jetbrains-mono` (500) | Шрифты отдаются с того же домена, что и сайт: нет отдельных DNS и TLS до Google, работает preload, нет сторонних запросов (GDPR-подобные претензии к Google Fonts тоже снимаются). Подключаем только подмножества `cyrillic` и `latin`: в `cyrillic` (U+0400–045F, U+0490–0491) есть і, ї, є, ґ, в `latin` есть апостроф U+02BC и типографский U+2019. `font-display: swap`, preload только двух файлов: Manrope cyrillic и Unbounded cyrillic 500 (H1) | Google Fonts CDN: лишнее соединение, preload не контролируем |
+| Шрифты | **Self-host через `@fontsource`**: `@fontsource/unbounded` (500), `@fontsource-variable/manrope` (ось 400–600), `@fontsource/jetbrains-mono` (500) | Шрифты отдаются с того же домена, что и сайт: нет отдельных DNS и TLS до Google, работает preload, нет сторонних запросов (GDPR-подобные претензии к Google Fonts тоже снимаются). Подключаем только подмножества `cyrillic` и `latin`: в `cyrillic` (U+0400–045F, U+0490–0491) есть і, ї, є, ґ, в `latin` есть апостроф U+02BC и типографский U+2019. `font-display: swap`, preload только двух файлов: Manrope cyrillic и Unbounded cyrillic 500 (H1) | Google Fonts CDN: лишнее соединение, preload не контролируем |
 | Знак гривны | Пишем «грн», символ ₴ не используем | ₴ (U+20B4) входит только в подмножество `cyrillic-ext`, ради него пришлось бы грузить лишний файл | — |
 | Бэкенд форм (фаза 6) | **PHP-скрипт `api/lead.php`** на хостинге владельца (PHP 8.1+), без фреймворка и Composer | На виртуальном хостинге нет serverless-функций и Node. PHP есть «из коробки»; один файл легко проверить и перенести. Секреты — в конфиге вне публичной папки (раздел 7.4) | Serverless-платформы — хостинг уже выбран владельцем |
 | Email-резерв | **Почта хостинга**: SMTP-ящик на домене (после регистрации домена), `mail()` как запасной вариант | Ничего платного и стороннего, SPF/DKIM настраиваются в панели adm.tools | Сторонние email-API — лишний внешний аккаунт |
@@ -259,6 +259,7 @@ stroika/
 | `district` | string | да | Район Черкас или населённый пункт области |
 | `altBase` | string | да | Начало alt-текста: «Кутова кухня з білими фасадами» |
 | `cover` | image | да* | Обложка карточки |
+| `coverFocus` | string `'X% Y%'`, по умолчанию `'50% 50%'` | нет | Точка кадра обложки при обрезке до 4:3 (`object-position`) |
 | `gallery` | список `{ src: image, alt?: string, caption?: string }`, от 8 до 15 | да* | Порядок в файле = порядок на странице |
 | `video` | `{ src: string ('/photos/video/…'), poster: image, title: string }` | нет | Грузится по клику |
 | `task` | string (1–3 предложения) | да | «Задача клієнта» |
@@ -887,7 +888,7 @@ export const facts = {
 
 | Роль | Шрифт | Начертание | Где |
 |---|---|---|---|
-| `--font-display` | Unbounded | 500 — H1, 600 — H2–H3 (решение владельца, ревью фазы 2) | H1–H3 |
+| `--font-display` | Unbounded | 500 для всех заголовков (решение владельца, фаза 3); 600 не грузим | H1–H3 |
 | `--font-body` | Manrope (variable) | 400 текст, 500 подписи, 600 кнопки и H4 | Всё остальное |
 | `--font-mono` | JetBrains Mono | 500, `font-variant-numeric: tabular-nums` | Цены, размеры, цифры доверия, сроки, заглушки |
 
@@ -902,8 +903,8 @@ Fallback-стек: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` и
 | Токен | 375 px | 1280 px | Межстрочный | Шрифт |
 |---|---|---|---|---|
 | `text-h1` | 28 | 46 | 1,15 | Unbounded 500, `letter-spacing: -0.01em` (было 56 / 600, уменьшено по ревью фазы 2) |
-| `text-h2` | 24 | 40 | 1,2 | Unbounded 600 |
-| `text-h3` | 20 | 28 | 1,25 | Unbounded 600 |
+| `text-h2` | 24 | 40 | 1,2 | Unbounded 500 |
+| `text-h3` | 20 | 28 | 1,25 | Unbounded 500 |
 | `text-h4` | 18 | 22 | 1,3 | Manrope 600 |
 | `text-lead` | 18 | 20 | 1,55 | Manrope 400 |
 | `text-body` | **16** | 18 | 1,6 | Manrope 400 |
