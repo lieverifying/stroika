@@ -1,12 +1,101 @@
 ---
-// Блок 8 — «Ціни «від»» (ТЗ). Заготовка: наполнение — задача 3.10 (PLAN.md).
+// Блок 8 — «Ціни від» (ТЗ): 4 карточки (пряма, кутова, з островом, шафа-купе), цены — только заглушки facts.ts.
+// Подпись «точна ціна після заміру» и одна кнопка в квиз на весь блок (жёлтая, cta-arbiter следит за правилом).
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import SectionStub from '../ui/SectionStub.astro';
+import { facts } from '../../content/facts';
+import { formatUAH } from '../../lib/facts';
+
+const from = facts.prices.from;
+const cards = [
+  { title: 'Пряма кухня', price: from.kitchenPryama },
+  { title: 'Кутова кухня', price: from.kitchenKutova },
+  { title: 'Кухня з островом', price: from.kitchenOstriv },
+  { title: 'Шафа-купе', price: from.wardrobeKupe },
+];
 ---
 
 <section data-block="8" class="section-pad" aria-labelledby="prices-title">
   <div class="container-site">
-    <SectionTitle id="prices-title" title="Ціни від" />
-    <SectionStub task="3.10" />
+    <SectionTitle id="prices-title" title="Ціни від" subtitle="Точна ціна — після заміру." />
+    <ul class="prices">
+      {
+        cards.map((c) => (
+          <li class="prices__card">
+            <h3 class="prices__name">{c.title}</h3>
+            <p class="prices__price">
+              <span class="prices__from">від</span>
+              <Fact value={c.price} format={formatUAH} class="prices__value" />
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="prices__cta">
+      <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+    </div>
   </div>
 </section>
+
+<style>
+  .prices {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .prices__card {
+    display: grid;
+    align-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+  }
+  .prices__name {
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  .prices__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .prices__from {
+    color: var(--color-ink-muted);
+  }
+  .prices__price :global(.prices__value) {
+    font-family: var(--font-mono);
+    font-size: var(--text-price);
+    line-height: var(--text-price--line-height);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Заглушка цены — 16 px, чтобы не распирала карточку (реальная цена будет крупной) */
+  .prices__price :global(.fact-ph) {
+    font-size: 1rem;
+  }
+  .prices__cta {
+    display: grid;
+    margin-top: var(--space-stack);
+  }
+  @media (min-width: 48rem) {
+    .prices {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .prices__cta {
+      justify-content: start;
+    }
+  }
+  @media (min-width: 64rem) {
+    .prices {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .prices__card {
+      min-height: 12rem;
+    }
+  }
+</style>
