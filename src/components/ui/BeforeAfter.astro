@@ -14,7 +14,7 @@ interface Props {
 const { index, width = 1200, height = 900 } = Astro.props;
 ---
 
-<figure class="ba" data-before-after style="--pos: 50%">
+<figure class="ba" data-before-after style="--pos: 50%; --pos-n: 50">
   <div class="ba__frame">
     <div class="ba__layer ba__layer--after">
       <PlaceholderImage width={width} height={height} label={`стало, пара ${index}`} />
@@ -46,7 +46,9 @@ const { index, width = 1200, height = 900 } = Astro.props;
   .ba {
     min-width: 0;
   }
+  /* Центр бегунка input range ходит по ширине минус бегунок (3rem) — ручку и границу ставим туда же */
   .ba__frame {
+    --x: calc(1.5rem + (100% - 3rem) * var(--pos-n) / 100);
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-lg);
@@ -55,7 +57,7 @@ const { index, width = 1200, height = 900 } = Astro.props;
   .ba__layer--before {
     position: absolute;
     inset: 0;
-    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+    clip-path: inset(0 calc(100% - var(--x)) 0 0);
   }
   /* «Було» темнее «стало», чтобы граница сравнения читалась и на плейсхолдерах */
   .ba__layer--before :global(.ph) {
@@ -91,7 +93,7 @@ const { index, width = 1200, height = 900 } = Astro.props;
     position: absolute;
     top: 0;
     bottom: 0;
-    left: var(--pos);
+    left: var(--x);
     z-index: var(--z-raised);
     width: 2px;
     margin-left: -1px;
@@ -160,6 +162,7 @@ const { index, width = 1200, height = 900 } = Astro.props;
     if (!range) return;
     const update = () => {
       fig.style.setProperty('--pos', `${range.value}%`);
+      fig.style.setProperty('--pos-n', range.value);
       range.setAttribute('aria-valuetext', `${range.value} % — було ліворуч, стало праворуч`);
     };
     range.addEventListener('input', update);

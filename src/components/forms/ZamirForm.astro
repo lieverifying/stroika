@@ -65,11 +65,17 @@ const TIMES = [
     consent: (f) => (f as HTMLInputElement).checked,
   };
 
+  // Ошибка: aria-invalid, видимый текст и id ошибки в aria-describedby (только пока ошибка показана)
   const setError = (field: HTMLElement, invalid: boolean) => {
     field.setAttribute('aria-invalid', String(invalid));
-    const id = field.getAttribute('aria-describedby')?.split(' ').find((x) => x.endsWith('-error'));
-    const error = id ? document.getElementById(id) : null;
+    const errorId = `${field.id}-error`;
+    const error = document.getElementById(errorId);
     if (error) error.hidden = !invalid;
+    const ids = new Set((field.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean));
+    if (invalid) ids.add(errorId);
+    else ids.delete(errorId);
+    if (ids.size) field.setAttribute('aria-describedby', [...ids].join(' '));
+    else field.removeAttribute('aria-describedby');
   };
 
   document.querySelectorAll<HTMLFormElement>('form[data-zamir-form]').forEach((form) => {

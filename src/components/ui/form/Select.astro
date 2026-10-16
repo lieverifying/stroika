@@ -20,7 +20,7 @@ const { name, label, options, id = `f-${name}`, required, placeholder, error = '
     {label}
     {!required && <span class="field__optional"> (необов’язково)</span>}
   </label>
-  <select class="field__control" id={id} name={name} required={required} aria-describedby={`${id}-error`}>
+  <select class="field__control" id={id} name={name} required={required}>
     {placeholder && <option value="">{placeholder}</option>}
     {options.map((o) => <option value={o.value}>{o.label}</option>)}
   </select>

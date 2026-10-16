@@ -30,6 +30,21 @@ test.describe('було / стало', () => {
   });
 });
 
+test('ручка стоит над бегунком: на краях шкалы не уезжает из зоны захвата', async ({ page }) => {
+  await page.goto('/');
+  const fig = page.locator('[data-before-after]').first();
+  await fig.scrollIntoViewIfNeeded();
+  const range = fig.locator('.ba__range');
+  await range.focus();
+  await page.keyboard.press('Home');
+  const frame = (await fig.locator('.ba__frame').boundingBox())!;
+  let knob = (await fig.locator('.ba__knob').boundingBox())!;
+  expect(Math.abs(knob.x + knob.width / 2 - (frame.x + 24))).toBeLessThanOrEqual(1);
+  await page.keyboard.press('End');
+  knob = (await fig.locator('.ba__knob').boundingBox())!;
+  expect(Math.abs(knob.x + knob.width / 2 - (frame.x + frame.width - 24))).toBeLessThanOrEqual(1);
+});
+
 test('телефон: ручка тянется пальцем (touch-события)', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'только телефон');
   await page.goto('/');

@@ -22,3 +22,10 @@ test('маска по мере ввода', () => {
   assert.equal(maskPhone('0671234567'), '+380 67 123 45 67');
   assert.equal(maskPhone('+380 67 123 45 67 89'), '+380 67 123 45 67');
 });
+
+test('Backspace по коду страны очищает поле', () => {
+  assert.equal(maskPhone('+380'), '+380');
+  assert.equal(maskPhone('+38'), '');
+  assert.equal(maskPhone('+3'), '');
+  assert.equal(maskPhone('+'), '');
+});

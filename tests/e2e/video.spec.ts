@@ -14,6 +14,14 @@ test.describe('видео бригады', () => {
     await expect(facade.locator('video')).toHaveCount(0);
     expect(videoRequests).toEqual([]);
 
+    // Пока видео — заглушка, по клику ничего не грузится
+    await facade.getByRole('button', { name: /Дивитися відео/ }).click();
+    await page.waitForTimeout(300);
+    await expect(facade.locator('video')).toHaveCount(0);
+    expect(videoRequests).toEqual([]);
+
+    // С настоящим адресом по клику появляется <video preload="none">
+    await facade.evaluate((el) => (el.dataset.src = '/photos/video/test.mp4'));
     await facade.getByRole('button', { name: /Дивитися відео/ }).click();
     await expect(facade.locator('video')).toHaveAttribute('preload', 'none');
   });
@@ -23,6 +31,7 @@ test.describe('видео бригады', () => {
     const button = page.locator('[data-video-facade] button');
     const box = (await button.boundingBox())!;
     expect(box.height).toBeGreaterThanOrEqual(48);
+    await page.locator('[data-video-facade]').evaluate((el) => (el.dataset.src = '/photos/video/test.mp4'));
     await button.focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('[data-video-facade] video')).toHaveCount(1);

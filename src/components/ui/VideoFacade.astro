@@ -3,6 +3,7 @@
 // По клику на место постера встаёт <video preload="none"> и сразу запускается.
 // Пока видео нет (заглушка {{TEAM_VIDEO}}), постер — плейсхолдер, а src остаётся заглушкой.
 import PlaceholderImage from './PlaceholderImage.astro';
+import { isPlaceholder } from '../../lib/facts';
 
 interface Props {
   src: string;
@@ -11,9 +12,11 @@ interface Props {
   label?: string;
 }
 const { src, title, label = 'Дивитися відео' } = Astro.props;
+// Пока видео нет (заглушка), адрес в HTML не выводим и по клику ничего не грузим
+const realSrc = isPlaceholder(src) ? undefined : src;
 ---
 
-<div class="video-facade" data-video-facade data-src={src} data-title={title}>
+<div class="video-facade" data-video-facade data-src={realSrc} data-title={title}>
   <PlaceholderImage width={1920} height={1080} label="постер відео" />
   <button type="button" class="video-facade__play" aria-label={`${label}: ${title}`}>
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
@@ -77,8 +80,9 @@ const { src, title, label = 'Дивитися відео' } = Astro.props;
   document.querySelectorAll<HTMLElement>('[data-video-facade]').forEach((box) => {
     const button = box.querySelector('button');
     button?.addEventListener('click', () => {
+      if (!box.dataset.src) return; // видео ещё нет — запрос по адресу-заглушке не делаем
       const video = document.createElement('video');
-      video.src = box.dataset.src ?? '';
+      video.src = box.dataset.src;
       video.title = box.dataset.title ?? '';
       video.preload = 'none';
       video.controls = true;

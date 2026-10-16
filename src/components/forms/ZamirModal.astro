@@ -92,13 +92,21 @@ import ZamirForm from './ZamirForm.astro';
       }),
     );
     dialog.querySelector('[data-zamir-close]')?.addEventListener('click', () => dialog.close());
-    // Клик по фону: событие приходит на сам <dialog>, а не на его содержимое
+    // Клик по фону: событие приходит на сам <dialog>. Закрываем, только если и нажатие было на фоне —
+    // иначе выделение текста в поле с отпусканием над фоном закрыло бы форму и стёрло ввод.
+    let downOnBackdrop = false;
+    dialog.addEventListener('mousedown', (e) => {
+      downOnBackdrop = e.target === dialog;
+    });
     dialog.addEventListener('click', (e) => {
-      if (e.target === dialog) dialog.close();
+      if (e.target === dialog && downOnBackdrop) dialog.close();
+      downOnBackdrop = false;
     });
     dialog.addEventListener('close', () => {
       sync();
-      opener?.focus();
+      // Кнопка в закрытом мобильном меню невидима — тогда фокус на бургер
+      const target = opener && opener.offsetParent !== null ? opener : document.querySelector<HTMLElement>('[data-menu-toggle]');
+      target?.focus();
     });
   }
 </script>

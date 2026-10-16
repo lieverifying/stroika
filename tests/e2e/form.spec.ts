@@ -12,6 +12,25 @@ test.describe('поля формы', () => {
     await expect(phone).toHaveAttribute('inputmode', 'tel');
   });
 
+  test('Backspace стирает номер вместе с +380, поле не застревает', async ({ page }) => {
+    await page.goto('/');
+    const phone = page.locator('#zamir-phone');
+    await phone.click();
+    await phone.pressSequentially('0671');
+    for (let i = 0; i < 12; i++) await page.keyboard.press('Backspace');
+    await expect(phone).toHaveValue('');
+  });
+
+  test('скрытая ошибка не подключена к aria-describedby, показанная — подключена', async ({ page }) => {
+    await page.goto('/');
+    const name = page.locator('#zamir-name');
+    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
+    await page.locator('#zamir form button[type=submit]').click();
+    await expect(name).toHaveAttribute('aria-describedby', /zamir-name-error/);
+    await name.fill('Тест');
+    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
+  });
+
   test('поля 48 px и шрифт 16 px (iOS не зумит), согласие не отмечено', async ({ page }) => {
     await page.goto('/');
     for (const sel of ['#zamir-name', '#zamir-phone', '#zamir-time']) {

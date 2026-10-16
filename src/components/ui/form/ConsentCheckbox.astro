@@ -10,7 +10,7 @@ const { id = 'f-consent' } = Astro.props;
 
 <div class="field consent">
   <label class="consent__label" for={id}>
-    <input class="consent__box" type="checkbox" id={id} name="consent" value="yes" required aria-describedby={`${id}-error`} />
+    <input class="consent__box" type="checkbox" id={id} name="consent" value="yes" required />
     <span>Погоджуюсь на обробку персональних даних згідно з <a href="/polityka">політикою конфіденційності</a></span>
   </label>
   <p class="field__error" id={`${id}-error`} data-error="Потрібна ваша згода" hidden>Потрібна ваша згода</p>

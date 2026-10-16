@@ -19,6 +19,6 @@ const { name, label, id = `f-${name}`, required, rows = 4, placeholder, error = 
     {label}
     {!required && <span class="field__optional"> (необов’язково)</span>}
   </label>
-  <textarea class="field__control" id={id} name={name} rows={rows} required={required} placeholder={placeholder} aria-describedby={`${id}-error`}></textarea>
+  <textarea class="field__control" id={id} name={name} rows={rows} required={required} placeholder={placeholder}></textarea>
   <p class="field__error" id={`${id}-error`} data-error={error} hidden>{error}</p>
 </div>

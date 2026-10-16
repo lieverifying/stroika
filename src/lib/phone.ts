@@ -23,6 +23,9 @@ export function normalizePhone(raw: string): string | null {
 
 /** Маска для поля: «+380 67 123 45 67», по мере ввода. Пустой ввод — пустая строка. */
 export function maskPhone(raw: string): string {
+  // «+38», «+3», «+» — стирают подставленный код страны Backspace'ом: поле очищается, а не застревает на «+380 38»
+  const t = raw.trim();
+  if (t !== '+380' && '+380'.startsWith(t)) return '';
   const d = nationalDigits(raw);
   if (!d && !/\d/.test(raw)) return '';
   const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);

@@ -22,6 +22,13 @@ test.describe('попап замера', () => {
     await expect(dialog).toBeHidden();
 
     await open.click();
+    // Выделение текста в поле с отпусканием над фоном окно не закрывает
+    const field = (await page.locator('#modal-name').boundingBox())!;
+    await page.mouse.move(field.x + 10, field.y + field.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(5, 400);
+    await page.mouse.up();
+    await expect(dialog).toBeVisible();
     await page.mouse.click(5, 400); // фон за окном
     await expect(dialog).toBeHidden();
   });
