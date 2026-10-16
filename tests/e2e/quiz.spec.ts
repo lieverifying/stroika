@@ -161,3 +161,38 @@ test.describe('квиз: шаг контакта и коротка форма', 
     });
   }
 });
+
+test.describe('квиз: отправка и /dyakuyemo', () => {
+  test('ветка шафы до конца → /dyakuyemo, экран Б (флаг B), квиз очищен, запросов в сеть нет', async ({ page }) => {
+    const posts: string[] = [];
+    page.on('request', (r) => {
+      if (r.method() !== 'GET') posts.push(r.url());
+    });
+    await openQuiz(page);
+    await choose(page, 'Шафа або гардеробна');
+    await choose(page, 'Гардеробна');
+    await choose(page, 'Не знаю — приїдемо заміряти');
+    await choose(page, 'Через 1–3 місяці');
+    await page.locator('#quiz-name').fill('Олена');
+    await page.locator('#quiz-phone').click();
+    await page.locator('#quiz-phone').pressSequentially('0671234567');
+    await page.locator('#quiz-consent').check();
+    await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+    await expect(page).toHaveURL(/\/dyakuyemo$/);
+    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'B');
+    // при флаге B причина всегда variant-b: строка «no-length» (только для отката с флага A) скрыта
+    await expect(page.locator('[data-result="B"] [data-no-length]')).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
+    expect(await page.evaluate(() => sessionStorage.getItem('vymir.quiz.result'))).toBeNull(); // удалён после показа
+    expect(posts).toEqual([]);
+  });
+
+  test('/dyakuyemo без данных квиза — общий текст; демо экрана А (?demoPrice=1, не в боевой сборке)', async ({ page }) => {
+    await page.goto('/dyakuyemo');
+    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+    await page.goto('/dyakuyemo?demoPrice=1');
+    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'A');
+    await expect(page.locator('[data-result="A"]')).toContainText('грн');
+  });
+});

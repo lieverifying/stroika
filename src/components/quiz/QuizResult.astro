@@ -1,0 +1,97 @@
+---
+// Экран результата на /dyakuyemo (ARCHITECTURE.md 4.4). Все варианты в разметке, скрипт показывает нужный:
+// — А (с ценой): «Орієнтовна вартість: від X до Y грн» — только при reason 'ok';
+// — Б (без цены): перезвон и бонус — по умолчанию (флаг facts.flags.quizResultVariant = 'B') и при любом откате;
+// — no-length: текст Б + «порахуємо точно після заміру»;
+// — без данных квиза (заявка из формы замера, перезагрузка) — общий текст.
+// Обещания (минуты перезвона, 3D у подарунок) — заглушки до подтверждения владельцем.
+import Fact from '../ui/Fact.astro';
+import { facts } from '../../content/facts';
+
+const { promises } = facts;
+---
+
+<div class="quiz-result" data-quiz-result>
+  <div data-result="generic">
+    <p class="quiz-result__lead">Заявку прийнято. Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин.</p>
+  </div>
+
+  <div data-result="A" hidden>
+    <p class="quiz-result__label">Орієнтовна вартість</p>
+    <p class="quiz-result__price">від <span data-price-from></span> до <span data-price-to></span></p>
+    <p class="quiz-result__lead">Точна ціна — після безкоштовного заміру.</p>
+    <p>Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин.</p>
+  </div>
+
+  <div data-result="B" hidden>
+    <p class="quiz-result__lead">Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин з розрахунком.</p>
+    <p class="quiz-result__no-length" data-no-length hidden>Порахуємо точно після заміру — це безкоштовно.</p>
+    <p class="quiz-result__gift"><Fact value={promises.gift3dText} /></p>
+  </div>
+</div>
+
+<style>
+  .quiz-result {
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .quiz-result > div {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .quiz-result > div[hidden],
+  .quiz-result [hidden] {
+    display: none;
+  }
+  .quiz-result__label {
+    color: var(--color-ink-muted);
+  }
+  .quiz-result__price {
+    font-family: var(--font-mono);
+    font-size: var(--text-price);
+    line-height: var(--text-price--line-height);
+    font-variant-numeric: tabular-nums;
+  }
+  .quiz-result__lead {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  .quiz-result__gift {
+    font-weight: 600;
+  }
+  @media (min-width: 48rem) {
+    .quiz-result {
+      padding: 2rem;
+    }
+  }
+</style>
+
+<script>
+  import { SITE_ENV } from 'astro:env/client';
+  import { takeResult } from '../../lib/lead/result-store';
+  import { formatUAH } from '../../lib/facts';
+  import type { QuizResult } from '../../lib/quiz/types';
+
+  const box = document.querySelector<HTMLElement>('[data-quiz-result]');
+  if (box) {
+    let result: QuizResult | null = takeResult();
+    // Демо экрана А на тестовых числах — только не в боевой сборке: /dyakuyemo?demoPrice=1
+    if (SITE_ENV !== 'production' && new URLSearchParams(location.search).has('demoPrice')) {
+      result = { variant: 'A', configured: 'A', reason: 'ok', price: { from: 48000, to: 62000, currency: 'UAH' } };
+    }
+    if (result) {
+      const show = result.variant === 'A' && result.reason === 'ok' && result.price ? 'A' : 'B';
+      box.querySelectorAll<HTMLElement>('[data-result]').forEach((el) => (el.hidden = el.dataset.result !== show));
+      if (show === 'A' && result.price) {
+        box.querySelector('[data-price-from]')!.textContent = formatUAH(result.price.from);
+        box.querySelector('[data-price-to]')!.textContent = formatUAH(result.price.to);
+      }
+      const noLength = box.querySelector<HTMLElement>('[data-no-length]');
+      if (noLength) noLength.hidden = result.reason !== 'no-length';
+      box.dataset.shown = show;
+    } else box.dataset.shown = 'generic';
+  }
+</script>

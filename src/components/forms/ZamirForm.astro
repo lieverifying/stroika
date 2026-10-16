@@ -1,6 +1,6 @@
 ---
 // Форма замера (блок 13 и попап из шапки): ім'я, телефон, зручний час, согласие, поле-ловушка.
-// Только интерфейс: скрипт проверяет поля и показывает ошибки, в сеть НЕ отправляет (отправка — фаза 6, api/lead.php).
+// Скрипт проверяет поля; отправка — заглушка src/lib/lead/submit.ts (в сеть не уходит до фазы 6), затем /dyakuyemo.
 // Без JS форма уйдёт обычным POST на action — бэкенд появится в фазе 6.
 import Button from '../ui/Button.astro';
 import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
@@ -56,10 +56,12 @@ const TIMES = [
 
 <script>
   import { clearErrorsOnFix, validateForm } from '../../lib/lead/field-errors';
+  import { saveResult } from '../../lib/lead/result-store';
+  import { submitLead } from '../../lib/lead/submit';
   import { validateConsent, validateName, validatePhone } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
 
-  // Проверка формы замера. В сеть ничего не отправляем — отправка появится в фазе 6 (api/lead.php).
+  // Проверка и отправка формы замера. Отправка — заглушка до фазы 6 (сеть не трогает), затем /dyakuyemo.
   const CHECKS = {
     name: (f: HTMLInputElement | HTMLTextAreaElement) => validateName(f.value),
     phone: (f: HTMLInputElement | HTMLTextAreaElement) => validatePhone(f.value),
@@ -69,16 +71,29 @@ const TIMES = [
   document.querySelectorAll<HTMLFormElement>('form[data-zamir-form]').forEach((form) => {
     const status = form.querySelector<HTMLElement>('[data-form-status]');
     clearErrorsOnFix(form, CHECKS);
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!validateForm(form, CHECKS)) {
         if (status) status.textContent = '';
         return;
       }
-      // Заглушка отправки до фазы 6: номер уже приведён к +380XXXXXXXXX, запросов в сеть нет
-      const phone = form.elements.namedItem('phone') as HTMLInputElement;
-      phone.dataset.normalized = normalizePhone(phone.value) ?? '';
-      if (status) status.textContent = 'Перевірку пройдено. Надсилання заявки буде підключено пізніше.';
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Надсилаємо…';
+      const data = new FormData(form);
+      const res = await submitLead({
+        form: 'zamir',
+        source: data.get('source'),
+        name: String(data.get('name') ?? '').trim(),
+        phone: normalizePhone(String(data.get('phone') ?? '')), // +380XXXXXXXXX
+        preferredTime: data.get('time'),
+        consent: true,
+        website: data.get('website') ?? '',
+      });
+      if (res.ok) {
+        saveResult(null); // у формы замера нет результата квиза — на /dyakuyemo общий текст
+        location.assign('/dyakuyemo');
+      }
     });
   });
 </script>

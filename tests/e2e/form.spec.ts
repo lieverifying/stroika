@@ -84,7 +84,7 @@ test.describe('блок 13: форма замера', () => {
     expect(posts).toEqual([]);
   });
 
-  test('заполненная форма проходит проверку, номер приведён к +380XXXXXXXXX, в сеть не уходит', async ({ page }) => {
+  test('заполненная форма → /dyakuyemo с общим текстом; запросов в сеть нет (заглушка до фазы 6)', async ({ page }) => {
     const posts: string[] = [];
     page.on('request', (r) => {
       if (r.method() !== 'GET') posts.push(r.url());
@@ -95,8 +95,8 @@ test.describe('блок 13: форма замера', () => {
     await page.locator('#zamir-phone').pressSequentially('0671234567');
     await page.locator('#zamir-consent').check();
     await page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' }).click();
-    await expect(page.locator('#zamir [data-form-status]')).toContainText('Перевірку пройдено');
-    await expect(page.locator('#zamir-phone')).toHaveAttribute('data-normalized', '+380671234567');
+    await expect(page).toHaveURL(/\/dyakuyemo$/);
+    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
     expect(posts).toEqual([]);
   });
 

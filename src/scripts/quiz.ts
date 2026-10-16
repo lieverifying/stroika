@@ -6,7 +6,12 @@
  * — ответы сохраняются (без имени и телефона) и восстанавливаются после перезагрузки;
  * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы.
  */
+import { facts } from '../content/facts';
 import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
+import { saveResult } from '../lib/lead/result-store';
+import { submitLead } from '../lib/lead/submit';
+import { normalizePhone } from '../lib/phone';
+import { computeResult, factsToPriceInput } from '../lib/quiz/price';
 import { validateConsent, validateName, validatePhone, validateTask } from '../lib/lead/validate';
 import { answer, back, isLastStep, progress, setTask, start } from '../lib/quiz/machine';
 import { clearState, loadState, saveState } from '../lib/quiz/storage';
@@ -150,10 +155,28 @@ export function initQuiz(root: HTMLElement): void {
     });
   });
 
-  // Заглушка до задачи 4.8 (отправка и /dyakuyemo)
-  function onValidSubmit(form: HTMLFormElement) {
+  // Отправка (заглушка до фазы 6, сеть не трогает) → результат в sessionStorage → очистка квиза → /dyakuyemo
+  async function onValidSubmit(form: HTMLFormElement) {
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     const status = form.querySelector<HTMLElement>('[data-form-status]');
-    if (status) status.textContent = 'Перевірку пройдено.';
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Надсилаємо…';
+    const data = new FormData(form);
+    const result = computeResult(state.answers, factsToPriceInput(facts));
+    const res = await submitLead({
+      form: 'quiz',
+      name: String(data.get('name') ?? '').trim(),
+      phone: normalizePhone(String(data.get('phone') ?? '')),
+      contactMethod: data.get('method'),
+      consent: true,
+      quiz: { answers: state.answers, result },
+      website: data.get('website') ?? '',
+    });
+    if (res.ok) {
+      saveResult(result);
+      clearState();
+      location.assign('/dyakuyemo');
+    }
   }
 
   history.replaceState({ ...history.state, quizStep: state.stepId }, '');

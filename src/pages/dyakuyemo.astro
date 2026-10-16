@@ -1,0 +1,32 @@
+---
+// /dyakuyemo — страница после заявки (минимальная, фаза 4; полная — фаза 5). noindex всегда.
+// Квиз кладёт результат в sessionStorage, форма замера — нет (тогда общий текст).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import QuizResult from '../components/quiz/QuizResult.astro';
+import Button from '../components/ui/Button.astro';
+import { contactLinks } from '../lib/contacts';
+---
+
+<BaseLayout title="Дякуємо — Вимір" description="Заявку прийнято." noindex>
+  <section class="container-site thanks section-pad">
+    <h1 class="text-h1">Дякуємо</h1>
+    <QuizResult />
+    <div class="thanks__actions">
+      <Button href={contactLinks.viber} variant="secondary" icon="viber">Написати у Viber</Button>
+      <Button href="/" variant="outline">На головну</Button>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks {
+    display: grid;
+    gap: var(--space-stack);
+    max-width: calc(48rem + 2 * var(--space-gutter));
+  }
+  .thanks__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>
