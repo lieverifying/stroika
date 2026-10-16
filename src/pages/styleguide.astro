@@ -1,0 +1,207 @@
+---
+// /styleguide — витрина готовых компонентов фаз 2–3 (PLAN.md 3.17). Только существующие компоненты, новых нет.
+// noindex всегда; в sitemap не попадает (sitemap — фаза 7, страницу туда не добавлять).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CaseCard from '../components/cases/CaseCard.astro';
+import Accordion from '../components/ui/Accordion.astro';
+import Badge from '../components/ui/Badge.astro';
+import BeforeAfter from '../components/ui/BeforeAfter.astro';
+import Button from '../components/ui/Button.astro';
+import Chip from '../components/ui/Chip.astro';
+import Dimension from '../components/ui/Dimension.astro';
+import Fact from '../components/ui/Fact.astro';
+import Icon, { type IconName } from '../components/ui/Icon.astro';
+import PlaceholderImage from '../components/ui/PlaceholderImage.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import ConsentCheckbox from '../components/ui/form/ConsentCheckbox.astro';
+import Input from '../components/ui/form/Input.astro';
+import PhoneInput from '../components/ui/form/PhoneInput.astro';
+import Select from '../components/ui/form/Select.astro';
+import Textarea from '../components/ui/form/Textarea.astro';
+import { getFeaturedCases } from '../lib/cases';
+
+const COLORS = [
+  { name: 'graphite', hex: '#1E2124', note: 'текст, темні фони' },
+  { name: 'tape', hex: '#E3B12C', note: 'лише кнопки заявки, одна на екран' },
+  { name: 'plaster', hex: '#F1F1EE', note: 'основний фон' },
+  { name: 'white', hex: '#FFFFFF', note: 'картки' },
+  { name: 'oak', hex: '#8A5A33', note: 'зрідка, для тепла' },
+  { name: 'ink-muted', hex: '#5C6166', note: 'другорядний текст' },
+  { name: 'line', hex: '#DCDCD7', note: 'розділювачі' },
+  { name: 'placeholder', hex: '#D6D6D1', note: 'плейсхолдери, заглушки' },
+  { name: 'error', hex: '#B3261E', note: 'помилки форм' },
+];
+const ICONS: IconName[] = ['phone', 'viber', 'telegram', 'instagram', 'menu', 'close', 'arrow-right', 'calculator'];
+const [demoCase] = await getFeaturedCases(1);
+---
+
+<BaseLayout title="Стайлгайд — Вимір" description="Компоненти сайту Вимір." noindex>
+  <div class="container-site sg">
+    <h1 class="text-h1">Стайлгайд</h1>
+    <p class="sg__note">
+      Внутрішня сторінка (noindex). Жовтою на екрані лишається одна кнопка заявки — так працює правило cta-arbiter.
+    </p>
+
+    <section class="sg__section" aria-labelledby="sg-colors">
+      <h2 id="sg-colors" class="text-h2">Кольори</h2>
+      <ul class="sg__colors">
+        {
+          COLORS.map((c) => (
+            <li>
+              <span class="sg__swatch" style={`background:${c.hex}`} />
+              <b>{c.name}</b> <code>{c.hex}</code>
+              <span class="sg__muted">{c.note}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-type">
+      <h2 id="sg-type" class="text-h2">Шрифти</h2>
+      <p class="text-h1 font-display">Unbounded 500 — Кухні ґ ї є і</p>
+      <p class="text-h3 font-display">H3 Unbounded 500</p>
+      <p class="text-lead">Manrope lead — кухні та меблі по вашому розміру</p>
+      <p>Manrope body — текст абзацу, 16–18 px.</p>
+      <p class="sg__mono">JetBrains Mono — 2 400 × 600 мм · 45 000 грн</p>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-buttons">
+      <h2 id="sg-buttons" class="text-h2">Кнопки</h2>
+      <div class="sg__row">
+        <Button href="/#kvyz" icon="calculator">Primary (заявка)</Button>
+        <Button href="#" variant="secondary" icon="viber">Secondary</Button>
+        <Button href="#" variant="outline">Outline</Button>
+        <Button href="#" variant="secondary" size="lg">Large 56 px</Button>
+      </div>
+      <div class="sg__row">
+        <Chip value="a" pressed>Chip вибраний</Chip>
+        <Chip value="b">Chip</Chip>
+        <Badge>Бейдж</Badge>
+      </div>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-title">
+      <h2 id="sg-title" class="text-h2">SectionTitle, Fact, Dimension</h2>
+      <SectionTitle id="sg-demo-title" eyebrow="Надзаголовок" title="Заголовок блоку" subtitle="Підзаголовок не ширше 65 символів." />
+      <p>Факт-заглушка: <Fact value="{{EXAMPLE_FACT}}" />, у рядку: <Fact value="Кутова кухня {{CASE_FACADE_DESCRIPTION}}" /></p>
+      <div class="sg__dim"><Dimension label="600 мм" /></div>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-icons">
+      <h2 id="sg-icons" class="text-h2">Іконки та логотипи</h2>
+      <ul class="sg__row">
+        {ICONS.map((name) => (
+          <li class="sg__icon"><Icon name={name} /> <code>{name}</code></li>
+        ))}
+      </ul>
+      <div class="sg__row sg__logos">
+        <img src="/brand/logo.svg" alt="Логотип на світлому" width="148" height="32" />
+        <span class="sg__dark"><img src="/brand/logo-dark.svg" alt="Логотип на темному" width="148" height="32" /></span>
+        <img src="/brand/mark.svg" alt="Знак" width="32" height="32" />
+      </div>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-media">
+      <h2 id="sg-media" class="text-h2">Плейсхолдер, картка кейсу, було / стало</h2>
+      <div class="sg__grid">
+        <PlaceholderImage width={1200} height={900} label="плейсхолдер 4:3" />
+        {demoCase && <CaseCard item={demoCase} />}
+        <BeforeAfter index={1} />
+      </div>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-form">
+      <h2 id="sg-form" class="text-h2">Поля форм</h2>
+      <form class="sg__form" novalidate onsubmit="return false">
+        <Input name="sg-name" label="Ім’я" required />
+        <PhoneInput id="sg-phone" name="sg-phone" />
+        <Select name="sg-time" label="Зручний час" options={[{ value: 'a', label: 'Зранку' }, { value: 'b', label: 'Ввечері' }]} />
+        <Textarea name="sg-text" label="Коментар" />
+        <ConsentCheckbox id="sg-consent" />
+      </form>
+    </section>
+
+    <section class="sg__section" aria-labelledby="sg-acc">
+      <h2 id="sg-acc" class="text-h2">Акордеон</h2>
+      <Accordion summary="Питання 1" open><p>Відповідь на питання.</p></Accordion>
+      <Accordion summary="Питання 2"><p>Ще одна відповідь.</p></Accordion>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .sg {
+    display: grid;
+    gap: var(--space-stack);
+    padding-block: 2rem var(--space-section);
+  }
+  .sg__note,
+  .sg__muted {
+    color: var(--color-ink-muted);
+  }
+  .sg__section {
+    display: grid;
+    gap: 1.25rem;
+    padding-top: var(--space-stack);
+    border-top: 1px solid var(--color-line);
+  }
+  .sg__colors {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .sg__colors li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+  .sg__swatch {
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+  }
+  .sg__mono,
+  code {
+    font-family: var(--font-mono);
+  }
+  .sg__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+  .sg__icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .sg__dark {
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    background: var(--color-graphite);
+  }
+  .sg__dim {
+    max-width: 20rem;
+    color: var(--color-oak);
+  }
+  .sg__grid {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .sg__form {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 32rem;
+  }
+  @media (min-width: 64rem) {
+    .sg__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
+    }
+    .sg__colors {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
