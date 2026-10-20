@@ -155,3 +155,27 @@ describe('недоступное хранилище', () => {
     expect(loadState(T0)).toBeNull();
   });
 });
+
+describe('состояние со старыми вариантами (ремонт убран, сроки изменены 2026-10-20)', () => {
+  const saved = (answers: Record<string, string>, stepId = 'shortForm') => {
+    const st = memoryStorage();
+    st.data.set(KEY, JSON.stringify({ ...start(T0), stepId, history: ['goal'], answers }));
+    return st;
+  };
+
+  test('ветка «Ремонт» не восстанавливается и удаляется', () => {
+    const st = saved({ goal: 'renovation', task: 'Плитка' });
+    expect(loadState(T0 + 1, st)).toBeNull();
+    expect(st.data.has(KEY)).toBe(false);
+  });
+
+  test('старый срок «до Нового року» сбрасывается, остальные ответы остаются', () => {
+    const st = saved({ goal: 'wardrobe', wardrobeType: 'kupe', timing: 'before-ny' }, 'contact');
+    expect(loadState(T0 + 1, st)?.answers).toEqual({ goal: 'wardrobe', wardrobeType: 'kupe' });
+  });
+
+  test('новый срок «Протягом 3 місяців» сохраняется', () => {
+    const st = saved({ goal: 'wardrobe', timing: 'within3m' }, 'contact');
+    expect(loadState(T0 + 1, st)?.answers.timing).toBe('within3m');
+  });
+});

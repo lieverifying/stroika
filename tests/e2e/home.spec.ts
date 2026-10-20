@@ -21,21 +21,21 @@ test.describe('главная', () => {
 });
 
 test.describe('блоки 6 и 7', () => {
-  test('бригада: фото, имя и роль первого мастера помещаются в один экран', async ({ page, isMobile }) => {
+  test('блок 6 — «Своя команда»: фото команды и текст о монтаже, без карточек мастеров и «субпідрядників»', async ({ page }) => {
     await page.goto('/');
-    const card = page.locator('.team__card').first();
-    const headerH = await page.locator('[data-header]').evaluate((el) => el.getBoundingClientRect().height);
-    await card.evaluate((el, h) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - h - 16), headerH);
-    const role = (await card.locator('.team__role').boundingBox())!;
-    const vh = page.viewportSize()!.height;
-    const barH = isMobile ? await page.locator('[data-bottom-bar]').evaluate((el) => el.getBoundingClientRect().height) : 0;
-    expect(role.y + role.height).toBeLessThanOrEqual(vh - barH);
-  });
-
-  test('заголовок блока 6 — «Своя бригада», подзаголовок «Без субпідрядників» (подтверждено владельцем)', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('#team-title')).toHaveText('Своя бригада');
-    await expect(page.locator('[data-block="6"]')).toContainText('Без субпідрядників');
+    const block = page.locator('[data-block="6"]');
+    await expect(page.locator('#team-title')).toHaveText('Своя команда');
+    await expect(block).toContainText('Замір, дизайн-проєкт і монтаж — наша команда.');
+    await expect(block).toContainText('фабрики-партнери');
+    await expect(block.locator('.team__install li')).toHaveText([
+      'врізка мийки та варильної поверхні',
+      'вбудована техніка',
+      'підключення води та розеток',
+      'прибирання',
+    ]);
+    await expect(block.locator('.team__card')).toHaveCount(0); // карточки мастеров за флагом flags.teamCards
+    await expect(block.locator('.team__photo .ph')).toHaveCount(1);
+    await expect(page.locator('body')).not.toContainText(/субпідряд|бригад/i);
   });
 
   test('десктоп: описания всех пяти шагов начинаются на одной линии', async ({ page, isMobile }) => {

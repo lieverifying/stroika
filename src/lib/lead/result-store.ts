@@ -1,29 +1,48 @@
 /**
- * Передача результата квиза на /dyakuyemo через sessionStorage (ARCHITECTURE.md 4.4–4.5).
- * Ключ vymir.quiz.result живёт до закрытия вкладки и удаляется после показа. Хранилище может быть недоступно —
- * тогда /dyakuyemo покажет общий текст.
+ * Передача данных для /dyakuyemo через sessionStorage (ARCHITECTURE.md 4.4–4.5): имя, способ связи и результат квиза.
+ * Ключ vymir.lead.thanks живёт до закрытия вкладки и удаляется сразу после показа. Телефон сюда не пишется никогда.
+ * Хранилище может быть недоступно — тогда /dyakuyemo покажет общий текст.
  */
-import type { QuizResult } from '../quiz/types';
+import type { ContactMethod, QuizResult } from '../quiz/types';
 
-export const RESULT_KEY = 'vymir.quiz.result';
+export const THANKS_KEY = 'vymir.lead.thanks';
 
-export function saveResult(result: QuizResult | null): void {
+export interface ThanksData {
+  name: string;
+  method: ContactMethod;
+  /** null — заявка не из квиза (форма замера, нестандартный запрос) */
+  result: QuizResult | null;
+}
+
+const METHODS: ContactMethod[] = ['viber', 'telegram', 'call'];
+
+/** Значение поля «Як зв’язатися» → способ связи; всё незнакомое — звонок */
+export function toMethod(value: unknown): ContactMethod {
+  return METHODS.includes(value as ContactMethod) ? (value as ContactMethod) : 'call';
+}
+
+export function saveThanks(data: ThanksData): void {
   try {
-    if (result) sessionStorage.setItem(RESULT_KEY, JSON.stringify(result));
-    else sessionStorage.removeItem(RESULT_KEY);
+    sessionStorage.setItem(THANKS_KEY, JSON.stringify(data));
   } catch {
-    // приватный режим / in-app браузер — без результата
+    // приватный режим / in-app браузер — без персонального текста
   }
 }
 
-/** Прочитать и сразу удалить результат («после показа») */
-export function takeResult(): QuizResult | null {
+/** Прочитать и сразу удалить («после показа»). Неполные данные отбрасываются. */
+export function takeThanks(): ThanksData | null {
   try {
-    const raw = sessionStorage.getItem(RESULT_KEY);
-    sessionStorage.removeItem(RESULT_KEY);
-    const r = raw ? (JSON.parse(raw) as QuizResult) : null;
-    return r && (r.variant === 'A' || r.variant === 'B') ? r : null;
+    const raw = sessionStorage.getItem(THANKS_KEY);
+    sessionStorage.removeItem(THANKS_KEY);
+    const d = raw ? (JSON.parse(raw) as Partial<ThanksData>) : null;
+    if (!d || typeof d.name !== 'string') return null;
+    const r = d.result;
+    const result = r && (r.variant === 'A' || r.variant === 'B') ? r : null;
+    return { name: d.name.slice(0, 50), method: toMethod(d.method), result };
   } catch {
     return null;
   }
 }
+
+/** Как назвать канал в тексте «Надішлемо розрахунок у …» */
+export const CHANNEL_LABEL: Record<Exclude<ContactMethod, 'call'>, string> = { viber: 'Viber', telegram: 'Telegram' };

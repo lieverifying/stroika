@@ -1,5 +1,6 @@
 /**
- * Вопросы и ответы (ТЗ, блок 12): сроки, цена, материалы, гарантия, техника, выезд в область, оплата, замер.
+ * Вопросы и ответы (ТЗ, блок 12): сроки, какие меблі, цена, материалы, гарантия, техника, выезд в область, оплата, замер;
+ * вопрос о рекомендациях — только при facts.flags.referralEnabled.
  * Ответы собираются только из facts.ts: факт — отдельная часть ответа, пока заглушка — видна плашкой.
  * Текст между фактами — шаблон без цифр и обещаний.
  */
@@ -18,18 +19,19 @@ export interface FaqItem {
 const brandNames = (brands: Fact<Brand[]>): Fact<string> =>
   isPlaceholder(brands) ? brands : brands.map((b) => b.name).join(', ');
 
-const DAYS: [string, string, string] = ['день', 'дні', 'днів'];
-const { terms, prices, warranty, payment, serviceArea, materials } = facts;
+const { terms, prices, warranty, payment, serviceArea, materials, services, referral } = facts;
 
 export const FAQ: FaqItem[] = [
   {
-    q: 'Скільки часу займає виготовлення кухні?',
+    q: 'Скільки часу займає виготовлення?',
     a: [
-      'Виготовлення — ',
-      { fact: terms.productionDaysTotal },
-      ` ${pluralUk(terms.productionDaysTotal, DAYS)}. Від заміру до монтажу — `,
-      { fact: terms.measureToInstallDays },
-      ` ${pluralUk(terms.measureToInstallDays, DAYS)}.`,
+      `Кухня — ${terms.kitchenProductionMonths} місяці від авансу. Шафи та інші меблі — ${terms.furnitureProductionMonths} місяці від авансу.`,
+    ],
+  },
+  {
+    q: 'Які меблі ви робите?',
+    a: [
+      `Корпусні меблі: ${services.furniture.join(', ')}. Для таких об’єктів: ${services.objects.join(', ')}.`,
     ],
   },
   {
@@ -58,7 +60,7 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: 'Чи працюєте в області?',
-    a: [{ fact: serviceArea.text }, ' ', { fact: serviceArea.terms }],
+    a: [`Так, працюємо: ${serviceArea.text.toLowerCase()}. `, { fact: serviceArea.terms }],
   },
   {
     q: 'Як відбувається оплата?',
@@ -68,4 +70,12 @@ export const FAQ: FaqItem[] = [
     q: 'Замір справді безкоштовний?',
     a: ['Так, замір безкоштовний.'],
   },
+  ...(facts.flags.referralEnabled
+    ? [
+        {
+          q: 'Чи є бонус, якщо порекомендувати вас друзям?',
+          a: ['Так. Вам — ', { fact: referral.reward }, ', другові — ', { fact: referral.friendBonus }, '.'],
+        },
+      ]
+    : []),
 ];

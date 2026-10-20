@@ -4,12 +4,13 @@
  * — переход по нажатию варианта, без кнопки «Далі»;
  * — «Назад» и системная «назад» (history.pushState / popstate) листают шаги;
  * — ответы сохраняются (без имени и телефона) и восстанавливаются после перезагрузки;
- * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы.
+ * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы;
+ * — «Інше, нестандартне» не меняет состояние, а ведёт в блок «Нестандартне завдання» (#zapyt).
  */
 import { facts } from '../content/facts';
 import { quizStepEvents, track } from '../lib/analytics';
 import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
-import { saveResult } from '../lib/lead/result-store';
+import { saveThanks, toMethod } from '../lib/lead/result-store';
 import { submitLead } from '../lib/lead/submit';
 import { normalizePhone } from '../lib/phone';
 import { branchOf } from '../lib/quiz/config';
@@ -94,11 +95,24 @@ export function initQuiz(root: HTMLElement): void {
   root.addEventListener('click', (e) => {
     const option = (e.target as HTMLElement).closest<HTMLElement>('[role="radio"][data-value]');
     if (!option || !root.contains(option)) return;
+    if (option.dataset.href) {
+      goToAnchor(option.dataset.href);
+      return;
+    }
     const completed = state.stepId;
     state = answer(state, option.dataset.value ?? '', Date.now());
     fireStepEvents(completed);
     go(state);
   });
+
+  // Переход к блоку на странице (шапку учитывает scroll-padding-top у html) и фокус на первое поле
+  function goToAnchor(href: string) {
+    const target = document.querySelector<HTMLElement>(href);
+    if (!target) return void location.assign(href);
+    history.pushState(history.state, '', href);
+    target.scrollIntoView({ block: 'start' });
+    target.querySelector<HTMLElement>('textarea, input:not([type="hidden"])')?.focus({ preventScroll: true });
+  }
 
   // Стрелки двигают фокус внутри группы вариантов, Home / End — к краям; выбор — Enter или пробел
   root.addEventListener('keydown', (e) => {
@@ -176,17 +190,21 @@ export function initQuiz(root: HTMLElement): void {
     if (status) status.textContent = 'Надсилаємо…';
     const data = new FormData(form);
     const result = computeResult(state.answers, factsToPriceInput(facts));
+    const method = toMethod(data.get('method'));
+    const name = String(data.get('name') ?? '').trim();
+    // Способ связи — первым полем: в Telegram-сообщении он первой строкой (ARCHITECTURE.md 7)
     const res = await submitLead({
+      contactMethod: method,
       form: 'quiz',
-      name: String(data.get('name') ?? '').trim(),
+      name,
       phone: normalizePhone(String(data.get('phone') ?? '')),
-      contactMethod: data.get('method'),
+      referrer: String(data.get('referrer') ?? '').trim(),
       consent: true,
       quiz: { answers: state.answers, result },
       website: data.get('website') ?? '',
     });
     if (res.ok) {
-      saveResult(result);
+      saveThanks({ name, method, result });
       clearState();
       location.assign('/dyakuyemo');
     }

@@ -1,0 +1,232 @@
+---
+// Блок «Нестандартне завдання» (решение владельца, 2026-10-20) — сразу после «Ціни від», якорь #zapyt.
+// Сюда же ведёт вариант квиза «Інше, нестандартне». Владелец перезванивает лично: имя и фото — заглушки facts.owner.
+// Форма: описание 10–1000 символов, до 3 файлов (JPG, PNG, HEIC, PDF, до 10 МБ), поля контакта, согласие.
+// Кнопка графитовая: жёлтый на экране остаётся за кнопками квиза и замера.
+// Отправка — заглушка до фазы 6 (файлы уйдут multipart-запросом в api/lead.php), затем /dyakuyemo.
+import ContactFields from '../quiz/ContactFields.astro';
+import Button from '../ui/Button.astro';
+import Fact from '../ui/Fact.astro';
+import PlaceholderImage from '../ui/PlaceholderImage.astro';
+import SectionTitle from '../ui/SectionTitle.astro';
+import Textarea from '../ui/form/Textarea.astro';
+import '../ui/form/field.css';
+import { facts } from '../../content/facts';
+import { FILES_MAX } from '../../lib/lead/validate';
+
+const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic,image/heif,application/pdf';
+---
+
+<section id="zapyt" class="section-pad" aria-labelledby="zapyt-title" data-section="zapyt">
+  <div class="container-site zapyt">
+    <div class="zapyt__intro">
+      <SectionTitle id="zapyt-title" title="Нестандартне завдання" />
+      <div class="zapyt__owner">
+        <div class="zapyt__photo">
+          <PlaceholderImage width={600} height={600} label="власник, кругле фото" />
+        </div>
+        <p class="zapyt__lead">
+          Опишіть, що потрібно зробити. Я, <Fact value={facts.owner.name} />, власник «{facts.brand.name}», зателефоную вам особисто
+          протягом <Fact value={facts.promises.callbackMinutes} /> хвилин у робочий час і дам детальну відповідь: терміни, орієнтовну
+          вартість і наступні кроки.
+        </p>
+      </div>
+    </div>
+
+    <form class="zapyt__form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-zapyt-form>
+      <input type="hidden" name="source" value="zapyt" />
+      <Textarea name="request" id="zapyt-request" label="Що потрібно зробити" rows={5} required error="Опишіть завдання — щонайменше 10 символів" />
+      <div class="field files">
+        <label class="field__label" for="zapyt-files">
+          Фото, креслення або ескіз <span class="field__optional">(необов’язково)</span>
+        </label>
+        <div class="files__box">
+          <input
+            class="files__input"
+            type="file"
+            id="zapyt-files"
+            name="files"
+            multiple
+            accept={ACCEPT}
+            aria-describedby="zapyt-files-hint"
+          />
+          <span class="files__pick" aria-hidden="true">Додати файли</span>
+          <span class="files__chosen" data-files-chosen aria-hidden="true">Файли не вибрано</span>
+        </div>
+        <p class="field__hint" id="zapyt-files-hint">До {FILES_MAX} файлів: JPG, PNG, HEIC або PDF, до 10 МБ кожен.</p>
+        <p class="field__error" id="zapyt-files-error" hidden></p>
+      </div>
+      <ContactFields prefix="zapyt" />
+      <Button type="submit" variant="secondary" size="lg" fullWidth>Надіслати запит</Button>
+      <p class="zapyt__status" role="status" aria-live="polite" data-form-status></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .zapyt {
+    display: grid;
+    gap: var(--space-stack);
+  }
+  .zapyt__intro {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+  .zapyt__owner {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  /* Круглое фото владельца; пока — серый круг без подписи (подпись не помещается в 80 px) */
+  .zapyt__photo :global(.ph) {
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+  }
+  .zapyt__photo :global(.ph__label),
+  .zapyt__photo :global(.ph__dim) {
+    display: none;
+  }
+  .zapyt__lead {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    max-width: 52ch;
+  }
+  .zapyt__form {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .zapyt__status:empty {
+    display: none;
+  }
+  .zapyt__status {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  /* Выбор файлов: настоящий input поверх «кнопки» (прозрачный) — работает мышью, пальцем и с клавиатуры */
+  .files__box {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--control-h);
+  }
+  .files__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .files__pick {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    padding-inline: 1.25rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+  .files__box:has(.files__input:focus-visible) .files__pick {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  .files__box:has(.files__input[aria-invalid='true']) .files__pick {
+    border: 2px solid var(--color-error);
+  }
+  .files__chosen {
+    min-width: 0;
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 48rem) {
+    .zapyt__form {
+      padding: 2rem;
+    }
+    .zapyt__owner {
+      grid-template-columns: 7rem minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .zapyt {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 4rem;
+      align-items: start;
+    }
+    .zapyt__owner {
+      grid-template-columns: 1fr;
+    }
+    .zapyt__photo {
+      width: 8rem;
+    }
+  }
+</style>
+
+<script>
+  import { clearErrorsOnFix, setFieldError, validateForm } from '../../lib/lead/field-errors';
+  import { saveThanks, toMethod } from '../../lib/lead/result-store';
+  import { submitLead } from '../../lib/lead/submit';
+  import { validateConsent, validateFiles, validateName, validatePhone, validateRequest } from '../../lib/lead/validate';
+  import { normalizePhone } from '../../lib/phone';
+
+  type Field = HTMLInputElement | HTMLTextAreaElement;
+  const CHECKS = {
+    request: (f: Field) => validateRequest(f.value),
+    files: (f: Field) => validateFiles((f as HTMLInputElement).files ?? []),
+    name: (f: Field) => validateName(f.value),
+    phone: (f: Field) => validatePhone(f.value),
+    consent: (f: Field) => validateConsent((f as HTMLInputElement).checked),
+  };
+
+  const form = document.querySelector<HTMLFormElement>('form[data-zapyt-form]');
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const filesInput = form.querySelector<HTMLInputElement>('input[name="files"]')!;
+    const chosen = form.querySelector<HTMLElement>('[data-files-chosen]')!;
+    clearErrorsOnFix(form, CHECKS);
+
+    // Имена выбранных файлов и проверка сразу после выбора
+    filesInput.addEventListener('change', () => {
+      const list = Array.from(filesInput.files ?? []);
+      chosen.textContent = list.length ? list.map((f) => f.name).join(', ') : 'Файли не вибрано';
+      setFieldError(filesInput, CHECKS.files(filesInput));
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateForm(form, CHECKS)) {
+        if (status) status.textContent = '';
+        return;
+      }
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Надсилаємо…';
+      const data = new FormData(form);
+      const method = toMethod(data.get('method'));
+      const name = String(data.get('name') ?? '').trim();
+      // Способ связи — первым полем: в Telegram-сообщении он первой строкой (ARCHITECTURE.md 7)
+      const res = await submitLead({
+        contactMethod: method,
+        form: 'zapyt',
+        request: String(data.get('request') ?? '').trim(),
+        files: Array.from(filesInput.files ?? []).map((f) => ({ name: f.name, size: f.size })),
+        name,
+        phone: normalizePhone(String(data.get('phone') ?? '')),
+        referrer: String(data.get('referrer') ?? '').trim(),
+        consent: true,
+        website: data.get('website') ?? '',
+      });
+      if (res.ok) {
+        saveThanks({ name, method, result: null });
+        location.assign('/dyakuyemo');
+      }
+    });
+  }
+</script>

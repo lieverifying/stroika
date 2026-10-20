@@ -1,30 +1,28 @@
 ---
-// Экран результата на /dyakuyemo (ARCHITECTURE.md 4.4). Все варианты в разметке, скрипт показывает нужный:
-// — А (с ценой): «Орієнтовна вартість: від X до Y грн» — только при reason 'ok';
-// — Б (без цены): перезвон и бонус — по умолчанию (флаг facts.flags.quizResultVariant = 'B') и при любом откате;
-// — no-length: текст Б + «порахуємо точно після заміру»;
-// — без данных квиза (заявка из формы замера, перезагрузка) — общий текст.
-// Обещания (минуты перезвона, 3D у подарунок) — заглушки до подтверждения владельцем.
+// Экран результата на /dyakuyemo (ARCHITECTURE.md 4.4). Скрипт подставляет имя и способ связи из sessionStorage:
+// «Дякуємо, {ім’я}. Надішлемо розрахунок у {Viber / Telegram} протягом N хвилин у робочий час»,
+// для звонка — «Зателефонуємо протягом N хвилин у робочий час». Без данных — общий текст со звонком.
+// Цена (экран А) — только при reason 'ok' и флаге facts.flags.quizResultVariant = 'A'; по умолчанию Б (без цены).
+// Минуты перезвона и подарок — заглушки до подтверждения владельцем.
 import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 
 const { promises } = facts;
 ---
 
-<div class="quiz-result" data-quiz-result>
-  <div data-result="generic">
-    <p class="quiz-result__lead">Заявку прийнято. Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин.</p>
-  </div>
-
+<div class="quiz-result" data-quiz-result data-shown="generic">
   <div data-result="A" hidden>
     <p class="quiz-result__label">Орієнтовна вартість</p>
     <p class="quiz-result__price">від <span data-price-from></span> до <span data-price-to></span></p>
-    <p class="quiz-result__lead">Точна ціна — після безкоштовного заміру.</p>
-    <p>Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин.</p>
+    <p>Точна ціна — після безкоштовного заміру.</p>
   </div>
 
+  <p class="quiz-result__lead" data-thanks>
+    Дякуємо<span data-thanks-name></span>.{' '}<span data-thanks-action>Зателефонуємо</span>{' '}протягом{' '}
+    <Fact value={promises.callbackMinutes} />{' '}хвилин у робочий час.
+  </p>
+
   <div data-result="B" hidden>
-    <p class="quiz-result__lead">Подзвонимо протягом <Fact value={promises.callbackMinutes} /> хвилин з розрахунком.</p>
     <p class="quiz-result__no-length" data-no-length hidden>Порахуємо точно після заміру — це безкоштовно.</p>
     <p class="quiz-result__gift"><Fact value={promises.gift3dText} /></p>
   </div>
@@ -71,17 +69,27 @@ const { promises } = facts;
 
 <script>
   import { SITE_ENV } from 'astro:env/client';
-  import { takeResult } from '../../lib/lead/result-store';
+  import { CHANNEL_LABEL, takeThanks, type ThanksData } from '../../lib/lead/result-store';
   import { formatUAH } from '../../lib/facts';
-  import type { QuizResult } from '../../lib/quiz/types';
 
   const box = document.querySelector<HTMLElement>('[data-quiz-result]');
   if (box) {
-    let result: QuizResult | null = takeResult();
+    let data: ThanksData | null = takeThanks();
     // Демо экрана А на тестовых числах — только не в боевой сборке: /dyakuyemo?demoPrice=1
     if (SITE_ENV !== 'production' && new URLSearchParams(location.search).has('demoPrice')) {
-      result = { variant: 'A', configured: 'A', reason: 'ok', price: { from: 48000, to: 62000, currency: 'UAH' } };
+      data = {
+        name: data?.name ?? '',
+        method: data?.method ?? 'viber',
+        result: { variant: 'A', configured: 'A', reason: 'ok', price: { from: 48000, to: 62000, currency: 'UAH' } },
+      };
     }
+    if (data) {
+      if (data.name) box.querySelector('[data-thanks-name]')!.textContent = `, ${data.name}`;
+      box.querySelector('[data-thanks-action]')!.textContent =
+        data.method === 'call' ? 'Зателефонуємо' : `Надішлемо розрахунок у ${CHANNEL_LABEL[data.method]}`;
+      box.dataset.method = data.method;
+    }
+    const result = data?.result;
     if (result) {
       const show = result.variant === 'A' && result.reason === 'ok' && result.price ? 'A' : 'B';
       box.querySelectorAll<HTMLElement>('[data-result]').forEach((el) => (el.hidden = el.dataset.result !== show));
@@ -92,6 +100,6 @@ const { promises } = facts;
       const noLength = box.querySelector<HTMLElement>('[data-no-length]');
       if (noLength) noLength.hidden = result.reason !== 'no-length';
       box.dataset.shown = show;
-    } else box.dataset.shown = 'generic';
+    }
   }
 </script>

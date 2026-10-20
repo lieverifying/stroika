@@ -1,5 +1,7 @@
 ---
 // Главная — лендинг кухонь: блоки 1–13 строго в порядке ТЗ, блок 0 (шапка) и 14 (футер) — в BaseLayout.
+// Вне нумерации ТЗ (решение владельца, 2026-10-20): «Нестандартне завдання» после «Ціни від»,
+// «Рекомендуйте нас» после «Відгуки» (только при facts.flags.referralEnabled).
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
 import TrustNumbers from '../components/sections/TrustNumbers.astro';
@@ -9,6 +11,8 @@ import QuizSection from '../components/sections/QuizSection.astro';
 import Team from '../components/sections/Team.astro';
 import Process from '../components/sections/Process.astro';
 import Prices from '../components/sections/Prices.astro';
+import CustomRequest from '../components/sections/CustomRequest.astro';
+import Referral from '../components/sections/Referral.astro';
 import Materials from '../components/sections/Materials.astro';
 import Reviews from '../components/sections/Reviews.astro';
 import WarrantyPayment from '../components/sections/WarrantyPayment.astro';
@@ -18,7 +22,7 @@ import FinalCta from '../components/sections/FinalCta.astro';
 
 <BaseLayout
   title="Кухні на замовлення в Черкасах — Вимір"
-  description="Кухні та меблі на замовлення в Черкасах. Безкоштовний замір і розрахунок вартості."
+  description="Кухні та корпусні меблі на замовлення: Черкаси та область. Безкоштовний замір і розрахунок вартості."
 >
   <Hero />
   <TrustNumbers />
@@ -28,8 +32,10 @@ import FinalCta from '../components/sections/FinalCta.astro';
   <Team />
   <Process />
   <Prices />
+  <CustomRequest />
   <Materials />
   <Reviews />
+  <Referral />
   <WarrantyPayment />
   <Faq />
   <FinalCta />

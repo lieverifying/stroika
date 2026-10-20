@@ -1,10 +1,12 @@
 ---
-// Общие поля контакта квиза (шаг 7 и коротка форма): ім'я, телефон +380, «Як зв'язатися», согласие, ловушка.
-// Способ связи по умолчанию — «Дзвінок»; согласие по умолчанию НЕ отмечено (ARCHITECTURE.md 4.1).
+// Общие поля контакта (шаг 7 квиза, коротка форма, «Нестандартне завдання»): сначала «Як зв’язатися»
+// (Viber · Telegram · Дзвінок, по умолчанию Viber), затем ім'я, телефон +380, «Хто вас порекомендував?»
+// (необязательно), согласие (по умолчанию НЕ отмечено), ловушка.
 import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
 import Honeypot from '../ui/form/Honeypot.astro';
 import Input from '../ui/form/Input.astro';
 import PhoneInput from '../ui/form/PhoneInput.astro';
+import ReferrerInput from '../ui/form/ReferrerInput.astro';
 
 interface Props {
   /** префикс id: на странице два набора полей (шаг 7 и коротка форма) */
@@ -12,14 +14,12 @@ interface Props {
 }
 const { prefix } = Astro.props;
 const METHODS = [
-  { value: 'call', label: 'Дзвінок' },
   { value: 'viber', label: 'Viber' },
   { value: 'telegram', label: 'Telegram' },
+  { value: 'call', label: 'Дзвінок' },
 ];
 ---
 
-<Input name="name" id={`${prefix}-name`} label="Ім’я" autocomplete="given-name" required />
-<PhoneInput id={`${prefix}-phone`} />
 <fieldset class="methods">
   <legend class="field__label">Як зв’язатися</legend>
   <div class="methods__list">
@@ -33,6 +33,9 @@ const METHODS = [
     }
   </div>
 </fieldset>
+<Input name="name" id={`${prefix}-name`} label="Ім’я" autocomplete="given-name" required />
+<PhoneInput id={`${prefix}-phone`} />
+<ReferrerInput id={`${prefix}-referrer`} />
 <ConsentCheckbox id={`${prefix}-consent`} />
 <Honeypot id={`${prefix}-website`} />
 

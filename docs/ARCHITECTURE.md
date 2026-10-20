@@ -139,7 +139,7 @@ stroika/
 │   │   │   ├── SeoHead.astro           # title, description, canonical, OG, robots
 │   │   │   ├── JsonLd.astro            # LocalBusiness, FAQPage (фаза 7)
 │   │   │   └── SkipLink.astro
-│   │   ├── sections/                   # блоки главной, используются и на /mebli, /remont
+│   │   ├── sections/                   # блоки главной, используются и на /mebli
 │   │   │   ├── Hero.astro              # 1
 │   │   │   ├── TrustNumbers.astro      # 2
 │   │   │   ├── Portfolio.astro         # 3
@@ -173,7 +173,7 @@ stroika/
 │   │       ├── QuizStep.astro
 │   │       ├── QuizOption.astro        # карточка-вариант со схемой
 │   │       ├── QuizContact.astro       # шаг 7
-│   │       ├── QuizShortForm.astro     # Ремонт / Інші меблі
+│   │       ├── QuizShortForm.astro     # Інші меблі
 │   │       └── QuizResult.astro        # экран А / Б (рендерится на /dyakuyemo)
 │   ├── content/
 │   │   ├── cases/                      # <slug>.md — один файл = один кейс
@@ -206,7 +206,6 @@ stroika/
 │   │   │   ├── index.astro             # /roboty
 │   │   │   └── [slug].astro            # /roboty/<slug>
 │   │   ├── mebli.astro
-│   │   ├── remont.astro
 │   │   ├── kontakty.astro
 │   │   ├── dyakuyemo.astro             # noindex; Lead; экран результата квиза
 │   │   ├── polityka.astro
@@ -239,7 +238,7 @@ stroika/
 
 | Адрес | Индексация | Sitemap |
 |---|---|---|
-| `/`, `/roboty`, `/roboty/<slug>`, `/mebli`, `/remont`, `/kontakty`, `/polityka` | да | да |
+| `/`, `/roboty`, `/roboty/<slug>`, `/mebli`, `/kontakty`, `/polityka` | да | да |
 | `/dyakuyemo`, `/styleguide`, `404` | `noindex` | нет |
 | Любая сборка с `SITE_ENV` ≠ `production` (локально, технический адрес хостинга) | `noindex` на всех страницах | — |
 
@@ -253,7 +252,7 @@ stroika/
 |---|---|---|---|
 | *(имя файла)* | `^[a-z0-9-]+$` | да | Это и есть slug, то есть адрес `/roboty/<slug>`. Транслит по правилам КМУ 2010, например `kutova-kukhnia-<rayon>` |
 | `title` | string ≤ 70 | да | «Кутова кухня з білими фасадами» |
-| `category` | `'kitchen' \| 'wardrobe' \| 'renovation'` | да | Фильтр на `/roboty`: Кухні / Шафи / Ремонт |
+| `category` | `'kitchen' \| 'wardrobe' \| 'furniture'` | да | Фильтр на `/roboty`: Кухні / Шафи / Інші меблі |
 | `kitchenShape` | `'pryama' \| 'kutova' \| 'p-podibna' \| 'ostriv'` | да, если `kitchen` | Фильтр на главной и на `/roboty` |
 | `wardrobeType` | `'kupe' \| 'rozpashna' \| 'harderobna' \| 'peredpokii'` | да, если `wardrobe` | Подпись карточки, подбор похожих |
 | `district` | string | да | Район Черкас или населённый пункт области |
@@ -292,7 +291,7 @@ cases = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/cases' }),
   schema: ({ image }) => z.object({
     title: z.string().max(70),
-    category: z.enum(['kitchen', 'wardrobe', 'renovation']),
+    category: z.enum(['kitchen', 'wardrobe', 'furniture']),
     kitchenShape: z.enum(['pryama', 'kutova', 'p-podibna', 'ostriv']).optional(),
     wardrobeType: z.enum(['kupe', 'rozpashna', 'harderobna', 'peredpokii']).optional(),
     district: z.string(),
@@ -394,21 +393,21 @@ placeholder: true
 
 | ID шага | № по ТЗ | Ветка | Вопрос (UI) | Варианты: `value` → подпись |
 |---|---|---|---|---|
-| `goal` | 1 | все | Що плануєте? | `kitchen` → Кухня; `wardrobe` → Шафа або гардеробна; `other` → Інші меблі; `renovation` → Ремонт |
+| `goal` | 1 | все | Що плануєте? | `kitchen` → Кухня; `wardrobe` → Шафа або гардеробна; `other` → Інші меблі; `custom` → Інше, нестандартне (ссылка на #zapyt) |
 | `kitchenShape` | 2 | кухня | Яка форма кухні? | `pryama` → Пряма; `kutova` → Кутова; `p-podibna` → П-подібна; `ostriv` → З островом (схематичные SVG) |
 | `kitchenLength` | 3 | кухня | Приблизна довжина | `lt3` → До 3 м; `3to4` → 3–4 м; `4to5` → 4–5 м; `gt5` → Більше 5 м; `unknown` → Не знаю — приїдемо заміряти |
-| `facade` | 4 | кухня | Фасади | `mdf-film` → МДФ у плівці; `mdf-painted` → Фарбований МДФ; `dsp` → ДСП; `advise` → Порадьте. Вариант «Дерево або шпон» из ТЗ убран до подтверждения материалов владельцем (добавляется одной строкой конфига). **Список фильтруется по `facts.facadeTypesConfirmed`** (вопрос В4) |
+| `facade` | 4 | кухня | Фасади | `mdf-film` → МДФ у плівці; `mdf-painted` → Фарбований МДФ; `dsp` → ДСП; `advise` → Порадьте. Вариант с деревом из ТЗ убран до подтверждения материалов владельцем (добавляется одной строкой конфига). **Список фильтруется по `facts.facadeTypesConfirmed`** (вопрос В4) |
 | `countertop` | 5 | кухня | Стільниця | `dsp` → ДСП; `quartz` → Кварц або акрил; `undecided` → Ще не вирішили |
 | `wardrobeType` | 2 | шафа | Що саме потрібно? | `kupe` → Шафа-купе; `rozpashna` → Розпашна шафа; `harderobna` → Гардеробна |
 | `wardrobeWidth` | 3 | шафа | Приблизна ширина | Диапазоны из `{{QUIZ_WARDROBE_WIDTH_BANDS}}` + `unknown` → Не знаю — приїдемо заміряти |
-| `timing` | 6 | кухня, шафа | Коли плануєте встановлення? | `before-ny` → `{{QUIZ_TIMING_SEASONAL_LABEL}}` (по ТЗ «До Нового року»); `1to3m` → Через 1–3 місяці; `later` → Пізніше |
-| `contact` | 7 | кухня, шафа | Куди надіслати розрахунок? | Ім'я; Телефон (+380); Як зв'язатися: Дзвінок / Viber / Telegram; галочка «Погоджуюсь з політикою конфіденційності» |
-| `shortForm` | 7 | інше, ремонт | Опишіть задачу | Текстовое поле «Що потрібно зробити» + те же поля контакта |
+| `timing` | 6 | кухня, шафа | Коли плануєте встановлення? | `within3m` → Протягом 3 місяців (вместо «До Нового року», 2026-10-20); `1to3m` → Через 1–3 місяці; `later` → Пізніше |
+| `contact` | 7 | кухня, шафа | Куди надіслати розрахунок? | Первым — Як зв'язатися: Viber / Telegram / Дзвінок (по умолчанию Viber); Ім'я; Телефон (+380); Хто вас порекомендував? (необязательно); галочка согласия. Кнопка «Отримати ціну» |
+| `shortForm` | 7 | інші меблі | Опишіть задачу | Текстовое поле «Що потрібно зробити» + те же поля контакта |
 
 Поведение:
 - Шаги с одним выбором переходят дальше сразу по нажатию на вариант, без кнопки «Далі». Так квиз проходится за 60 секунд.
 - Карточки вариантов: высота ≥ 64 px, на 375 px по 2 в ряд.
-- Способ связи по умолчанию — «Дзвінок».
+- Способ связи по умолчанию — Viber (решение владельца 2026-10-20). «Інше, нестандартне» на шаге 1 не ветка, а переход в блок #zapyt.
 - Галочка согласия по умолчанию **не** отмечена.
 - Кнопка отправки: «Отримати розрахунок».
 
@@ -419,7 +418,7 @@ flowchart TD
   goal{"1. Що плануєте?"}
   goal -- "Кухня" --> ks["2. Форма кухні"] --> kl["3. Довжина"] --> fc["4. Фасади"] --> ct["5. Стільниця"] --> tm["6. Коли"]
   goal -- "Шафа або гардеробна" --> wt["2. Тип шафи"] --> ww["3. Ширина"] --> tm
-  goal -- "Інші меблі / Ремонт" --> sf["Коротка форма: задача + контакт"]
+  goal -- "Інші меблі" --> sf["Коротка форма: задача + контакт"]
   tm --> cn["7. Контакт"]
   cn --> send[["POST заявки"]]
   sf --> send
@@ -433,12 +432,12 @@ flowchart TD
 |---|---|---|
 | `kitchen` | goal → kitchenShape → kitchenLength → facade → countertop → timing → contact | 7 |
 | `wardrobe` | goal → wardrobeType → wardrobeWidth → timing → contact | 5 |
-| `short` (`other`, `renovation`) | goal → shortForm | 2 |
+| `short` (`other`) | goal → shortForm | 2 |
 
 ### 4.3. Типы (псевдо-TypeScript, `src/lib/quiz/types.ts`)
 
 ```ts
-type Goal = 'kitchen' | 'wardrobe' | 'other' | 'renovation';
+type Goal = 'kitchen' | 'wardrobe' | 'other' | 'custom'; // custom — ссылка на #zapyt, не ветка
 type Branch = 'kitchen' | 'wardrobe' | 'short';
 type StepId = 'goal' | 'kitchenShape' | 'kitchenLength' | 'facade' | 'countertop'
             | 'wardrobeType' | 'wardrobeWidth' | 'timing' | 'contact' | 'shortForm';
@@ -583,11 +582,15 @@ Y = L_max × (p_max + s_max) [+ остров]   → округлить ввер�
 
 ```ts
 interface LeadPayload {
-  form: 'quiz' | 'zamir' | 'case' | 'remont' | 'kontakty';
+  // Первым полем; в сообщении Telegram — ПЕРВАЯ СТРОКА (решение владельца 2026-10-20). Форма замера — всегда 'call'.
+  contactMethod: 'viber' | 'telegram' | 'call';
+  form: 'quiz' | 'zamir' | 'zapyt' | 'case' | 'kontakty';
   name: string;                         // 2–50
   phone: string;                        // +380XXXXXXXXX
-  contactMethod?: 'call' | 'viber' | 'telegram';
   preferredTime?: string;               // форма замера: «Зручний час»
+  referrer?: string;                    // «Хто вас порекомендував?», необязательно, до 100 символов
+  request?: string;                     // «Нестандартне завдання»: 10–1000 символов
+  files?: File[];                       // «Нестандартне завдання»: до 3, JPG/PNG/HEIC/PDF, до 10 МБ (multipart)
   consent: true;
 
   quiz?: {
@@ -598,7 +601,6 @@ interface LeadPayload {
     result: QuizResult;
   };
   case?: { slug: string; title: string };
-  remont?: { objectType: string; area?: string; task: string };
   message?: string;                     // ветка short, форма контактов
 
   attribution: {
@@ -801,7 +803,7 @@ export const facts = {
 
 | Имя | Что это | Где | Кто |
 |---|---|---|---|
-| `{{HERO_MEDIA}}` | Фото (и опционально видео) первого экрана | Блок 1, `/mebli`, `/remont` | В |
+| `{{HERO_MEDIA}}` | Фото (и опционально видео) первого экрана | Блок 1, `/mebli` | В |
 | `{{BEFORE_AFTER_PAIRS}}` | От 2 до 3 пар «було / стало» | Блок 4 | В |
 | `{{OG_IMAGE}}` | Картинка для соцсетей | `SeoHead` | В+А |
 

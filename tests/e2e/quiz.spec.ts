@@ -121,9 +121,20 @@ test.describe('квиз: шаг контакта и коротка форма', 
   test('пустая отправка, неполный номер, нет согласия — отправка блокируется с понятными ошибками', async ({ page }) => {
     await toContact(page);
     const step = visibleStep(page);
-    await expect(step.getByRole('radio', { name: 'Дзвінок' })).toBeChecked(); // способ связи по умолчанию
+    // способ связи — первым, порядок Viber · Telegram · Дзвінок, по умолчанию Viber
+    await expect(step.getByRole('heading', { name: 'Куди надіслати розрахунок?' })).toBeVisible();
+    await expect(step.locator('input[name="method"]')).toHaveCount(3);
+    expect(await step.locator('input[name="method"]').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value))).toEqual([
+      'viber',
+      'telegram',
+      'call',
+    ]);
+    await expect(step.getByRole('radio', { name: 'Viber' })).toBeChecked();
+    const firstField = await step.locator('form input:not([type="hidden"])').first().getAttribute('name');
+    expect(firstField).toBe('method');
+    await expect(step.locator('#quiz-referrer')).toBeVisible(); // «Хто вас порекомендував?» — необязательно
     await expect(step.locator('#quiz-consent')).not.toBeChecked();
-    const submit = step.getByRole('button', { name: 'Отримати розрахунок' });
+    const submit = step.getByRole('button', { name: 'Отримати ціну' });
     await submit.click();
     await expect(page.locator('#quiz-name')).toBeFocused();
     await expect(page.locator('#quiz-name-error')).toBeVisible();
@@ -145,22 +156,44 @@ test.describe('квиз: шаг контакта и коротка форма', 
     await toContact(page);
     await page.locator('#quiz-phone').focus();
     await expect(page.locator('[data-bottom-bar]')).toHaveAttribute('data-hidden', '');
-    const submit = visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' });
+    const submit = visibleStep(page).getByRole('button', { name: 'Отримати ціну' });
     await submit.scrollIntoViewIfNeeded();
     await expect(submit).toBeInViewport();
   });
 
-  for (const goal of ['Інші меблі', 'Ремонт']) {
-    test(`«${goal}» ведёт на короткую форму 2 из 2, задача обязательна`, async ({ page }) => {
-      await openQuiz(page);
-      await choose(page, goal);
-      await expect(visibleStep(page)).toHaveAttribute('data-step', 'shortForm');
-      await expect(progressText(page)).toHaveText('Крок 2 з 2');
-      await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
-      await expect(page.locator('#quiz-short-task')).toBeFocused();
-      await expect(page.locator('#quiz-short-task-error')).toBeVisible();
-    });
-  }
+  test('«Інші меблі» ведёт на короткую форму 2 из 2, задача обязательна', async ({ page }) => {
+    await openQuiz(page);
+    await choose(page, 'Інші меблі');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'shortForm');
+    await expect(progressText(page)).toHaveText('Крок 2 з 2');
+    await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
+    await expect(page.locator('#quiz-short-task')).toBeFocused();
+    await expect(page.locator('#quiz-short-task-error')).toBeVisible();
+  });
+
+  test('шаг 1: четыре варианта, ремонта нет', async ({ page }) => {
+    await openQuiz(page);
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
+  });
+
+  test('«Інше, нестандартне» ведёт в блок #zapyt, поле описания в фокусе, квиз остаётся на шаге 1', async ({ page }) => {
+    await openQuiz(page);
+    await choose(page, 'Інше, нестандартне');
+    await expect(page).toHaveURL(/#zapyt$/);
+    await expect(page.locator('#zapyt-request')).toBeFocused();
+    await expect(page.locator('#zapyt-title')).toBeInViewport();
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
+  });
+
+  test('шаг сроков: «Протягом 3 місяців» вместо «до Нового року»', async ({ page }) => {
+    await openQuiz(page);
+    await choose(page, 'Шафа або гардеробна');
+    await choose(page, 'Шафа-купе');
+    await choose(page, 'Не знаю — приїдемо заміряти');
+    await expect(visibleStep(page).getByRole('radio').first()).toHaveText('Протягом 3 місяців');
+    await expect(visibleStep(page)).not.toContainText('Нового року');
+  });
 });
 
 test.describe('квиз: отправка и /dyakuyemo', () => {
@@ -178,19 +211,41 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await page.locator('#quiz-phone').click();
     await page.locator('#quiz-phone').pressSequentially('0671234567');
     await page.locator('#quiz-consent').check();
-    await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+    await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'B');
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Олена\. Надішлемо розрахунок у Viber протягом .+ хвилин у робочий час\.$/);
+    await expect(page.locator('[data-result="A"]')).toBeHidden(); // экран А (цена) выключен
     // при флаге B причина всегда variant-b: строка «no-length» (только для отката с флага A) скрыта
     await expect(page.locator('[data-result="B"] [data-no-length]')).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
-    expect(await page.evaluate(() => sessionStorage.getItem('vymir.quiz.result'))).toBeNull(); // удалён после показа
+    expect(await page.evaluate(() => sessionStorage.getItem('vymir.lead.thanks'))).toBeNull(); // удалён после показа
     expect(posts).toEqual([]);
+  });
+
+  test('способ «Дзвінок» → «Зателефонуємо…», Telegram → «Надішлемо розрахунок у Telegram»', async ({ page }) => {
+    for (const [method, text] of [
+      ['Дзвінок', /^Дякуємо, Олена\. Зателефонуємо протягом .+ хвилин у робочий час\.$/],
+      ['Telegram', /^Дякуємо, Олена\. Надішлемо розрахунок у Telegram протягом .+ хвилин у робочий час\.$/],
+    ] as const) {
+      await openQuiz(page);
+      await choose(page, 'Інші меблі');
+      await page.locator('#quiz-short-task').fill('Тумба у ванну');
+      await visibleStep(page).getByRole('radio', { name: method }).check();
+      await page.locator('#quiz-short-name').fill('Олена');
+      await page.locator('#quiz-short-phone').click();
+      await page.locator('#quiz-short-phone').pressSequentially('0671234567');
+      await page.locator('#quiz-short-consent').check();
+      await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
+      await expect(page).toHaveURL(/\/dyakuyemo$/);
+      await expect(page.locator('[data-thanks]')).toHaveText(text);
+    }
   });
 
   test('/dyakuyemo без данных квиза — общий текст; демо экрана А (?demoPrice=1, не в боевой сборке)', async ({ page }) => {
     await page.goto('/dyakuyemo');
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо\. Зателефонуємо протягом .+ хвилин у робочий час\.$/);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     await page.goto('/dyakuyemo?demoPrice=1');
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'A');
@@ -222,7 +277,7 @@ test('события: ветка шафы — ровно quiz_start, quiz_step_1
   await page.locator('#quiz-phone').click();
   await page.locator('#quiz-phone').pressSequentially('0671234567');
   await page.locator('#quiz-consent').check();
-  await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+  await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
   await expect(page).toHaveURL(/\/dyakuyemo$/);
   const events = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.dl') ?? '[]') as { event: string }[]);
   expect(events.map((e) => e.event)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_3', 'quiz_step_6', 'quiz_step_7']);
@@ -262,7 +317,7 @@ test.describe('квиз за 60 секунд (критерий фазы 4)', () 
     await page.locator('#quiz-phone').click();
     await page.locator('#quiz-phone').pressSequentially('0671234567', { delay: 150 });
     await page.locator('#quiz-consent').check();
-    await visibleStep(page).getByRole('button', { name: 'Отримати розрахунок' }).click();
+    await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'B');
     const seconds = (Date.now() - t0) / 1000;
@@ -289,6 +344,6 @@ test('320 px: ни на одном шаге квиза страница не е�
   await choose(page, 'Гардеробна');
   await noOverflow(); // ширина с заглушками
   await quiz(page).locator('[data-quiz-restart]').click();
-  await choose(page, 'Ремонт');
+  await choose(page, 'Інші меблі');
   await noOverflow(); // коротка форма
 });

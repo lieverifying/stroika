@@ -1,0 +1,12 @@
+---
+// Необязательное поле «Хто вас порекомендував?» — есть во всех формах заявки (реферальная программа).
+// Блок «Рекомендуйте нас» и вопрос в FAQ — за флагом facts.flags.referralEnabled, а поле есть всегда.
+import Input from './Input.astro';
+
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+
+<Input name="referrer" id={id} label="Хто вас порекомендував?" autocomplete="off" maxlength={100} />

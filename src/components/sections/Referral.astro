@@ -1,0 +1,63 @@
+---
+// Блок «Рекомендуйте нас» — после «Відгуки», только при facts.flags.referralEnabled (по умолчанию выключен).
+// Награды — заглушки facts.referral до подтверждения владельцем. Кнопок нет: друг указывает рекомендателя
+// в поле «Хто вас порекомендував?», которое есть во всех формах.
+import Fact from '../ui/Fact.astro';
+import SectionTitle from '../ui/SectionTitle.astro';
+import { facts } from '../../content/facts';
+
+const { referral } = facts;
+---
+
+{
+  facts.flags.referralEnabled && (
+    <section id="rekomenduyte" class="section-pad" aria-labelledby="referral-title" data-section="referral">
+      <div class="container-site referral">
+        <SectionTitle id="referral-title" title="Рекомендуйте нас" />
+        <ul class="referral__list">
+          <li class="referral__card">
+            <p class="referral__label">Вам</p>
+            <p class="referral__value"><Fact value={referral.reward} /></p>
+          </li>
+          <li class="referral__card">
+            <p class="referral__label">Другові</p>
+            <p class="referral__value"><Fact value={referral.friendBonus} /></p>
+          </li>
+        </ul>
+        <p class="referral__note">Друг вказує ваше ім’я в полі «Хто вас порекомендував?», коли залишає заявку.</p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .referral__list {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .referral__card {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+  }
+  .referral__label {
+    color: var(--color-ink-muted);
+  }
+  .referral__value {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .referral__note {
+    margin-top: 1.25rem;
+    color: var(--color-ink-muted);
+    max-width: 60ch;
+  }
+  @media (min-width: 48rem) {
+    .referral__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,5 +1,5 @@
 ---
-// Форма замера (блок 13 и попап из шапки): ім'я, телефон, зручний час, согласие, поле-ловушка.
+// Форма замера (блок 13 и попап из шапки): ім'я, телефон, зручний час, «Хто вас порекомендував?», согласие, ловушка.
 // Скрипт проверяет поля; отправка — заглушка src/lib/lead/submit.ts (в сеть не уходит до фазы 6), затем /dyakuyemo.
 // Без JS форма уйдёт обычным POST на action — бэкенд появится в фазе 6.
 import Button from '../ui/Button.astro';
@@ -7,6 +7,7 @@ import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
 import Honeypot from '../ui/form/Honeypot.astro';
 import Input from '../ui/form/Input.astro';
 import PhoneInput from '../ui/form/PhoneInput.astro';
+import ReferrerInput from '../ui/form/ReferrerInput.astro';
 import Select from '../ui/form/Select.astro';
 
 interface Props {
@@ -33,6 +34,7 @@ const TIMES = [
   <Input name="name" id={id('name')} label="Ім’я" autocomplete="given-name" required error="Вкажіть, як до вас звертатися" />
   <PhoneInput id={id('phone')} />
   <Select name="time" id={id('time')} label="Зручний час для дзвінка" options={TIMES} />
+  <ReferrerInput id={id('referrer')} />
   <ConsentCheckbox id={id('consent')} />
   <Honeypot id={id('website')} />
   <Button type="submit" size="lg" fullWidth ctaPriority={ctaPriority}>Надіслати заявку</Button>
@@ -56,7 +58,7 @@ const TIMES = [
 
 <script>
   import { clearErrorsOnFix, validateForm } from '../../lib/lead/field-errors';
-  import { saveResult } from '../../lib/lead/result-store';
+  import { saveThanks } from '../../lib/lead/result-store';
   import { submitLead } from '../../lib/lead/submit';
   import { validateConsent, validateName, validatePhone } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
@@ -81,17 +83,21 @@ const TIMES = [
       if (button) button.disabled = true;
       if (status) status.textContent = 'Надсилаємо…';
       const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
+      // Способ связи — первым полем: у формы замера это всегда звонок
       const res = await submitLead({
+        contactMethod: 'call',
         form: 'zamir',
         source: data.get('source'),
-        name: String(data.get('name') ?? '').trim(),
+        name,
         phone: normalizePhone(String(data.get('phone') ?? '')), // +380XXXXXXXXX
         preferredTime: data.get('time'),
+        referrer: String(data.get('referrer') ?? '').trim(),
         consent: true,
         website: data.get('website') ?? '',
       });
       if (res.ok) {
-        saveResult(null); // у формы замера нет результата квиза — на /dyakuyemo общий текст
+        saveThanks({ name, method: 'call', result: null }); // результата квиза нет — «Зателефонуємо…»
         location.assign('/dyakuyemo');
       }
     });

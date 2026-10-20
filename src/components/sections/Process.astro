@@ -1,5 +1,5 @@
 ---
-// Блок 7 — «Як працюємо» (ТЗ): 5 шагов, у каждого срок. Сроки — только заглушки facts.ts до подтверждения.
+// Блок 7 — «Як працюємо» (ТЗ): 5 шагов, у каждого срок. Срок изготовления подтверждён, остальные — заглушки facts.ts.
 // Телефон — вертикальная шкала с номерами, десктоп — 5 колонок, шаги соединяет размерная линия (мотив замера).
 import Dimension from '../ui/Dimension.astro';
 import Fact from '../ui/Fact.astro';
@@ -10,12 +10,14 @@ import { pluralUk } from '../../lib/facts';
 const DAYS: [string, string, string] = ['день', 'дні', 'днів'];
 const { terms, promises } = facts;
 
+// Изготовление — фабрики-партнёры по нашему проекту; срок подтверждён владельцем (от авансу). Монтаж — что входит.
+const install = facts.services.install;
 const steps = [
   { title: 'Заявка', text: 'Квіз, форма на сайті, дзвінок або Viber.', term: promises.callbackMinutes, unit: 'хв', prefix: 'Передзвонимо за' },
   { title: 'Замір', text: 'Безкоштовно приїжджаємо і знімаємо розміри приміщення.', term: terms.stepMeasureDays, unit: pluralUk(terms.stepMeasureDays, DAYS) },
-  { title: '3D-проєкт і кошторис', text: 'Показуємо, як виглядатиме кухня, і рахуємо вартість.', term: terms.stepProjectDays, unit: pluralUk(terms.stepProjectDays, DAYS) },
-  { title: 'Договір і виробництво', text: 'Підписуємо договір і виготовляємо кухню.', term: terms.stepContractProductionDays, unit: pluralUk(terms.stepContractProductionDays, DAYS) },
-  { title: 'Монтаж', text: 'Встановлюємо кухню у вас удома.', term: terms.stepInstallDays, unit: pluralUk(terms.stepInstallDays, DAYS) },
+  { title: 'Дизайн-проєкт і кошторис', text: 'Готуємо дизайн-проєкт і рахуємо вартість.', term: terms.stepProjectDays, unit: pluralUk(terms.stepProjectDays, DAYS) },
+  { title: 'Договір і виготовлення', text: 'Підписуємо договір. Деталі за нашим проєктом виготовляють фабрики-партнери.', term: terms.kitchenProductionMonths, unit: 'місяці від авансу', prefix: 'Кухня —' },
+  { title: 'Монтаж', text: `Встановлюємо меблі. У монтаж входять: ${install.join(', ')}.`, term: terms.stepInstallDays, unit: pluralUk(terms.stepInstallDays, DAYS) },
 ];
 ---
 

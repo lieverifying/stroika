@@ -1,12 +1,12 @@
 ---
-// Коротка форма квиза для «Інші меблі» и «Ремонт»: «Що потрібно зробити» + поля контакта.
+// Коротка форма квиза для «Інші меблі»: «Що потрібно зробити» + поля контакта.
 import ContactFields from './ContactFields.astro';
 import Button from '../ui/Button.astro';
 import Textarea from '../ui/form/Textarea.astro';
 ---
 
 <form class="quiz-form" novalidate data-quiz-form="short">
-  <Textarea name="task" id="quiz-short-task" label="Що потрібно зробити" rows={3} required error="Опишіть, що потрібно зробити" />
+  <Textarea name="task" id="quiz-short-task" label="Що потрібно зробити" rows={3} required error="Опишіть, що потрібно зробити" placeholder="Передпокій, дитяча, тумба у ванну, ТВ-зона, меблі для офісу чи магазину" />
   <ContactFields prefix="quiz-short" />
   <Button type="submit" size="lg" fullWidth ctaPriority={3}>Надіслати заявку</Button>
   <p class="quiz-form__status" role="status" aria-live="polite" data-form-status></p>

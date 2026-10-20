@@ -58,7 +58,7 @@ describe('computeResult: причины отката', () => {
       reason: 'variant-b',
     });
   });
-  test.each(['other', 'renovation'] as const)('короткая ветка %s', (goal) => {
+  test.each(['other', 'custom'] as const)('короткая ветка %s', (goal) => {
     const r = computeResult({ goal, task: 'щось' }, input());
     expect(r).toEqual({ variant: 'B', configured: 'A', reason: 'short-branch' });
   });
@@ -204,7 +204,7 @@ describe('computeResult: шафа', () => {
 });
 
 describe('computeResult: охранные свойства', () => {
-  const GOALS = ['kitchen', 'wardrobe', 'other', 'renovation', undefined] as const;
+  const GOALS = ['kitchen', 'wardrobe', 'other', 'custom', undefined] as const;
   const SHAPES = ['pryama', 'kutova', 'p-podibna', 'ostriv', undefined] as const;
   const LENS = ['lt3', '3to4', '4to5', 'gt5', 'unknown', undefined] as const;
   const FACADES = ['mdf-film', 'mdf-painted', 'dsp', 'advise', undefined] as const;
@@ -267,7 +267,7 @@ describe('computeResult с реальными facts.ts', () => {
     const real = factsToPriceInput(facts);
     // флаг Б по умолчанию, поэтому проверяем и с принудительным A: тогда причина no-prices / no-length / short-branch
     for (const inp of [real, { ...real, configured: 'A' as const }]) {
-      for (const goal of ['kitchen', 'wardrobe', 'other', 'renovation'] as const) {
+      for (const goal of ['kitchen', 'wardrobe', 'other', 'custom'] as const) {
         for (const len of ['lt3', '3to4', '4to5', 'gt5', 'unknown'] as const) {
           for (const facade of ['mdf-film', 'mdf-painted', 'dsp', 'advise'] as const) {
             for (const shape of ['pryama', 'ostriv'] as const) {

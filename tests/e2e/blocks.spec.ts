@@ -53,10 +53,11 @@ test('телефон: цены сеткой 2 × 2, логотипы по 3 в �
   for (const b of boxes) expect(b.h).toBeLessThanOrEqual(48);
 });
 
-test('блок 12: 8 вопросов, аккордеон открывается мышью и клавиатурой, работает без JS', async ({ page, browser }) => {
+test('блок 12: 9 вопросов (рекомендации — за выключенным флагом), аккордеон открывается мышью и клавиатурой, работает без JS', async ({ page, browser }) => {
   await page.goto('/');
   const items = page.locator('[data-block="12"] details');
-  await expect(items).toHaveCount(8);
+  await expect(items).toHaveCount(9);
+  await expect(page.locator('[data-block="12"]')).not.toContainText('порекомендувати');
   const first = items.first();
   const summary = first.locator('summary');
   expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(48);

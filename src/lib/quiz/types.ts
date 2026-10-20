@@ -4,7 +4,8 @@
  */
 import type { Fact } from '../../content/facts';
 
-export type Goal = 'kitchen' | 'wardrobe' | 'other' | 'renovation';
+/** 'custom' («Інше, нестандартне») — не ветка квиза: ведёт в блок «Нестандартне завдання» (#zapyt) */
+export type Goal = 'kitchen' | 'wardrobe' | 'other' | 'custom';
 export type Branch = 'kitchen' | 'wardrobe' | 'short';
 export type StepId =
   | 'goal'
@@ -20,13 +21,12 @@ export type StepId =
 
 export type KitchenShape = 'pryama' | 'kutova' | 'p-podibna' | 'ostriv';
 export type LengthBand = 'lt3' | '3to4' | '4to5' | 'gt5' | 'unknown';
-/** 'veneer' («Дерево або шпон») — добавится одной строкой конфига после подтверждения материалов */
 export type Facade = 'mdf-film' | 'mdf-painted' | 'dsp' | 'advise';
 export type Countertop = 'dsp' | 'quartz' | 'undecided';
 export type WardrobeType = 'kupe' | 'rozpashna' | 'harderobna';
 /** id диапазона ширины из facts.quiz.wardrobeWidthBands или 'unknown' */
 export type WidthBand = string;
-export type Timing = 'before-ny' | '1to3m' | 'later';
+export type Timing = 'within3m' | '1to3m' | 'later';
 export type ContactMethod = 'call' | 'viber' | 'telegram';
 
 export interface QuizAnswers {
@@ -48,6 +48,8 @@ export interface QuizContact {
   phone: string;
   method: ContactMethod;
   consent: true;
+  /** «Хто вас порекомендував?» — необязательно */
+  referrer?: string;
 }
 
 export interface OptionDef {
@@ -56,6 +58,8 @@ export interface OptionDef {
   label: Fact<string>;
   /** Схема-картинка (inline SVG по имени) */
   icon?: KitchenShape;
+  /** Вариант не выбирается в квизе, а ведёт по ссылке (например, «Інше, нестандартне» → #zapyt) */
+  href?: string;
 }
 
 export interface StepDef {

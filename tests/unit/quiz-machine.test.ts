@@ -1,6 +1,6 @@
 // Юнит-тесты конечного автомата квиза (ARCHITECTURE 4.2): чистые функции, без DOM
 import { describe, expect, test } from 'vitest';
-import { BRANCH_FIELDS, PATHS } from '../../src/lib/quiz/config';
+import { BRANCH_FIELDS, PATHS, STEPS, branchOf } from '../../src/lib/quiz/config';
 import { answer, back, currentPath, isLastStep, progress, setTask, start } from '../../src/lib/quiz/machine';
 import type { Branch, QuizState, StepId } from '../../src/lib/quiz/types';
 
@@ -11,7 +11,6 @@ const WALKS: Record<string, { branch: Branch; values: string[] }> = {
   kitchen: { branch: 'kitchen', values: ['kitchen', 'kutova', '3to4', 'mdf-film', 'quartz', '1to3m'] },
   wardrobe: { branch: 'wardrobe', values: ['wardrobe', 'kupe', 'unknown', 'later'] },
   other: { branch: 'short', values: ['other'] },
-  renovation: { branch: 'short', values: ['renovation'] },
 };
 
 /** Проходит ветку до конца, возвращает пройденные шаги и все промежуточные состояния */
@@ -70,7 +69,6 @@ describe('прохождение веток совпадает с PATHS', () => 
     expect(walk(WALKS.kitchen.values).visited).toHaveLength(7);
     expect(walk(WALKS.wardrobe.values).visited).toHaveLength(5);
     expect(walk(WALKS.other.values).visited).toHaveLength(2);
-    expect(walk(WALKS.renovation.values).visited).toHaveLength(2);
   });
 
   test('isLastStep false на промежуточных шагах', () => {
@@ -146,12 +144,12 @@ describe('смена ветки на шаге 1', () => {
     expect(s.answers).toEqual({ goal: 'other' });
   });
 
-  test('other -> renovation: ветка та же, task сохраняется', () => {
+  test('other -> назад -> other: task сохраняется', () => {
     let s = answer(start(T0), 'other', 1);
     s = setTask(s, 'Тумба в передпокій', 2);
     s = back(s, 3);
-    s = answer(s, 'renovation', 4);
-    expect(s.answers).toEqual({ goal: 'renovation', task: 'Тумба в передпокій' });
+    s = answer(s, 'other', 4);
+    expect(s.answers).toEqual({ goal: 'other', task: 'Тумба в передпокій' });
   });
 
   test('тот же goal повторно: ответы ветки сохраняются', () => {
@@ -173,7 +171,7 @@ describe('смена ветки на шаге 1', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
     for (let i = 0; i < 6; i++) s = back(s, 1);
-    s = answer(s, 'renovation', 2);
+    s = answer(s, 'other', 2);
     for (const f of [...BRANCH_FIELDS.kitchen, ...BRANCH_FIELDS.wardrobe]) {
       expect(s.answers[f]).toBeUndefined();
     }
@@ -224,7 +222,6 @@ describe('progress', () => {
 
   test('коротка: 2/2', () => {
     expect(progress(answer(start(T0), 'other', 1))).toEqual({ current: 2, total: 2 });
-    expect(progress(answer(start(T0), 'renovation', 1))).toEqual({ current: 2, total: 2 });
   });
 
   test('последний шаг каждой ветки: current == total', () => {
@@ -265,5 +262,29 @@ describe('иммутабельность', () => {
     const snap = structuredClone(s);
     answer(s, 'wardrobe', 9);
     expect(s).toEqual(snap);
+  });
+});
+
+describe('шаг 1 и сроки (решение владельца, 2026-10-20)', () => {
+  test('варианты шага 1: Кухня / Шафа або гардеробна / Інші меблі / Інше, нестандартне', () => {
+    expect(STEPS.goal.options?.map((o) => o.label)).toEqual(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
+  });
+
+  test('«Інше, нестандартне» — не ветка квиза, а ссылка на блок #zapyt', () => {
+    const custom = STEPS.goal.options?.find((o) => o.value === 'custom');
+    expect(custom?.href).toBe('#zapyt');
+    expect(branchOf('custom')).toBeNull();
+    expect(STEPS.goal.options?.filter((o) => o.href)).toHaveLength(1);
+  });
+
+  test('ремонта в квизе нет', () => {
+    const labels = Object.values(STEPS).flatMap((st) => (st.options ?? []).map((o) => String(o.label)));
+    expect(labels.some((l) => /ремонт/i.test(l))).toBe(false);
+  });
+
+  test('сроки: «Протягом 3 місяців» вместо «до Нового року»', () => {
+    const labels = STEPS.timing.options?.map((o) => o.label);
+    expect(labels?.[0]).toBe('Протягом 3 місяців');
+    expect(labels?.some((l) => /Нового року/.test(String(l)))).toBe(false);
   });
 });

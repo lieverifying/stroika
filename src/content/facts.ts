@@ -45,6 +45,20 @@ export const facts = {
     descriptor: 'Кухні та меблі · Черкаси',
   },
 
+  // Не заглушки: подтверждено владельцем (2026-10-20). Только корпусні меблі, без м'яких меблів.
+  services: {
+    furniture: ['кухні', 'шафи', 'гардеробні', 'передпокої', 'дитячі', 'тумби у ванну', 'ТВ-зони', 'меблі для бізнесу'],
+    objects: ['квартири', 'будинки', 'офіси', 'магазини', 'салони'],
+    // Что входит в монтаж
+    install: ['врізка мийки та варильної поверхні', 'вбудована техніка', 'підключення води та розеток', 'прибирання'],
+  },
+
+  // Владелец — подпись и фото в блоке «Нестандартне завдання»
+  owner: {
+    name: '{{OWNER_NAME}}',
+    photo: '{{OWNER_PHOTO}}',
+  },
+
   prices: {
     perMeter: {
       mdfFilm: '{{PRICE_PER_M_MDF_FILM}}',
@@ -77,7 +91,6 @@ export const facts = {
     wardrobeWidthBands: '{{QUIZ_WARDROBE_WIDTH_BANDS}}',
     priceRound: '{{QUIZ_PRICE_ROUND}}',
     maxRangeRatio: '{{QUIZ_MAX_RANGE_RATIO}}',
-    timingSeasonalLabel: '{{QUIZ_TIMING_SEASONAL_LABEL}}',
     facadeTypesConfirmed: '{{FACADE_TYPES_CONFIRMED}}',
     countertopTypesConfirmed: '{{COUNTERTOP_TYPES_CONFIRMED}}',
   },
@@ -94,10 +107,11 @@ export const facts = {
   terms: {
     stepMeasureDays: '{{TERM_STEP_MEASURE_DAYS}}',
     stepProjectDays: '{{TERM_STEP_PROJECT_DAYS}}',
-    stepContractProductionDays: '{{TERM_STEP_CONTRACT_PRODUCTION_DAYS}}',
     stepInstallDays: '{{TERM_STEP_INSTALL_DAYS}}',
-    productionDaysTotal: '{{PRODUCTION_DAYS_TOTAL}}',
-    measureToInstallDays: '{{TERM_MEASURE_TO_INSTALL_DAYS}}',
+    // Подтверждено владельцем (2026-10-20). Срочное изготовление не обещаем.
+    // Месяцы изготовления от авансу: кухня и шафи / інші меблі
+    kitchenProductionMonths: '2–3',
+    furnitureProductionMonths: '1–2',
   },
 
   trust: {
@@ -129,7 +143,7 @@ export const facts = {
   },
 
   serviceArea: {
-    text: '{{SERVICE_AREA_TEXT}}',
+    text: 'Черкаси та область',
     terms: '{{SERVICE_AREA_TERMS}}',
     cityDistricts: '{{SERVICE_AREA_CITY_DISTRICTS}}',
     map: '{{SERVICE_AREA_MAP}}',
@@ -151,6 +165,7 @@ export const facts = {
     privacyUpdatedAt: '{{PRIVACY_UPDATED_AT}}',
   },
 
+  // Карточки мастеров — за флагом flags.teamCards (выключен): без имён и личных фото до согласия мастеров.
   // Вёрстка рассчитана на 2–6 карточек; сейчас 3 заглушки
   team: [1, 2, 3].map(
     (n): TeamMember => ({
@@ -161,10 +176,18 @@ export const facts = {
       photo: `{{MASTER_${n}_PHOTO}}`,
     }),
   ),
-  // Заголовок и подзаголовок блока 6. Владелец подтвердил: мастера — штатные сотрудники (2026-10-16).
-  teamTitle: 'Своя бригада',
-  teamSubtitle: 'Без субпідрядників.',
+  // Блок 6 (решение владельца, 2026-10-20): замір, дизайн-проєкт і монтаж — своя команда, детали делают фабрики-партнёры
+  teamTitle: 'Своя команда',
+  teamSubtitle: 'Замір, дизайн-проєкт і монтаж — наша команда.',
+  // Одно фото команды или монтажа
+  teamPhoto: '{{TEAM_PHOTO}}',
   teamVideo: '{{TEAM_VIDEO}}',
+
+  // Реферальная программа — блок «Рекомендуйте нас» и вопрос в FAQ показываются при flags.referralEnabled
+  referral: {
+    reward: '{{REFERRAL_REWARD}}',
+    friendBonus: '{{REFERRAL_FRIEND_BONUS}}',
+  },
 
   materials: {
     hardwareBrands: '{{HARDWARE_BRANDS}}',
@@ -206,6 +229,10 @@ export const facts = {
     // Отправка заявок подключена (фаза 6, api/lead.php). Пока false — формы и квиз только проверяют поля,
     // а боевая сборка (SITE_ENV=production) падает: scripts/check-release.mjs.
     leadSubmitEnabled: false as boolean,
+    // Карточки мастеров в блоке 6 (имена, фото, стаж) — только после согласия мастеров на публикацию
+    teamCards: false as boolean,
+    // Блок «Рекомендуйте нас» и вопрос о рекомендациях в FAQ. Поле «Хто вас порекомендував?» в формах есть всегда.
+    referralEnabled: false as boolean,
   },
 } satisfies FactsSchema;
 
@@ -217,6 +244,8 @@ export const factDefaults: Record<string, string> = {};
 
 interface FactsSchema {
   brand: { name: string; nameUpper: string; descriptor: string };
+  services: { furniture: string[]; objects: string[]; install: string[] };
+  owner: { name: Fact<string>; photo: Fact<string> };
   prices: {
     perMeter: Record<'mdfFilm' | 'mdfPainted' | 'dsp', Fact<number>>;
     countertopPerMeter: Record<'dsp' | 'quartz', Fact<number>>;
@@ -233,7 +262,6 @@ interface FactsSchema {
     wardrobeWidthBands: Fact<WidthBand[]>;
     priceRound: Fact<number>;
     maxRangeRatio: Fact<number>;
-    timingSeasonalLabel: Fact<string>;
     facadeTypesConfirmed: Fact<string[]>;
     countertopTypesConfirmed: Fact<string[]>;
   };
@@ -244,7 +272,8 @@ interface FactsSchema {
     gift3dText: Fact<string>;
     oneTeam: Fact<string>;
   };
-  terms: Record<string, Fact<number>>;
+  terms: Record<'stepMeasureDays' | 'stepProjectDays' | 'stepInstallDays', Fact<number>> &
+    Record<'kitchenProductionMonths' | 'furnitureProductionMonths', string>;
   trust: { kitchensDone: Fact<number>; years: Fact<number> };
   warranty: { years: Fact<number>; terms: Fact<string> };
   payment: { prepayPercent: Fact<number>; schedule: Fact<string>; methods: Fact<string> };
@@ -259,7 +288,9 @@ interface FactsSchema {
   };
   legal: Record<string, Fact<string>>;
   team: TeamMember[];
+  teamPhoto: Fact<string>;
   teamVideo: Fact<string>;
+  referral: { reward: Fact<string>; friendBonus: Fact<string> };
   materials: { hardwareBrands: Fact<Brand[]>; materialBrands: Fact<Brand[]> };
   faq: { appliances: Fact<string> };
   reviews: Review[];
@@ -267,5 +298,11 @@ interface FactsSchema {
   seasonalBadgeText: Fact<string>;
   teamTitle: Fact<string>;
   teamSubtitle: Fact<string>;
-  flags: { quizResultVariant: 'A' | 'B'; seasonalBadge: boolean; leadSubmitEnabled: boolean };
+  flags: {
+    quizResultVariant: 'A' | 'B';
+    seasonalBadge: boolean;
+    leadSubmitEnabled: boolean;
+    teamCards: boolean;
+    referralEnabled: boolean;
+  };
 }

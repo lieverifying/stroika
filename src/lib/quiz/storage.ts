@@ -44,6 +44,10 @@ function pickAnswers(raw: unknown): QuizAnswers {
   return result as QuizAnswers;
 }
 
+/** Ветки, которые сейчас есть в квизе: состояние со старой веткой (например, убранной) не восстанавливаем */
+const GOALS = new Set(['kitchen', 'wardrobe', 'other']);
+const TIMINGS = new Set(['within3m', '1to3m', 'later']);
+
 /** Только поля из белого списка; null, если форма не похожа на состояние */
 function sanitize(raw: unknown): QuizState | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -51,11 +55,14 @@ function sanitize(raw: unknown): QuizState | null {
   if (r.version !== 1) return null;
   if (typeof r.stepId !== 'string' || !Array.isArray(r.history) || !Array.isArray(r.firedSteps)) return null;
   if (typeof r.startedAt !== 'number' || typeof r.updatedAt !== 'number') return null;
+  const answers = pickAnswers(r.answers);
+  if (answers.goal !== undefined && !GOALS.has(answers.goal)) return null;
+  if (answers.timing !== undefined && !TIMINGS.has(answers.timing)) delete answers.timing;
   return {
     version: 1,
     stepId: r.stepId as StepId,
     history: r.history.filter((x): x is StepId => typeof x === 'string'),
-    answers: pickAnswers(r.answers),
+    answers,
     started: r.started === true,
     firedSteps: r.firedSteps.filter((x): x is number => typeof x === 'number'),
     startedAt: r.startedAt,

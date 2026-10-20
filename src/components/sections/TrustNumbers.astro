@@ -1,5 +1,6 @@
 ---
 // Блок 2 — «Цифри довіри» (ТЗ): 4 числа, только реальные — до подтверждения владельцем заглушки facts.ts.
+// Срок изготовления кухни (2–3 місяці від авансу) подтверждён владельцем.
 // Телефон — 2 × 2, десктоп — 4 в ряд. Размерная линия под числом — мотив замера, только здесь как деталь.
 import Dimension from '../ui/Dimension.astro';
 import Fact from '../ui/Fact.astro';
@@ -10,7 +11,7 @@ const items = [
   { value: facts.trust.kitchensDone, label: `${pluralUk(facts.trust.kitchensDone, ['кухня', 'кухні', 'кухонь'])} зроблено` },
   { value: facts.trust.years, label: `${pluralUk(facts.trust.years, ['рік', 'роки', 'років'])} досвіду` },
   { value: facts.warranty.years, label: `${pluralUk(facts.warranty.years, ['рік', 'роки', 'років'])} гарантії` },
-  { value: facts.terms.productionDaysTotal, label: `${pluralUk(facts.terms.productionDaysTotal, ['день', 'дні', 'днів'])} на виготовлення` },
+  { value: facts.terms.kitchenProductionMonths, label: 'місяці на виготовлення кухні від авансу' },
 ];
 ---
 

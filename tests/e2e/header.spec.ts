@@ -41,7 +41,7 @@ test.describe('шапка', () => {
     await page.goto('/');
     await expect(page.locator('[data-menu-toggle]')).toBeHidden();
     const items = page.getByRole('navigation', { name: 'Головне меню' }).getByRole('link');
-    await expect(items).toHaveCount(5);
+    await expect(items).toHaveText(['Кухні', 'Меблі', 'Роботи', 'Контакти']); // «Ремонт» убран (2026-10-20)
     const tops = await items.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
     expect(new Set(tops).size).toBe(1);
   });

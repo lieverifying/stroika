@@ -27,7 +27,8 @@ const cases = defineCollection({
     z
       .object({
         title: z.string().max(70),
-        category: z.enum(['kitchen', 'wardrobe', 'renovation']),
+        // furniture — інші корпусні меблі (передпокої, дитячі, ТВ-зони, меблі для бізнесу), 2026-10-20
+        category: z.enum(['kitchen', 'wardrobe', 'furniture']),
         kitchenShape: z.enum(['pryama', 'kutova', 'p-podibna', 'ostriv']).optional(),
         wardrobeType: z.enum(['kupe', 'rozpashna', 'harderobna', 'peredpokii']).optional(),
         district: z.string(),

@@ -97,6 +97,7 @@ test.describe('блок 13: форма замера', () => {
     await page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Тест\. Зателефонуємо протягом .+ хвилин у робочий час\.$/);
     expect(posts).toEqual([]);
   });
 

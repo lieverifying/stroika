@@ -2,7 +2,8 @@
  * Шаги, варианты и граф переходов квиза (ARCHITECTURE.md 4.1–4.2, ТЗ «Квиз-калькулятор»).
  * В конфиге нет ни цифр ширины, ни цен, ни сроков: всё, что зависит от владельца, — из facts.ts.
  * Пути: кухня goal → kitchenShape → kitchenLength → facade → countertop → timing → contact (7);
- *       шафа goal → wardrobeType → wardrobeWidth → timing → contact (5); інше / ремонт goal → shortForm (2).
+ *       шафа goal → wardrobeType → wardrobeWidth → timing → contact (5); інші меблі goal → shortForm (2).
+ * «Інше, нестандартне» — не ветка: вариант со ссылкой на блок «Нестандартне завдання» (#zapyt).
  */
 import { facts, type Fact, type WidthBand as WidthBandFact } from '../../content/facts';
 import { isPlaceholder } from '../facts';
@@ -12,7 +13,7 @@ import type { Branch, Goal, OptionDef, QuizAnswers, StepDef, StepId } from './ty
 export function branchOf(goal: Goal | undefined): Branch | null {
   if (goal === 'kitchen') return 'kitchen';
   if (goal === 'wardrobe') return 'wardrobe';
-  if (goal === 'other' || goal === 'renovation') return 'short';
+  if (goal === 'other') return 'short';
   return null;
 }
 
@@ -29,7 +30,7 @@ export const BRANCH_FIELDS: Record<Branch, (keyof QuizAnswers)[]> = {
   short: ['task'],
 };
 
-// Фасады: «Дерево або шпон» убран до подтверждения материалов. «Порадьте» есть всегда.
+// Фасады: дерево убрано до подтверждения материалов. «Порадьте» есть всегда.
 const FACADES: OptionDef[] = [
   { value: 'mdf-film', label: 'МДФ у плівці' },
   { value: 'mdf-painted', label: 'Фарбований МДФ' },
@@ -68,7 +69,7 @@ export const STEPS: Record<StepId, StepDef> = {
       { value: 'kitchen', label: 'Кухня' },
       { value: 'wardrobe', label: 'Шафа або гардеробна' },
       { value: 'other', label: 'Інші меблі' },
-      { value: 'renovation', label: 'Ремонт' },
+      { value: 'custom', label: 'Інше, нестандартне', href: '#zapyt' },
     ],
     next: (a) => {
       const branch = branchOf(a.goal);
@@ -147,7 +148,7 @@ export const STEPS: Record<StepId, StepDef> = {
     title: 'Коли плануєте встановлення?',
     kind: 'single',
     options: [
-      { value: 'before-ny', label: facts.quiz.timingSeasonalLabel },
+      { value: 'within3m', label: 'Протягом 3 місяців' },
       { value: '1to3m', label: 'Через 1–3 місяці' },
       { value: 'later', label: 'Пізніше' },
     ],

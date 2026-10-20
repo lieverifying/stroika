@@ -1,8 +1,9 @@
 ---
-// Блок 6 — «Своя бригада» (ТЗ; мастера — штатные сотрудники, подтверждено). Заголовок — facts.teamTitle. Главный козырь, поэтому блок крупный и тёмный, не в конце страницы.
-// Мастера — facts.team (2–6 человек); имена, роли, стаж, фразы и фото — только реальные, до этого заглушки.
-// Видео бригады — фасад, грузится только по клику (facts.teamVideo).
-// Телефон — лента со scroll-snap, десктоп — сетка (2 / 3 / 4 колонки в зависимости от числа мастеров).
+// Блок 6 — «Своя команда» (решение владельца, 2026-10-20). Заголовок и подзаголовок — facts.teamTitle / teamSubtitle.
+// Замір, дизайн-проєкт і монтаж делает своя команда, детали — фабрики-партнёры. Главный козырь: блок крупный и тёмный.
+// Одно фото команды или монтажа (facts.teamPhoto) и текст: что делаем сами и что входит в монтаж (facts.services.install).
+// Карточки мастеров (имена, фото, стаж) — за флагом facts.flags.teamCards, выключен до согласия мастеров.
+// Видео — фасад, грузится только по клику (facts.teamVideo).
 import Fact from '../ui/Fact.astro';
 import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
@@ -10,7 +11,7 @@ import VideoFacade from '../ui/VideoFacade.astro';
 import { facts } from '../../content/facts';
 import { pluralUk, withDefault } from '../../lib/facts';
 
-const team = facts.team;
+const team = facts.flags.teamCards ? facts.team : [];
 const heading = withDefault(facts.teamTitle);
 const subtitle = withDefault(facts.teamSubtitle);
 // 4 мастера — в ряд, 2 — по два, остальное — по три в ряд
@@ -20,28 +21,44 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
 <section data-block="6" class="team on-dark" aria-labelledby="team-title">
   <div class="container-site">
     <SectionTitle id="team-title" title={heading.text} pendingFact={heading.pending} subtitle={subtitle.text} dark />
-    <ul class="team__list" style={`--team-cols: ${cols}`}>
-      {
-        team.map((m, i) => (
-          <li class="team__card">
-            <PlaceholderImage width={1200} height={1600} label={`майстер ${i + 1}, вертикальне 3:4`} />
-            <div class="team__body">
-              <p class="team__name">
-                <Fact value={m.name} />
-              </p>
-              <p class="team__role">
-                <Fact value={m.role} /> · стаж <Fact value={m.years} /> {pluralUk(m.years, ['рік', 'роки', 'років'])}
-              </p>
-              <blockquote class="team__quote">
-                <Fact value={m.quote} />
-              </blockquote>
-            </div>
-          </li>
-        ))
-      }
-    </ul>
+    <div class="team__main">
+      <div class="team__photo">
+        <PlaceholderImage width={1600} height={1200} label="команда або монтаж, горизонтальне 4:3" />
+      </div>
+      <div class="team__text">
+        <p class="team__lead">Приїжджаємо на замір, готуємо дизайн-проєкт і встановлюємо меблі самі. Деталі за нашим проєктом виготовляють фабрики-партнери.</p>
+        <div>
+          <h3 class="team__subtitle">Монтаж включає</h3>
+          <ul class="team__install">
+            {facts.services.install.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {
+      team.length > 0 && (
+        <ul class="team__list" style={`--team-cols: ${cols}`}>
+          {team.map((m, i) => (
+            <li class="team__card">
+              <PlaceholderImage width={1200} height={1600} label={`майстер ${i + 1}, вертикальне 3:4`} />
+              <div class="team__body">
+                <p class="team__name">
+                  <Fact value={m.name} />
+                </p>
+                <p class="team__role">
+                  <Fact value={m.role} /> · стаж <Fact value={m.years} /> {pluralUk(m.years, ['рік', 'роки', 'років'])}
+                </p>
+                <blockquote class="team__quote">
+                  <Fact value={m.quote} />
+                </blockquote>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )
+    }
     <div class="team__video">
-      <VideoFacade src={facts.teamVideo} title="Бригада «Вимір» за роботою" />
+      <VideoFacade src={facts.teamVideo} title="Команда «Вимір» на монтажі" />
     </div>
   </div>
 </section>
@@ -54,7 +71,56 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
     background: var(--color-graphite);
     color: var(--color-plaster);
   }
+  .team__main {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .team__photo :global(.ph) {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    background: var(--color-graphite-2);
+    color: var(--color-ink-muted-dark);
+  }
+  .team__photo :global(.ph__dim) {
+    stroke: var(--color-ink-muted-dark);
+  }
+  .team__text {
+    display: grid;
+    align-content: center;
+    gap: 1.5rem;
+  }
+  .team__lead {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    max-width: 40ch;
+  }
+  .team__subtitle {
+    margin-bottom: 0.75rem;
+    font-family: var(--font-body);
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: 600;
+  }
+  .team__install {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .team__install li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  /* Отметка — короткая размерная черта, мотив замера */
+  .team__install li::before {
+    content: '';
+    position: absolute;
+    top: 0.75em;
+    left: 0;
+    width: 0.875rem;
+    height: 1px;
+    background: currentColor;
+  }
   .team__list {
+    margin-top: var(--space-stack);
     display: flex;
     gap: var(--grid-gap);
     margin-inline: calc(-1 * var(--space-gutter));
@@ -112,6 +178,10 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
     }
   }
   @media (min-width: 64rem) {
+    .team__main {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 3rem;
+    }
     .team__list {
       display: grid;
       /* колонка не шире 24rem: при 2 мастерах фото 4:5 не растягиваются на пол-экрана */
