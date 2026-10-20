@@ -233,6 +233,8 @@ export const facts = {
     teamCards: false as boolean,
     // Блок «Рекомендуйте нас» и вопрос о рекомендациях в FAQ. Поле «Хто вас порекомендував?» в формах есть всегда.
     referralEnabled: false as boolean,
+    // Сюжет «Шафа-купе» на странице «Як ми створюємо» (кадры получены 2026-10-21)
+    storyWardrobe: true as boolean,
   },
 } satisfies FactsSchema;
 
@@ -304,5 +306,6 @@ interface FactsSchema {
     leadSubmitEnabled: boolean;
     teamCards: boolean;
     referralEnabled: boolean;
+    storyWardrobe: boolean;
   };
 }

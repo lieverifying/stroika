@@ -134,15 +134,23 @@ test.describe('содержимое', () => {
     await expect(page.locator(`${K} [data-step="0"] .story__note`)).toHaveCSS('color', 'rgb(92, 97, 102)');
   });
 
-  test('шафа-купе: 5 этапов из wardrobe.json, плейсхолдеры с подписью этапа', async ({ page }) => {
+  test('шафа-купе (flags.storyWardrobe): 5 этапов, кадры wardrobe-01 … 05, сцена 4:3, подпись «Візуалізація етапів»', async ({ page }) => {
     await page.goto(PATH);
     await expect(page.locator(`${W} h2`)).toHaveText('Шафа-купе');
     await expect(page.locator(`${W} .story__title`)).toHaveText(['Порожня ніша', 'Дизайн-проєкт', 'Корпус', 'Двері', 'Готово']);
     expect(wardrobe.stages.map((s) => s.title)).toEqual(['Порожня ніша', 'Дизайн-проєкт', 'Корпус', 'Двері', 'Готово']);
-    const labels = page.locator(`${W} .ph__label`);
-    await expect(labels).toHaveCount(5);
-    await expect(labels.nth(0)).toContainText('Порожня ніша');
-    await expect(page.locator(`${W} .story__note`)).toHaveCount(0); // плейсхолдер — не визуализация
+    const files = await page.locator(`${W} .story__step img.story__img`).evaluateAll((els) => els.map((e) => e.getAttribute('data-src') ?? e.getAttribute('src')));
+    expect(files).toHaveLength(5);
+    ['01-empty', '02-design', '03-carcass', '04-doors', '05-ready'].forEach((f, i) => expect(files[i]).toContain(`wardrobe-${f}`));
+    await expect(page.locator(`${W} .ph`)).toHaveCount(0); // плейсхолдеров больше нет
+    await expect(page.locator(`${W} .story__note`)).toHaveCount(5);
+    await expect(page.locator(`${W} .story__note`).first()).toHaveText('Візуалізація етапів');
+    await scrollToStage(page, W, 2);
+    await expect.poll(() => active(page, W)).toBe('2');
+    const frame = (await page.locator(`${W} [data-step="2"] .story__frame`).boundingBox())!;
+    expect(Math.abs(frame.width / frame.height - 4 / 3)).toBeLessThan(0.01);
+    await expect(page.locator(`${W} [data-step="2"] img`)).toHaveCSS('object-fit', 'contain');
+    await expect(page.locator(`${W} [data-step="2"] .story__note`)).toBeVisible();
   });
 
   test('размерные линии — только на этапе 1; на 375 px «ширина стіни» не касается розетки', async ({ page }) => {
@@ -163,12 +171,12 @@ test.describe('содержимое', () => {
     }
   });
 
-  test('кадры — WebP, каждый размер до 200 КБ', async ({ page }) => {
+  test('кадры обоих сюжетов — WebP, каждый размер до 200 КБ', async ({ page }) => {
     await page.goto(PATH);
     const urls = await page
-      .locator(`${K} .story__step img.story__img`)
+      .locator('[data-story] .story__step img.story__img')
       .evaluateAll((els) => els.flatMap((e) => (e.getAttribute('srcset') ?? e.getAttribute('data-srcset') ?? '').split(',').map((p) => p.trim().split(' ')[0])).filter(Boolean));
-    expect(urls.length).toBe(28);
+    expect(urls.length).toBe((7 + 5) * 4);
     for (const url of new Set(urls)) {
       expect(url).toMatch(/\.webp$/);
       const res = await page.request.get(url);
