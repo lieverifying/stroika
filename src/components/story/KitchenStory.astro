@@ -1,0 +1,242 @@
+---
+// Сюжет кухни для страницы «Як ми створюємо»: 7 этапов на одной сцене 4:3 (решение владельца, 2026-10-21).
+// Кадры — визуализации из src/assets/stories/kitchen/ (один ракурс), под сценой подпись «Візуалізація етапів».
+// Сцена 4:3 на всех ширинах, кадр без обрезки (пропорции кадра 1448 × 1086 = 4:3). WebP при сборке, до 200 КБ на кадр.
+// Переключение — радиокнопки и :has(), работает без JS; стрелки клавиатуры листают этапы (родное поведение radio).
+// На этапе 1 — размерные линии по стене кухни (координаты в пикселях кадра kitchen-01-empty), без цифр:
+// размеры — у каждого клиента свои, выдумывать их нельзя.
+import { Image } from 'astro:assets';
+import k1 from '../../assets/stories/kitchen/kitchen-01-empty.png';
+import k2 from '../../assets/stories/kitchen/kitchen-02-design.png';
+import k3 from '../../assets/stories/kitchen/kitchen-03-carcass.png';
+import k4 from '../../assets/stories/kitchen/kitchen-04-fronts.png';
+import k5 from '../../assets/stories/kitchen/kitchen-05-countertop.png';
+import k6 from '../../assets/stories/kitchen/kitchen-06-light.png';
+import k7 from '../../assets/stories/kitchen/kitchen-07-ready.png';
+
+const KITCHEN_STAGES = [
+  { title: 'Почнемо з вашого розміру', img: k1, alt: 'Порожня стіна під кухню з розетками й виводами води' },
+  { title: 'Дизайн-проєкт', img: k2, alt: 'Дизайн-проєкт кутової кухні на тій самій стіні' },
+  { title: 'Корпуси', img: k3, alt: 'Встановлені корпуси шаф без фасадів' },
+  { title: 'Фасади', img: k4, alt: 'Кухня з графітовими нижніми і білими верхніми фасадами' },
+  { title: 'Стільниця', img: k5, alt: 'Кухня зі стільницею, варильною поверхнею і мийкою' },
+  { title: 'Світло і техніка', img: k6, alt: 'Кухня з підсвіткою над стільницею і вбудованою духовкою' },
+  { title: 'Готово', img: k7, alt: 'Готова кухня з посудом і декором' },
+];
+
+// Стена на кадре kitchen-01-empty (1448 × 1086): левый угол x 77, правый x 1078;
+// верх плинтуса от (77, 838) до (1078, 708), потолок у правого угла y 145.
+// Подпись ширины — на свободном участке стены (x 500), не на розетках и выводах воды.
+const W = 1448;
+const H = 1086;
+const pct = (x: number, y: number) => `left: ${((x / W) * 100).toFixed(2)}%; top: ${((y / H) * 100).toFixed(2)}%`;
+---
+
+<div class="story" data-story="kitchen">
+  <div class="story__scene">
+    {
+      KITCHEN_STAGES.map((s, i) => (
+        <div class="story__frame" data-frame={i + 1}>
+          <Image
+            src={s.img}
+            alt={s.alt}
+            widths={[480, 800, 1200, 1448]}
+            sizes="(min-width: 80rem) 46rem, (min-width: 64rem) 58vw, calc(100vw - 2rem)"
+            format="webp"
+            quality={72}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            class="story__img"
+          />
+          {i === 0 && (
+            <div class="story__dims" aria-hidden="true" data-dims>
+              <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                {/* ширина стены: параллельно плинтусу, на 48 px выше; выносные линии вверх от плинтуса */}
+                <path class="story__ext" d="M77 838V772 M1078 708V642" />
+                <path class="story__line" d="M77 790L1078 660" />
+                <path class="story__tick" d="M65 802L89 778 M1066 672L1090 648" />
+                {/* высота: у правого угла, от потолка до пола */}
+                <path class="story__line" d="M1040 140V733" />
+                <path class="story__tick" d="M1028 152L1052 128 M1028 745L1052 721" />
+              </svg>
+              <span class="story__dim-label story__dim-label--w" style={pct(500, 735)}>
+                ширина стіни
+              </span>
+              <span class="story__dim-label story__dim-label--h" style={pct(1040, 370)}>
+                висота
+              </span>
+            </div>
+          )}
+        </div>
+      ))
+    }
+  </div>
+  <p class="story__note">Візуалізація етапів</p>
+
+  <fieldset class="story__stages">
+    <legend class="sr-only">Етапи створення кухні</legend>
+    {
+      KITCHEN_STAGES.map((s, i) => (
+        <label class="story__stage">
+          <input type="radio" name="kitchen-stage" value={i + 1} checked={i === 0} class="story__radio" />
+          <span class="story__num" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <span class="story__title">{s.title}</span>
+        </label>
+      ))
+    }
+  </fieldset>
+</div>
+
+<style>
+  .story {
+    display: grid;
+    gap: 1rem;
+  }
+  /* Сцена строго 4:3, кадр вписан целиком (object-fit: contain), кадры наложены друг на друга */
+  .story__scene {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .story__frame {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-base, 0.3s) var(--ease-out, ease),
+      visibility 0s linear var(--dur-base, 0.3s);
+  }
+  .story__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  /* Активный этап — по отмеченной радиокнопке (без JS) */
+  .story:has(.story__radio[value='1']:checked) [data-frame='1'],
+  .story:has(.story__radio[value='2']:checked) [data-frame='2'],
+  .story:has(.story__radio[value='3']:checked) [data-frame='3'],
+  .story:has(.story__radio[value='4']:checked) [data-frame='4'],
+  .story:has(.story__radio[value='5']:checked) [data-frame='5'],
+  .story:has(.story__radio[value='6']:checked) [data-frame='6'],
+  .story:has(.story__radio[value='7']:checked) [data-frame='7'] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-base, 0.3s) var(--ease-out, ease);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .story__frame,
+    .story:has(.story__radio:checked) .story__frame {
+      transition: none;
+    }
+  }
+
+  /* Размерные линии этапа 1 — графит поверх светлой стены; толщина не зависит от масштаба */
+  .story__dims {
+    position: absolute;
+    inset: 0;
+    color: var(--color-graphite);
+  }
+  .story__dims svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+  }
+  .story__line,
+  .story__tick {
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .story__ext {
+    stroke-width: 1;
+    opacity: 0.6;
+    vector-effect: non-scaling-stroke;
+  }
+  .story__dim-label {
+    position: absolute;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm, 4px);
+    background: rgb(241 241 238 / 0.85);
+    font-family: var(--font-mono);
+    font-size: var(--text-dim);
+    line-height: var(--text-dim--line-height);
+    white-space: nowrap;
+  }
+  /* Подпись над линией, повёрнута по наклону стены (atan(130 / 1001) ≈ 7.4°) */
+  .story__dim-label--w {
+    transform: translate(-50%, -50%) rotate(-7.4deg) translateY(-1.1em);
+  }
+  .story__dim-label--h {
+    transform: translate(-50%, -50%) rotate(-90deg) translateY(-1.1em);
+  }
+
+  .story__note {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+
+  .story__stages {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .story__stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--control-h);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    cursor: pointer;
+  }
+  /* Радиокнопка невидима, но доступна с клавиатуры и скринридеру; выбор — графитовая рамка */
+  .story__radio {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .story__stage:has(.story__radio:checked) {
+    border: 2px solid var(--color-graphite);
+    background: var(--color-plaster);
+  }
+  .story__stage:has(.story__radio:focus-visible) {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  .story__num {
+    font-family: var(--font-mono);
+    color: var(--color-ink-muted);
+  }
+  .story__title {
+    font-weight: 600;
+  }
+  @media (min-width: 64rem) {
+    .story {
+      grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+      grid-template-areas: 'scene stages' 'note stages';
+      column-gap: var(--grid-gap);
+      align-items: start;
+    }
+    .story__scene {
+      grid-area: scene;
+    }
+    .story__note {
+      grid-area: note;
+    }
+    .story__stages {
+      grid-area: stages;
+    }
+  }
+</style>

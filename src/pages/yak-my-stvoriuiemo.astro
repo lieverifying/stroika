@@ -1,0 +1,35 @@
+---
+// /yak-my-stvoriuiemo — «Як ми створюємо» (решение владельца, 2026-10-21): сюжет кухни по этапам
+// от пустой стены до готовой кухни и одна кнопка в квиз. Кадры — визуализации, подписаны «Візуалізація етапів».
+import BaseLayout from '../layouts/BaseLayout.astro';
+import KitchenStory from '../components/story/KitchenStory.astro';
+import Button from '../components/ui/Button.astro';
+---
+
+<BaseLayout
+  title="Як ми створюємо кухню — Вимір"
+  description="Етапи створення кухні на замовлення: замір, дизайн-проєкт, корпуси, фасади, стільниця, світло і техніка."
+>
+  <section class="container-site section-pad stvoriuiemo" aria-labelledby="stvoriuiemo-title">
+    <h1 id="stvoriuiemo-title" class="text-h1">Як ми створюємо</h1>
+    <KitchenStory />
+    <div class="stvoriuiemo__cta">
+      <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .stvoriuiemo {
+    display: grid;
+    gap: var(--space-stack);
+  }
+  .stvoriuiemo__cta {
+    display: grid;
+  }
+  @media (min-width: 48rem) {
+    .stvoriuiemo__cta {
+      justify-content: start;
+    }
+  }
+</style>
