@@ -3,5 +3,6 @@ export const NAV = [
   { label: 'Кухні', href: '/' },
   { label: 'Меблі', href: '/mebli' },
   { label: 'Роботи', href: '/roboty' },
+  { label: 'Як ми створюємо', href: '/yak-my-stvoriuiemo' },
   { label: 'Контакти', href: '/kontakty' },
 ] as const;

@@ -572,6 +572,7 @@ Y = L_max × (p_max + s_max) [+ остров]   → округлить ввер�
 | `quiz_start` | Первый выбор на шаге 1, один раз за жизнь `QuizState` | `quiz_branch`, `quiz_variant` |
 | `quiz_step_N` | Шаг с `tzNumber = N` пройден (выбран вариант или отправлен контакт). Повторно для того же N не шлётся | `quiz_branch`, `step_id` |
 | `quiz_submit` | Ответ `api/lead.php`: `ok` | `quiz_branch`, `result_variant`, `result_reason` |
+| `story_complete` | «Як ми створюємо»: достигнут последний этап сюжета кухни (один раз за просмотр) | `story: 'kitchen'` |
 | `quiz_submit_error` | Ошибка отправки | `error_kind` (`network` / `validation` / `server`) |
 
 Какие N получает каждая ветка: кухня 1–7; шафа 1, 2, 3, 6, 7; коротка форма 1, 7. В воронке GA4 ветки разделяются параметром `quiz_branch`.

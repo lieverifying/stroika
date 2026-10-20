@@ -1,28 +1,32 @@
 ---
-// /yak-my-stvoriuiemo — «Як ми створюємо» (решение владельца, 2026-10-21): сюжет кухни по этапам
-// от пустой стены до готовой кухни и одна кнопка в квиз. Кадры — визуализации, подписаны «Візуалізація етапів».
+// /yak-my-stvoriuiemo — «Як ми створюємо» (решение владельца, 2026-10-21): сюжеты кухни и шафи-купе по этапам,
+// этапы меняются прокруткой (src/components/story/Story.astro), в конце одна кнопка в квиз.
+// Данные сюжетов — src/content/stories/*.json.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import KitchenStory from '../components/story/KitchenStory.astro';
+import Story, { type StoryData } from '../components/story/Story.astro';
 import Button from '../components/ui/Button.astro';
+import kitchen from '../content/stories/kitchen.json';
+import wardrobe from '../content/stories/wardrobe.json';
 ---
 
 <BaseLayout
   title="Як ми створюємо кухню — Вимір"
-  description="Етапи створення кухні на замовлення: замір, дизайн-проєкт, корпуси, фасади, стільниця, світло і техніка."
+  description="Етапи створення кухні та шафи-купе на замовлення: замір, дизайн-проєкт, корпуси, фасади, стільниця, світло і техніка."
 >
-  <section class="container-site section-pad stvoriuiemo" aria-labelledby="stvoriuiemo-title">
-    <h1 id="stvoriuiemo-title" class="text-h1">Як ми створюємо</h1>
-    <KitchenStory />
+  <div class="container-site section-pad stvoriuiemo">
+    <h1 class="text-h1">Як ми створюємо</h1>
+    <Story story={kitchen as StoryData} />
+    <Story story={wardrobe as StoryData} />
     <div class="stvoriuiemo__cta">
       <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
     </div>
-  </section>
+  </div>
 </BaseLayout>
 
 <style>
   .stvoriuiemo {
     display: grid;
-    gap: var(--space-stack);
+    gap: var(--space-section);
   }
   .stvoriuiemo__cta {
     display: grid;

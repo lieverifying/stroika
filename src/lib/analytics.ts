@@ -1,20 +1,12 @@
 /**
- * Аналитика (ARCHITECTURE.md 4.7). До фазы 7 track() только кладёт событие в window.dataLayer
- * (его подхватит GTM) и в dev пишет в консоль. Имя и телефон в события не передаём никогда.
+ * Аналитика (ARCHITECTURE.md 4.7). track() — в ./track.ts (до фазы 7 только window.dataLayer).
+ * Имя и телефон в события не передаём никогда.
  */
 import { facts } from '../content/facts';
 import { STEPS } from './quiz/config';
 import type { Branch, QuizState, StepId } from './quiz/types';
 
-type Params = Record<string, string | number | boolean>;
-
-export function track(name: string, params?: Params): void {
-  if (typeof window === 'undefined') return;
-  const w = window as unknown as { dataLayer?: Record<string, unknown>[] };
-  const layer = (w.dataLayer ??= []);
-  layer.push({ event: name, ...params });
-  if (import.meta.env.DEV) console.debug('[track]', name, params ?? {});
-}
+export { track } from './track';
 
 export interface QuizEvent {
   name: string;

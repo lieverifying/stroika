@@ -1,0 +1,62 @@
+---
+// Размерные линии этапа 1 кухни, выровнены по стене на кадре kitchen-01-empty (1448 × 1086 px).
+// Стена: левый угол x 77, правый x 1078; низ плинтуса (пол) от (77, 868) до (1078, 728), потолок у правого угла y 145.
+// Ширина — по полу перед стеной, на 40 px ниже плинтуса: на полу нет розеток и выводов, подпись ничего не закрывает.
+// Без цифр: размеры у каждого клиента свои, выдумывать их нельзя.
+const W = 1448;
+const H = 1086;
+const pct = (x: number, y: number) => `left: ${((x / W) * 100).toFixed(2)}%; top: ${((y / H) * 100).toFixed(2)}%`;
+---
+
+<div class="dims" aria-hidden="true" data-dims>
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <path class="dims__ext" d="M77 868V922 M1078 728V782" />
+    <path class="dims__line" d="M77 908L1078 768" />
+    <path class="dims__line" d="M65 920L89 896 M1066 780L1090 756" />
+    <path class="dims__line" d="M1040 140V733" />
+    <path class="dims__line" d="M1028 152L1052 128 M1028 745L1052 721" />
+  </svg>
+  <span class="dims__label dims__label--w" style={pct(577, 838)}>ширина стіни</span>
+  <span class="dims__label dims__label--h" style={pct(1040, 370)}>висота</span>
+</div>
+
+<style>
+  .dims {
+    position: absolute;
+    inset: 0;
+    color: var(--color-graphite);
+    pointer-events: none;
+  }
+  .dims svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+  }
+  .dims__line {
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .dims__ext {
+    stroke-width: 1;
+    opacity: 0.6;
+    vector-effect: non-scaling-stroke;
+  }
+  .dims__label {
+    position: absolute;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm);
+    background: rgb(241 241 238 / 0.9);
+    font-family: var(--font-mono);
+    font-size: var(--text-dim);
+    line-height: var(--text-dim--line-height);
+    white-space: nowrap;
+  }
+  /* Ширина: подпись под линией, по наклону пола (atan(140 / 1001) ≈ 8°); высота — слева от линии */
+  .dims__label--w {
+    transform: translate(-50%, -50%) rotate(-8deg) translateY(1.1em);
+  }
+  .dims__label--h {
+    transform: translate(-50%, -50%) rotate(-90deg) translateY(-1.1em);
+  }
+</style>
