@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Слайдер «було / стало». Блок 4 на главной скрыт, пока нет пар фото (режим запуска) — компонент проверяем на /styleguide.
 test.describe('було / стало', () => {

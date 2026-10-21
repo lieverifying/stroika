@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Посадочные: блоков без фактов нет, никаких выдуманных цен, брендов, отзывов и условий
 

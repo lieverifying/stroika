@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { noTransitions, yellowOnScreen } from './helpers';
 
 // Квиз (блок 5). Варианты выбираются нажатием, без кнопки «Далі».
@@ -218,11 +218,7 @@ test.describe('квиз: шаг контакта', () => {
 });
 
 test.describe('квиз: отправка и /dyakuyemo', () => {
-  test('ветка шафы до конца → /dyakuyemo, экран Б (флаг B), квиз очищен, запросов в сеть нет', async ({ page }) => {
-    const posts: string[] = [];
-    page.on('request', (r) => {
-      if (r.method() !== 'GET') posts.push(r.url());
-    });
+  test('ветка шафы до конца → одна заявка в api/lead.php, /dyakuyemo, экран Б (флаг B), квиз очищен', async ({ page, leadApi }) => {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
     await choose(page, 'Гардеробна');
@@ -241,7 +237,44 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await expect(page.locator('[data-result="B"] [data-no-length]')).toBeHidden();
     expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
     expect(await page.evaluate(() => sessionStorage.getItem('vymir.lead.thanks'))).toBeNull(); // удалён после показа
-    expect(posts).toEqual([]);
+    expect(leadApi.leads).toHaveLength(1);
+    const lead = leadApi.leads[0];
+    // способ связи — первым полем; ответы квиза текстом для Telegram и таблицы
+    expect(Object.keys(lead)[0]).toBe('contactMethod');
+    expect(lead).toMatchObject({
+      contactMethod: 'viber',
+      form: 'quiz',
+      name: 'Олена',
+      phone: '+380671234567',
+      consent: true,
+      page: '/kukhni',
+      landing: 'kukhni',
+      quiz: { summary: 'Шафа або гардеробна · Гардеробна · 1,5–2,5 м · Через 3–6 місяців', branch: 'wardrobe', timing: 'Через 3–6 місяців' },
+    });
+    expect(String(lead.eventId)).toMatch(/.{8,}/);
+  });
+
+  test('сервер не принял заявку → текст ошибки и прямые кнопки связи, ответы и поля на месте', async ({ page, leadApi }) => {
+    leadApi.status = 502;
+    await openQuiz(page);
+    await choose(page, 'Інші меблі');
+    await choose(page, 'Передпокій');
+    await choose(page, 'Пізніше');
+    await page.locator('#quiz-name').fill('Олена');
+    await page.locator('#quiz-phone').click();
+    await page.locator('#quiz-phone').pressSequentially('0671234567');
+    await page.locator('#quiz-consent').check();
+    const submit = visibleStep(page).getByRole('button', { name: 'Отримати ціну' });
+    await submit.click();
+    const status = visibleStep(page).locator('[data-form-status]');
+    await expect(status).toContainText('Не вдалося надіслати. Подзвоніть або напишіть нам', { timeout: 8000 });
+    await expect(status.getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914843');
+    await expect(status.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
+    await expect(status.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
+    await expect(page).toHaveURL(/\/kukhni#kvyz$/);
+    await expect(page.locator('#quiz-name')).toHaveValue('Олена');
+    await expect(submit).toBeEnabled();
+    expect(leadApi.leads).toHaveLength(2); // первая попытка + один повтор через 2 с
   });
 
   test('способ «Дзвінок» → «Зателефонуємо…», Telegram → «Надішлемо розрахунок у Telegram»', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Две посадочные (2026-10-21, структура — ТЗ v2): фото, H1 → сюжет → работы → квиз → три обіцянки → вопросы → финал
 

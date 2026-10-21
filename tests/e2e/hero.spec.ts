@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Блок 1 посадочной — правки владельца по ревью фазы 2, скриншотам фазы 3 и ТЗ v2 (фото 4:3 на телефоне)
 test.describe('первый экран', () => {

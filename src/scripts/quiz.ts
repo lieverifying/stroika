@@ -13,14 +13,27 @@ import { quizStepEvents, track } from '../lib/analytics';
 import { leadLanding } from '../lib/landing';
 import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
 import { saveThanks, toMethod } from '../lib/lead/result-store';
+import { showSendError } from '../lib/lead/send-error';
 import { submitLead } from '../lib/lead/submit';
 import { normalizePhone } from '../lib/phone';
-import { branchOf } from '../lib/quiz/config';
+import { STEPS, branchOf } from '../lib/quiz/config';
 import { computeResult, factsToPriceInput } from '../lib/quiz/price';
 import { validateConsent, validateName, validatePhone } from '../lib/lead/validate';
-import { answer, back, isLastStep, progress, start } from '../lib/quiz/machine';
+import { answer, back, currentPath, isLastStep, progress, start } from '../lib/quiz/machine';
 import { clearState, loadState, saveState } from '../lib/quiz/storage';
 import type { QuizAnswers, QuizState, StepId } from '../lib/quiz/types';
+
+/** Ответы квиза текстом для Telegram и таблицы: «Кухня · Кутова · 3–4 м · …» (подписи вариантов из config.ts) */
+function answersSummary(answers: QuizAnswers): string {
+  return currentPath(answers)
+    .map((id) => {
+      const value = answers[id as keyof QuizAnswers];
+      const label = STEPS[id].options?.find((o) => o.value === value)?.label;
+      return typeof label === 'string' ? label : '';
+    })
+    .filter(Boolean)
+    .join(' · ');
+}
 
 /** Предвыбор ветки: data-preset квиза (посадочная) или адрес /?kvyz=shafa */
 function presetFor(root: HTMLElement): Partial<QuizAnswers> | undefined {
@@ -219,7 +232,13 @@ export function initQuiz(root: HTMLElement): void {
       phone: normalizePhone(String(data.get('phone') ?? '')),
       referrer: String(data.get('referrer') ?? '').trim(),
       consent: true,
-      quiz: { answers: state.answers, result },
+      quiz: {
+        answers: state.answers,
+        result,
+        summary: answersSummary(state.answers),
+        branch: branchOf(state.answers.goal) ?? '',
+        timing: STEPS.timing.options?.find((o) => o.value === state.answers.timing)?.label ?? '',
+      },
       website: data.get('website') ?? '',
     });
     if (res.ok) {
@@ -227,6 +246,9 @@ export function initQuiz(root: HTMLElement): void {
       saveThanks({ name, method, result });
       clearState();
       location.assign('/dyakuyemo');
+    } else {
+      if (button) button.disabled = false;
+      showSendError(status);
     }
   }
 

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { yellowOnScreen } from './helpers';
 
 // Сводное обновление 2026-10-20: факты бригады, квиз, блоки «Нестандартне завдання» и «Рекомендуйте нас»
@@ -81,11 +81,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     await expect(page.locator('[data-files-chosen]')).toHaveText('план.pdf, фото.HEIC');
   });
 
-  test('заполненный запрос → /dyakuyemo «Надішлемо розрахунок у Viber»; в сеть ничего не уходит', async ({ page }) => {
-    const posts: string[] = [];
-    page.on('request', (r) => {
-      if (r.method() !== 'GET') posts.push(r.url());
-    });
+  test('заполненный запрос → одна заявка с файлом в api/lead.php, /dyakuyemo «Надішлемо розрахунок у Viber»', async ({ page, leadApi }) => {
     await page.goto('/kontakty#zapyt');
     await page.locator('#zapyt-request').fill('Стелаж у нішу 2,4 м і стіл для салону краси');
     await page.locator('#zapyt-files').setInputFiles([{ name: 'ескіз.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(100) }]);
@@ -98,7 +94,16 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     await page.locator('#zapyt form').getByRole('button', { name: 'Надіслати запит' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
     await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Ігор\. Надішлемо розрахунок у Viber у робочий час\.$/);
-    expect(posts).toEqual([]);
+    expect(leadApi.leads).toHaveLength(1);
+    expect(leadApi.leads[0]).toMatchObject({
+      contactMethod: 'viber',
+      form: 'zapyt',
+      request: 'Стелаж у нішу 2,4 м і стіл для салону краси',
+      name: 'Ігор',
+      phone: '+380671234567',
+      referrer: 'Олена',
+      __files: ['ескіз.jpg'],
+    });
   });
 });
 

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Поля форм (маска телефона, ошибки, размеры) — на форме «Нестандартне завдання» (/kontakty#zapyt).
 // С ТЗ v2 короткой формы замера в финале нет; отправку формы проверяет update-2026-10.spec, квиза — quiz.spec.

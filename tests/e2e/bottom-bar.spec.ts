@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test.describe('нижняя панель', () => {
   test('телефон: видна, кнопки ≥ 48 px, конец страницы не перекрыт', async ({ page, isMobile }) => {

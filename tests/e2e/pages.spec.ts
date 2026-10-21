@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { yellowOnScreen } from './helpers';
 
 // Внутренние страницы (ТЗ): «Меблі», «Контакти», «Політика конфіденційності», 404 — и ни одной битой ссылки

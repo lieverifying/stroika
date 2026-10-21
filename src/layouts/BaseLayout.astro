@@ -43,7 +43,9 @@ const landing = landingOfPath(pagePath(Astro.url));
     {!bare && <MobileBottomBar />}
     <script>
       import { initCtaArbiter } from '../lib/cta-arbiter';
+      import { captureAttribution } from '../lib/lead/attribution';
       initCtaArbiter();
+      captureAttribution(new URL(location.href), document.referrer);
     </script>
   </body>
 </html>

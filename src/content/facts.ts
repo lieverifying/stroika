@@ -231,9 +231,9 @@ export const facts = {
   flags: {
     quizResultVariant: 'B' as 'A' | 'B',
     seasonalBadge: false as boolean,
-    // Отправка заявок подключена (фаза 6, api/lead.php). Пока false — формы и квиз только проверяют поля,
+    // Отправка заявок в api/lead.php (фаза 6, подключено 2026-10-21). false — формы только проверяют поля, сеть не трогают,
     // а боевая сборка (SITE_ENV=production) падает: scripts/check-release.mjs.
-    leadSubmitEnabled: false as boolean,
+    leadSubmitEnabled: true as boolean,
     // Карточки мастеров в блоке 6 (имена, фото, стаж) — только после согласия мастеров на публикацию
     teamCards: false as boolean,
     // Блок «Рекомендуйте нас» и вопрос о рекомендациях в FAQ. Поле «Хто вас порекомендував?» в формах есть всегда.

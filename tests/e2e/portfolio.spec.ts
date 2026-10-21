@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { readFileSync } from 'node:fs';
 
 // «Наші роботи» (ТЗ v2, 2026-10-21): галерея из src/content/portfolio.json — фото архива vymir-foto, блоки на главной и посадочных

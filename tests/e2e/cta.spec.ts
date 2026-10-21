@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { nextFrames, noTransitions, yellowOnScreen } from './helpers';
 
 // Правило «один жёлтый элемент на экран» (ARCHITECTURE.md 6.9).

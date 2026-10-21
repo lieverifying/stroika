@@ -1039,7 +1039,11 @@ Viber и Telegram не красим в фирменные цвета мессе�
 
 ---
 
-## 7. Поток заявки (схема; реализация — ФАЗА 6)
+## 7. Поток заявки (реализовано в фазе 6, 2026-10-21)
+
+Код: `api/lead.php` (точка входа), `api/lead-lib.php` (чистые функции), `api/.htaccess`; клиент — `src/lib/lead/submit.ts`, `attribution.ts`, `send-error.ts`. Тесты: `npm run test:php` (юнит + интеграция через `php -S` с заглушкой Telegram и Apps Script), `tests/unit/lead-submit.test.ts`, e2e — подмена `/api/lead.php` в `tests/e2e/fixtures.ts`. Флаг `facts.flags.leadSubmitEnabled = false` возвращает заглушку без сети.
+
+Ниже — исходная схема; где расходится с кодом, прав код (конфиг — `config/lead.php`, см. 7.4).
 
 В фазах 2–5 `submit.ts` отдаёт заглушку: ждёт 600 мс, отвечает `ok` и делает редирект на `/dyakuyemo`. Сеть не трогается.
 
@@ -1147,7 +1151,7 @@ ID: <leadId>
 | `SITE_ENV` | `production` / `development`: noindex, строгая проверка заглушек |
 | `PUBLIC_GTM_ID`, `META_PIXEL_ID`, `PUBLIC_CLARITY_ID` | Аналитика (фаза 7) |
 
-**PHP на хостинге** — файл `lead-config.php` **вне публичной папки** (на уровень выше корня сайта), подключается из `api/lead.php` через `require dirname(__DIR__, 2) . '/lead-config.php'` (точный путь уточняется по структуре adm.tools). Файл в репозиторий не попадает: в репозитории лежит только `api/lead-config.example.php` без значений, владелец создаёт настоящий файл один раз через файловый менеджер или SFTP.
+**PHP на хостинге** — файл `config/lead.php` **вне публичной папки**: `api/lead.php` ищет его по `VYMIR_LEAD_CONFIG`, затем в `<над корнем сайта>/config/lead.php` (хостинг), затем в `<репозиторий>/config/lead.php` (локально, в `.gitignore`). В репозитории — только `config/lead.example.php`. Telegram-токен и chat ID лежат в GitHub Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`); деплой (фаза 9) собирает из них `config/lead.php` на хостинге. Журнал, счётчики частоты, последние ID и резерв `leads-failed.jsonl` — в `config/data/`.
 
 | Ключ | Назначение |
 |---|---|

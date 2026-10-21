@@ -101,3 +101,13 @@ html[data-cta-ready] [data-cta='primary'][data-cta-on] {
 html[data-cta-ready] [data-cta='primary'][data-cta-on]:hover {
   background: var(--color-tape-hover);
 }
+
+/* Ссылки связи в тексте ошибки отправки (src/lib/lead/send-error.ts) */
+.send-error__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

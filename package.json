@@ -16,7 +16,8 @@
     "screens": "node scripts/screens.mjs",
     "check:placeholders": "node scripts/check-placeholders.mjs",
     "test:unit": "vitest run",
-    "check:release": "node scripts/check-release.mjs"
+    "check:release": "node scripts/check-release.mjs",
+    "test:php": "php tests/php/run.php"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",

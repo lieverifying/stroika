@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test.describe('шапка', () => {
   test('телефон: бургер открывает и закрывает меню мышью и клавиатурой', async ({ page, isMobile }) => {

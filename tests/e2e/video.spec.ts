@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Видео-фасад. На главной видео скрыто, пока его нет (режим запуска) — компонент проверяем на /styleguide.
 test.describe('видео бригады', () => {
