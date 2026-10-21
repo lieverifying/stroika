@@ -20,7 +20,7 @@ test.describe('один жёлтый на экран', () => {
     test.skip(isMobile, 'только десктоп');
     await page.goto('/kukhni');
     await noTransitions(page);
-    await expect.poll(() => yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+    await expect.poll(() => yellowOnScreen(page)).toEqual(['Порахувати вартість']);
   });
 
   test('телефон: когда кнопка hero видна, жёлтая она, а не панель', async ({ page, isMobile }) => {
@@ -28,10 +28,10 @@ test.describe('один жёлтый на экран', () => {
     await page.goto('/kukhni');
     await noTransitions(page);
     await page.locator('.hero__actions [data-cta]').scrollIntoViewIfNeeded();
-    await expect.poll(() => yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+    await expect.poll(() => yellowOnScreen(page)).toEqual(['Порахувати вартість']);
   });
 
-  test('телефон: ниже hero жёлтой становится «Розрахувати» в панели', async ({ page, isMobile }) => {
+  test('телефон: ниже hero жёлтой становится «Порахувати» в панели', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
     await page.goto('/kukhni');
     await page.evaluate(() => window.scrollTo(0, 1600));
@@ -50,7 +50,7 @@ test.describe('один жёлтый на экран', () => {
     const page = await ctx.newPage();
     await page.goto('/kukhni');
     await page.locator('.hero__actions [data-cta]').scrollIntoViewIfNeeded();
-    expect(await yellowOnScreen(page)).toEqual(['Розрахувати вартість']);
+    expect(await yellowOnScreen(page)).toEqual(['Порахувати вартість']);
     await ctx.close();
   });
 });

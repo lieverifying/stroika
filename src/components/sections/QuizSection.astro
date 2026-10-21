@@ -1,22 +1,23 @@
 ---
-// Блок 5 — квиз. Якорь #kvyz — сюда ведут «Розрахувати вартість» и кнопка панели.
-// На посадочной квиз открывается с выбранной веткой: /kukhni — «Кухня», /mebli — «Шафа або гардеробна».
+// Квиз на посадочной (ТЗ v2). Якорь #kvyz — сюда ведут «Порахувати вартість» и кнопка панели.
+// Свёрнут: сначала только шаг 1 из карточек, дальше — один вопрос на экран.
 import Quiz from '../quiz/Quiz.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import type { Goal } from '../../lib/quiz/types';
 
 interface Props {
   title: string;
-  subtitle: string;
-  preset?: Extract<Goal, 'kitchen' | 'wardrobe'>;
 }
-const { title, subtitle, preset } = Astro.props;
+const { title } = Astro.props;
 ---
 
 <section id="kvyz" data-block="5" class="section-pad" aria-labelledby="quiz-title">
   <div class="container-site quiz-section">
-    <SectionTitle id="quiz-title" title={title} subtitle={subtitle} />
-    <Quiz preset={preset} />
+    <SectionTitle
+      id="quiz-title"
+      title={title}
+      subtitle="Оберіть, що вам потрібно, — ми порахуємо і надішлемо ціну у зручний для вас месенджер"
+    />
+    <Quiz />
   </div>
 </section>
 

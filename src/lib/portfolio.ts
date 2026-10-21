@@ -1,12 +1,13 @@
 /**
  * Портфолио «Наші роботи» (решение владельца, 2026-10-21): реальные фото и видео из архива владельца.
- * Файлы — public/portfolio/ (уже WebP: большое фото до 1600 px и превью до 640 px; видео H.264 без звука).
+ * Файлы — public/portfolio/ (уже WebP: большое фото до 1600 px и превью до 720 px). Источник — архив vymir-foto
+ * после ретуши (ТЗ v2, 2026-10-21); других фото на сайте нет.
  * Список, категории, подписи и выбор для главной — только src/content/portfolio.json, в разметке не дублируются.
  */
 import data from '../content/portfolio.json';
 import { facts } from '../content/facts';
 
-export type PortfolioCategory = 'kuhni' | 'shafy' | 'interier' | 'komertsiia';
+export type PortfolioCategory = 'kukhni' | 'shafy' | 'garderobni' | 'inshi';
 
 interface Base {
   id: string;
@@ -14,6 +15,8 @@ interface Base {
   src: string;
   width: number;
   height: number;
+  /** Точка кадра при обрезке до карточки (CSS object-position) */
+  focus?: string;
   alt: string;
 }
 export interface PortfolioPhoto extends Base {
@@ -39,13 +42,14 @@ const byId = (id: string) => {
   return item;
 };
 
-/** 6 работ для блока «Наші роботи» на посадочной — в порядке featured (подобран по пропорциям, по 2 в ряд) */
+/** Работы для блока «Наші роботи»: главная (6 разных категорий), /kukhni (6 кухонь), /mebli (шафи, гардеробна, ТВ-зона) */
 export const FEATURED = {
+  home: data.featured.home.map(byId),
   kukhni: data.featured.kukhni.map(byId),
   mebli: data.featured.mebli.map(byId),
 };
 
 export const photoById = (id: string) => byId(id) as PortfolioPhoto;
 
-/** Фото первого экрана — id из facts.media.hero */
+/** Фото первого экрана /kukhni — id из facts.media.hero */
 export const HERO = byId(facts.media.hero) as PortfolioPhoto;

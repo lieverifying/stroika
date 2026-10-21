@@ -1,6 +1,6 @@
 ---
-// Блок 3 — «Наші роботи» на посадочной: 6 работ из src/content/portfolio.json (featured.kukhni / featured.mebli),
-// крупно, по 2 в ряд (ряды целиком, без обрезки), без подписей, фото открывается на весь экран; внизу — в галерею.
+// Блок 3 — «Наші роботи» (ТЗ v2): работы из src/content/portfolio.json (featured.home / kukhni / mebli), карточки
+// 4:5 на телефоне и 1:1 на десктопе, без подписей, фото открывается на весь экран; внизу — в галерею.
 import Lightbox from '../portfolio/Lightbox.astro';
 import PortfolioGrid from '../portfolio/PortfolioGrid.astro';
 import Button from '../ui/Button.astro';
@@ -12,16 +12,18 @@ interface Props {
   items: PortfolioItem[];
   moreHref: string;
   moreLabel: string;
+  /** Колонок на телефоне и с 768 px */
+  cols?: [number, number];
 }
-const { title, items, moreHref, moreLabel } = Astro.props;
+const { title, items, moreHref, moreLabel, cols = [2, 3] } = Astro.props;
 ---
 
 <section data-block="3" class="section-pad" aria-labelledby="portfolio-title" data-gallery>
   <div class="container-site">
     <SectionTitle id="portfolio-title" title={title} />
-    <PortfolioGrid items={items} eager={0} perRow={[2, 2]} />
+    <PortfolioGrid items={items} eager={0} cols={cols} />
     <div class="portfolio__more">
-      <Button href={moreHref} variant="secondary" icon="arrow-right">{moreLabel}</Button>
+      <Button href={moreHref} variant="outline" icon="arrow-right">{moreLabel}</Button>
     </div>
   </div>
   <Lightbox />

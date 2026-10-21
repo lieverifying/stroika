@@ -34,8 +34,9 @@ export interface Review {
 export interface WidthBand {
   id: string;
   label: string;
-  min: number;
-  max: number;
+  /** Метры для экрана А с ценой; без них цену не считаем */
+  min?: number;
+  max?: number;
 }
 
 export type HeroOrientation = 'portrait' | 'landscape';
@@ -58,7 +59,7 @@ export const facts = {
     furniture: ['кухні', 'шафи', 'гардеробні', 'передпокої', 'дитячі', 'тумби у ванну', 'ТВ-зони', 'меблі для бізнесу'],
     objects: ['квартири', 'будинки', 'офіси', 'магазини', 'салони'],
     // Что входит в монтаж
-    install: ['врізка мийки та варильної поверхні', 'вбудована техніка', 'підключення води та розеток', 'прибирання'],
+    install: ['врізка мийки та варильної поверхні', 'вбудована техніка', 'підключення води та розеток', 'прибирання після монтажу'],
   },
 
   // Владелец — подпись и фото в блоке «Нестандартне завдання»
@@ -90,7 +91,12 @@ export const facts = {
   quiz: {
     kitchenLenMinM: missing('QUIZ_KITCHEN_LEN_MIN_M'),
     kitchenLenMaxM: missing('QUIZ_KITCHEN_LEN_MAX_M'),
-    wardrobeWidthBands: missing('QUIZ_WARDROBE_WIDTH_BANDS'),
+    // Диапазоны ширины шафы — ТЗ v2 владельца (2026-10-21)
+    wardrobeWidthBands: [
+      { id: 'lt1.5', label: 'До 1,5 м' },
+      { id: '1.5to2.5', label: '1,5–2,5 м' },
+      { id: 'gt2.5', label: 'Більше 2,5 м' },
+    ] as WidthBand[],
     priceRound: missing('QUIZ_PRICE_ROUND'),
     maxRangeRatio: missing('QUIZ_MAX_RANGE_RATIO'),
     facadeTypesConfirmed: missing('FACADE_TYPES_CONFIRMED'),
@@ -100,7 +106,8 @@ export const facts = {
   // Обещания из ТЗ: на сайт попадут только после подтверждения владельцем
   promises: {
     callbackMinutes: missing('PROMISE_CALLBACK_MINUTES'),
-    priceFixedText: missing('PROMISE_PRICE_FIXED_TEXT'),
+    // ТЗ v2 (2026-10-21): вторая из трёх обіцянок — src/content/brand.ts
+    priceFixedText: 'Ціну фіксуємо в договорі. Без доплат у процесі.',
     gift3dText: missing('PROMISE_3D_GIFT_TEXT'),
     oneTeam: missing('PROMISE_ONE_TEAM'),
   },
@@ -207,7 +214,7 @@ export const facts = {
 
   media: {
     // Фото первого экрана — id работы из src/content/portfolio.json (вертикальная 4:5, получено 2026-10-21)
-    hero: 'kuhni-20',
+    hero: 'kukhnia-06',
     // Не заглушка, а настройка: рамка фото первого экрана на десктопе.
     // 'portrait' — 4:5 (реальные фото кухонь в основном вертикальные), 'landscape' — 4:3.
     heroOrientation: 'portrait' as HeroOrientation,

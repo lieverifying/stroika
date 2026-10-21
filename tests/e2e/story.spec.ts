@@ -131,7 +131,7 @@ test.describe('содержимое', () => {
     expect(Math.abs(frame.width / frame.height - 4 / 3)).toBeLessThan(0.01);
     await expect(page.locator(`${K} [data-step="0"] img`)).toHaveCSS('object-fit', 'contain');
     await expect(page.locator(`${K} [data-step="0"] .story__note`)).toHaveText('Візуалізація етапів');
-    await expect(page.locator(`${K} [data-step="0"] .story__note`)).toHaveCSS('color', 'rgb(92, 97, 102)');
+    await expect(page.locator(`${K} [data-step="0"] .story__note`)).toHaveCSS('color', 'rgb(85, 83, 77)');
   });
 
   test('шафа-купе (flags.storyWardrobe): 5 этапов, кадры wardrobe-01 … 05, сцена 4:3, подпись «Візуалізація етапів»', async ({ page }) => {

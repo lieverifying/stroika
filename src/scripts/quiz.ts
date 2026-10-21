@@ -17,8 +17,8 @@ import { submitLead } from '../lib/lead/submit';
 import { normalizePhone } from '../lib/phone';
 import { branchOf } from '../lib/quiz/config';
 import { computeResult, factsToPriceInput } from '../lib/quiz/price';
-import { validateConsent, validateName, validatePhone, validateTask } from '../lib/lead/validate';
-import { answer, back, isLastStep, progress, setTask, start } from '../lib/quiz/machine';
+import { validateConsent, validateName, validatePhone } from '../lib/lead/validate';
+import { answer, back, isLastStep, progress, start } from '../lib/quiz/machine';
 import { clearState, loadState, saveState } from '../lib/quiz/storage';
 import type { QuizAnswers, QuizState, StepId } from '../lib/quiz/types';
 
@@ -181,21 +181,19 @@ export function initQuiz(root: HTMLElement): void {
     render(true);
   });
 
-  // Шаг 7 и коротка форма: проверка полей (имя 2–50, телефон +380, согласие; задача — для короткой формы)
+  // Шаг контакта: проверка полей (имя 2–50, телефон +380, согласие)
   const CONTACT_CHECKS = {
     name: (f: HTMLInputElement | HTMLTextAreaElement) => validateName(f.value),
     phone: (f: HTMLInputElement | HTMLTextAreaElement) => validatePhone(f.value),
     consent: (f: HTMLInputElement | HTMLTextAreaElement) => validateConsent((f as HTMLInputElement).checked),
   };
   root.querySelectorAll<HTMLFormElement>('form[data-quiz-form]').forEach((form) => {
-    const short = form.dataset.quizForm === 'short';
-    const checks = short ? { task: (f: HTMLInputElement | HTMLTextAreaElement) => validateTask(f.value), ...CONTACT_CHECKS } : CONTACT_CHECKS;
+    const checks = CONTACT_CHECKS;
     clearErrorsOnFix(form, checks);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!validateForm(form, checks)) return;
-      if (short) state = setTask(state, (form.elements.namedItem('task') as HTMLTextAreaElement).value, Date.now());
-      fireStepEvents(state.stepId); // шаг 7 (контакт / коротка форма) пройден
+      fireStepEvents(state.stepId); // шаг контакта пройден
       persist();
       onValidSubmit(form);
     });

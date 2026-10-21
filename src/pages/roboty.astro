@@ -1,6 +1,6 @@
 ---
 // /roboty — «Наші роботи» (решение владельца, 2026-10-21): галерея из src/content/portfolio.json.
-// Вкладки «Усі» + 4 категории (на телефоне — горизонтальная прокрутка), ровные ряды превью без обрезки,
+// Вкладки «Усі · Кухні · Шафи · Гардеробні · Інші меблі» (ТЗ v2; на телефоне — горизонтальная прокрутка), сетка 2 / 3 колонки,
 // просмотр на весь экран, видео с автозапуском в видимой области. Без JS видны все работы, фото открываются ссылкой.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PortfolioGrid from '../components/portfolio/PortfolioGrid.astro';
@@ -26,9 +26,9 @@ const tabs = [{ id: 'all', title: 'Усі' }, ...CATEGORIES];
         ))
       }
     </div>
-    <PortfolioGrid items={ITEMS} />
+    <PortfolioGrid items={ITEMS} cols={[2, 3]} wide />
     <div class="roboty__cta">
-      <Button href="/kukhni#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+      <Button href="/kukhni#kvyz" size="lg" icon="calculator" ctaPriority={3}>Порахувати вартість</Button>
     </div>
   </div>
   <Lightbox />

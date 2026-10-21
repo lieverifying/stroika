@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-// Блок 1 — правки владельца по ревью фазы 2 и скриншотам фазы 3
+// Блок 1 посадочной — правки владельца по ревью фазы 2, скриншотам фазы 3 и ТЗ v2 (фото 4:3 на телефоне)
 test.describe('первый экран', () => {
-  test('телефон: фото первым над H1, 16:10, во всю ширину; заявка доступна из нижней панели', async ({ page, isMobile }) => {
+  test('телефон: фото первым над H1, 4:3, во всю ширину; заявка доступна из нижней панели', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
     await page.goto('/kukhni');
     const media = (await page.locator('.hero__media').boundingBox())!;
     const h1 = (await page.locator('h1').boundingBox())!;
     expect(media.y + media.height).toBeLessThanOrEqual(h1.y);
     expect(media.width).toBe(375);
-    expect(media.width / media.height).toBeCloseTo(1.6, 1);
-    // Кнопки hero могут уйти ниже первого экрана — «Розрахувати» в панели видна всегда
+    expect(media.width / media.height).toBeCloseTo(4 / 3, 1);
+    // Кнопки hero могут уйти ниже первого экрана — «Порахувати» в панели видна всегда
     await expect(page.locator('[data-bottom-bar] [data-cta]')).toBeInViewport();
   });
 
@@ -33,7 +33,7 @@ test.describe('первый экран', () => {
   test('фото — настоящая работа из портфолио (facts.media.hero), с alt, грузится сразу', async ({ page }) => {
     await page.goto('/kukhni');
     const img = page.locator('.hero__media img');
-    await expect(img).toHaveAttribute('src', /\/portfolio\/img\/kuhni\/kuhni-20\.webp$/);
+    await expect(img).toHaveAttribute('src', /\/portfolio\/img\/kukhni\/kukhnia-06\.webp$/);
     await expect(img).toHaveAttribute('alt', /.+/);
     await expect(img).toHaveAttribute('fetchpriority', 'high');
     await expect(img).not.toHaveAttribute('loading', 'lazy');

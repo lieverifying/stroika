@@ -101,7 +101,7 @@ describe('контактные данные не сохраняются', () => 
       answers: {
         goal: 'kitchen',
         kitchenShape: 'kutova',
-        task: 'Тумба',
+        otherType: 'tumba',
         name: 'Олена',
         phone: '+380671234567',
         method: 'viber',
@@ -114,7 +114,7 @@ describe('контактные данные не сохраняются', () => 
       expect(raw, bad).not.toContain(bad);
     }
     const loaded = loadState(T0 + 5, st);
-    expect(loaded?.answers).toEqual({ goal: 'kitchen', kitchenShape: 'kutova', task: 'Тумба' });
+    expect(loaded?.answers).toEqual({ goal: 'kitchen', kitchenShape: 'kutova', otherType: 'tumba' });
   });
 
   test('при загрузке лишние поля из хранилища тоже отбрасываются', () => {

@@ -3,6 +3,7 @@
  * В хранилище попадают только белые списки полей: имя, телефон и прочие контактные данные не сохраняются.
  * Любая ошибка хранилища (приватный режим, встроенные браузеры, квота) гасится: функции не бросают.
  */
+import { STEPS } from './config';
 import type { QuizAnswers, QuizState, StepId } from './types';
 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
@@ -19,8 +20,8 @@ const ANSWER_KEYS = [
   'countertop',
   'wardrobeType',
   'wardrobeWidth',
+  'otherType',
   'timing',
-  'task',
 ] as const satisfies readonly (keyof QuizAnswers)[];
 
 /** Доступ к localStorage внутри try/catch: сам геттер может бросить */
@@ -46,7 +47,7 @@ function pickAnswers(raw: unknown): QuizAnswers {
 
 /** Ветки, которые сейчас есть в квизе: состояние со старой веткой (например, убранной) не восстанавливаем */
 const GOALS = new Set(['kitchen', 'wardrobe', 'other']);
-const TIMINGS = new Set(['within3m', '1to3m', 'later']);
+const TIMINGS = new Set(['within3m', '3to6m', 'later', 'unknown']);
 
 /** Только поля из белого списка; null, если форма не похожа на состояние */
 function sanitize(raw: unknown): QuizState | null {
@@ -54,6 +55,8 @@ function sanitize(raw: unknown): QuizState | null {
   const r = raw as Record<string, unknown>;
   if (r.version !== 1) return null;
   if (typeof r.stepId !== 'string' || !Array.isArray(r.history) || !Array.isArray(r.firedSteps)) return null;
+  // Шаг убран из квиза (например, «Стільниця» или коротка форма до ТЗ v2) — прохождение не восстанавливаем
+  if (!(r.stepId in STEPS) || r.history.some((x) => typeof x !== 'string' || !(x in STEPS))) return null;
   if (typeof r.startedAt !== 'number' || typeof r.updatedAt !== 'number') return null;
   const answers = pickAnswers(r.answers);
   if (answers.goal !== undefined && !GOALS.has(answers.goal)) return null;

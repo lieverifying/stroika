@@ -1,39 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// Две посадочные и экран выбора (решение владельца, 2026-10-21)
-
-test.describe('«/» — экран выбора', () => {
-  test('логотип, строка, две плитки «Кухні» и «Шафи та меблі», телефон и Viber — больше ничего', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('h1')).toHaveText('Корпусні меблі під ваш розмір у Черкасах');
-    await expect(page.locator('img[alt="Вимір"]')).toHaveCount(1);
-    const tiles = page.getByRole('navigation', { name: 'Оберіть, що потрібно' }).getByRole('link');
-    await expect(tiles).toHaveText(['Кухні', 'Шафи та меблі']);
-    await expect(tiles.nth(0)).toHaveAttribute('href', '/kukhni');
-    await expect(tiles.nth(1)).toHaveAttribute('href', '/mebli');
-    await expect(page.locator('a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
-    await expect(page.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
-    // ни шапки, ни подвала, ни нижней панели, ни форм
-    for (const sel of ['[data-header]', 'footer[data-block="14"]', '[data-bottom-bar]', 'form', '[data-quiz]']) await expect(page.locator(sel)).toHaveCount(0);
-    await expect(page.locator('main a')).toHaveCount(4);
-  });
-
-  test('плитки на весь экран: на телефоне одна под другой, на десктопе рядом; всё в одном экране', async ({ page, isMobile }) => {
-    await page.goto('/');
-    const [a, b] = await page.locator('.choice__tile').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
-    if (isMobile) expect(b.top).toBeGreaterThanOrEqual(a.bottom);
-    else expect(Math.abs(a.top - b.top)).toBeLessThan(1);
-    const bottom = await page.locator('.choice__bottom').evaluate((e) => e.getBoundingClientRect().bottom);
-    expect(bottom).toBeLessThanOrEqual(page.viewportSize()!.height + 1);
-    expect(a.height).toBeGreaterThan(200);
-  });
-
-  test('клик по плитке ведёт на посадочную', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('link', { name: 'Шафи та меблі' }).click();
-    await expect(page).toHaveURL(/\/mebli$/);
-  });
-});
+// Две посадочные (2026-10-21, структура — ТЗ v2): фото, H1 → сюжет → работы → квиз → три обіцянки → вопросы → финал
 
 for (const l of [
   {
@@ -42,47 +9,68 @@ for (const l of [
     h1: 'Кухні на замовлення в Черкасах',
     title: 'Кухні на замовлення в Черкасах — Вимір',
     story: 'kitchen',
-    preset: 'kitchen',
-    cats: ['kuhni'],
+    photo: 'kukhnia-06',
+    cats: ['kukhni'],
+    works: 6,
     active: 'Кухні',
   },
   {
     path: '/mebli',
     other: '/kukhni',
-    h1: 'Шафи, гардеробні та корпусні меблі під ваш розмір у Черкасах',
+    h1: 'Шафи, гардеробні та корпусні меблі під ваш розмір',
     title: 'Шафи, гардеробні та корпусні меблі на замовлення в Черкасах — Вимір',
     story: 'wardrobe',
-    preset: 'wardrobe',
-    cats: ['shafy', 'interier', 'komertsiia'],
+    photo: 'shafa-01',
+    cats: ['shafy', 'garderobni', 'inshi'],
+    works: 4,
     active: 'Меблі',
   },
 ] as const) {
   test.describe(l.path, () => {
-    test('структура: фото и одна строка → сюжет → работы → квиз → вопросы → «Подзвонити», «Viber» и форма', async ({ page }) => {
+    test('структура: фото, H1 → сюжет → работы → квиз → три обіцянки → вопросы → финал', async ({ page }) => {
       await page.goto(l.path);
       await expect(page).toHaveTitle(l.title);
       await expect(page.locator('h1')).toHaveText(l.h1);
+      await expect(page.locator('[data-block="1"] img')).toHaveAttribute('src', new RegExp(`${l.photo}\\.webp$`));
+      await expect(page.locator('[data-block="1"]').getByRole('link', { name: 'Написати у Viber' })).toBeVisible();
       const order = await page.locator('main [data-block], main [data-story]').evaluateAll((els) =>
         els.map((e) => e.getAttribute('data-block') ?? `story:${e.getAttribute('data-story')}`),
       );
-      expect(order).toEqual(['1', `story:${l.story}`, '3', '5', '12', '13']);
-      await expect(page.locator('[data-block="13"]').getByRole('link', { name: 'Подзвонити' })).toBeVisible();
+      expect(order).toEqual(['1', `story:${l.story}`, '3', '5', 'promises', '12', '13']);
+      await expect(page.locator('main')).toContainText('Візуалізація етапів');
+      await expect(page.locator('[data-block="13"] h2')).toHaveText('Скажіть розмір — ми скажемо ціну');
     });
 
-    test('работы — только своей категории, 6 крупных фото', async ({ page }) => {
+    test('работы — только своей категории, крупные фото', async ({ page }) => {
       await page.goto(l.path);
       const cats = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.category));
-      expect(cats).toHaveLength(6);
+      expect(cats).toHaveLength(l.works);
       for (const c of cats) expect(l.cats as readonly string[]).toContain(c);
     });
 
-    test('квиз на шаге 1 с выбранной веткой; «Розрахувати» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
+    test('квиз свёрнут: сначала только шаг 1 из карточек; «Порахувати вартість» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
       await page.goto(`${l.path}#kvyz`);
       await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
+      await expect(page.locator('[data-quiz] [data-step]:visible')).toHaveCount(1);
       await expect(page.locator('[data-quiz] [data-step]:not([hidden])')).toHaveAttribute('data-step', 'goal');
-      await expect(page.locator(`[data-step="goal"] [data-value="${l.preset}"]`)).toHaveAttribute('aria-checked', 'true');
-      await expect(page.locator('[data-block="1"]').getByRole('link', { name: 'Розрахувати вартість' })).toHaveAttribute('href', `${l.path}#kvyz`);
+      await expect(page.locator('[data-step="goal"] [aria-checked="true"]')).toHaveCount(0);
+      await expect(page.locator('[data-block="1"]').getByRole('link', { name: 'Порахувати вартість' })).toHaveAttribute('href', `${l.path}#kvyz`);
       if (isMobile) await expect(page.locator('[data-bottom-bar] [data-cta]')).toHaveAttribute('href', `${l.path}#kvyz`);
+    });
+
+    test('6 вопросов FAQ; цена и срок — «Розрахуємо під ваше завдання і надішлемо у месенджер.»', async ({ page }) => {
+      await page.goto(l.path);
+      const faq = page.locator('[data-block="12"]');
+      await expect(faq.locator('summary')).toHaveText([
+        'Скільки коштує?',
+        'Скільки часу займає?',
+        'Чим ви відрізняєтесь від модульних меблів з мережевого магазину?',
+        'Чи можна за моїм дизайн-проєктом?',
+        'Чи встановлюєте техніку і мийку?',
+        'Чи працюєте в області?',
+      ]);
+      await faq.locator('summary').first().click();
+      await expect(faq.locator('details').first()).toContainText('Розрахуємо під ваше завдання і надішлемо у месенджер.');
     });
 
     test('переключатель «Кухні · Меблі»: активный выделен; меню Кухні · Меблі · Роботи · Як ми створюємо · Контакти', async ({ page, isMobile }) => {
@@ -103,11 +91,14 @@ for (const l of [
     });
 
     test('заявка помечается страницей-источником (аналитика)', async ({ page }) => {
-      await page.goto(l.path);
-      await page.locator('#zamir-name').fill('Тест');
-      await page.locator('#zamir-phone').click();
-      await page.locator('#zamir-phone').pressSequentially('0671234567');
-      await page.locator('#zamir-consent').check();
+      await page.goto(`${l.path}#kvyz`);
+      await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
+      const step = page.locator('[data-quiz] [data-step]:not([hidden])');
+      for (const label of ['Інші меблі', 'Передпокій', 'Пізніше']) await step.getByRole('radio', { name: label, exact: true }).click();
+      await page.locator('#quiz-name').fill('Тест');
+      await page.locator('#quiz-phone').click();
+      await page.locator('#quiz-phone').pressSequentially('0671234567');
+      await page.locator('#quiz-consent').check();
       await page.evaluate(() => {
         const w = window as unknown as { dataLayer?: unknown[]; leads: unknown[] };
         w.dataLayer ??= [];
@@ -119,27 +110,26 @@ for (const l of [
           return push(...items);
         };
       });
-      await page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' }).click();
+      await step.getByRole('button', { name: 'Отримати ціну' }).click();
       await expect(page).toHaveURL(/\/dyakuyemo$/);
-      const leads = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.leads') ?? '[]'));
-      expect(leads).toEqual([{ event: 'lead_submit', form: 'zamir', landing: l.path.slice(1) }]);
+      const leads = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.leads') ?? '[]') as { event: string }[]);
+      expect(leads.filter((e) => e.event === 'lead_submit')).toEqual([{ event: 'lead_submit', form: 'quiz', landing: l.path.slice(1) }]);
     });
   });
 }
 
-test('тексты /kukhni и /mebli не повторяются дословно; title и description разные', async ({ page }) => {
+test('title, description и H1 у /kukhni и /mebli разные', async ({ page }) => {
   const grab = async (path: string) => {
     await page.goto(path);
     return {
-      texts: await page.locator('main h1, main .hero__lead, main h2, main .section-title__subtitle, main summary').allInnerTexts(),
+      h1: await page.locator('h1').innerText(),
       title: await page.title(),
       desc: await page.locator('meta[name="description"]').getAttribute('content'),
     };
   };
   const k = await grab('/kukhni');
   const m = await grab('/mebli');
-  const shared = k.texts.filter((t) => m.texts.includes(t) && t.length > 25);
-  expect(shared).toEqual([]);
+  expect(k.h1).not.toBe(m.h1);
   expect(k.title).not.toBe(m.title);
   expect(k.desc).not.toBe(m.desc);
 });

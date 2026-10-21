@@ -1,16 +1,17 @@
 ---
-// Посадочная (решение владельца, 2026-10-21): /kukhni и /mebli по одной структуре, тексты у каждой свои.
-// 1 фото, H1 и одна строка → сюжет сборки (визуализация этапов, «Детальніше») → 3 «Наші роботи» (6 фото, lightbox)
-// → 5 квиз (ветка выбрана заранее, виден только текущий шаг) → 12 вопросы → 13 «Подзвонити», «Viber» и короткая форма.
+// Посадочная (ТЗ v2, 2026-10-21): /kukhni и /mebli по одной структуре, тексты у каждой свои.
+// 1 фото, H1, одна строка, «Порахувати вартість» и «Написати у Viber» → 2 сюжет сборки (візуалізація етапів)
+// → 3 роботи своих категорий → 4 квиз (свёрнут: сначала только шаг 1) → 5 три обіцянки → 6 питання і відповіді → 7 финал.
 // Шапка с переключателем «Кухні · Меблі» и подвал — в BaseLayout.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../sections/Hero.astro';
 import Portfolio from '../sections/Portfolio.astro';
 import QuizSection from '../sections/QuizSection.astro';
+import Promises from '../sections/Promises.astro';
 import Faq from '../sections/Faq.astro';
 import FinalCta from '../sections/FinalCta.astro';
 import Story, { type StoryData } from '../story/Story.astro';
-import type { FaqItem } from '../../content/faq';
+import { FAQ } from '../../content/faq';
 import { quizHref, type Landing } from '../../lib/landing';
 import type { PortfolioItem, PortfolioPhoto } from '../../lib/portfolio';
 
@@ -26,15 +27,12 @@ interface Props {
   storyHeading: string;
   worksTitle: string;
   works: PortfolioItem[];
+  worksCols?: [number, number];
   worksMoreHref: string;
   worksMoreLabel: string;
   quizTitle: string;
-  quizSubtitle: string;
-  faq: FaqItem[];
-  finalSubtitle: string;
 }
 const p = Astro.props;
-const preset = p.landing === 'mebli' ? 'wardrobe' : 'kitchen';
 ---
 
 <BaseLayout title={p.title} description={p.description}>
@@ -42,8 +40,9 @@ const preset = p.landing === 'mebli' ? 'wardrobe' : 'kitchen';
   <div class="container-site section-pad">
     <Story story={p.story} heading={p.storyHeading} moreHref="/yak-my-stvoriuiemo" />
   </div>
-  <Portfolio title={p.worksTitle} items={p.works} moreHref={p.worksMoreHref} moreLabel={p.worksMoreLabel} />
-  <QuizSection title={p.quizTitle} subtitle={p.quizSubtitle} preset={preset} />
-  <Faq items={p.faq} />
-  <FinalCta subtitle={p.finalSubtitle} source={`${p.landing}-final`} />
+  <Portfolio title={p.worksTitle} items={p.works} cols={p.worksCols} moreHref={p.worksMoreHref} moreLabel={p.worksMoreLabel} />
+  <QuizSection title={p.quizTitle} />
+  <Promises variant="scroll" />
+  <Faq items={FAQ} />
+  <FinalCta />
 </BaseLayout>

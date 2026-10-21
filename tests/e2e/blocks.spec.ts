@@ -8,10 +8,10 @@ test('посадочная: блоков 2, 4, 6–11 нет, пустых пл�
   await expect(page.locator('.fact-ph')).toHaveCount(0);
 });
 
-test('блок 12 на /kukhni: 5 вопросов (без фактов вопросы о гарантии, оплате, материалах скрыты), аккордеон открывается мышью и клавиатурой, работает без JS', async ({ page, browser }) => {
+test('блок 12 на /kukhni: 6 вопросов (ТЗ v2), аккордеон открывается мышью и клавиатурой, работает без JS', async ({ page, browser }) => {
   await page.goto('/kukhni');
   const items = page.locator('[data-block="12"] details');
-  await expect(items).toHaveCount(5);
+  await expect(items).toHaveCount(6);
   await expect(page.locator('[data-block="12"]')).not.toContainText('порекомендувати');
   const first = items.first();
   const summary = first.locator('summary');

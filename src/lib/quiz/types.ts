@@ -1,32 +1,32 @@
 /**
- * Типы квиза (ARCHITECTURE.md 4.3). Квиз — 7 шагов с ветками: кухня (7), шафа (5), коротка форма (2).
+ * Типы квиза (ARCHITECTURE.md 4.3, ТЗ v2 2026-10-21). Ветки: кухня (6 шагов), шафа (5), інші меблі (4).
  * Имя и телефон живут только в QuizContact и никогда не попадают в QuizState / localStorage.
  */
 import type { Fact } from '../../content/facts';
 
 /** 'custom' («Інше, нестандартне») — не ветка квиза: ведёт в блок «Нестандартне завдання» (#zapyt) */
 export type Goal = 'kitchen' | 'wardrobe' | 'other' | 'custom';
-export type Branch = 'kitchen' | 'wardrobe' | 'short';
+export type Branch = 'kitchen' | 'wardrobe' | 'other';
 export type StepId =
   | 'goal'
   | 'kitchenShape'
   | 'kitchenLength'
   | 'facade'
-  | 'countertop'
   | 'wardrobeType'
   | 'wardrobeWidth'
+  | 'otherType'
   | 'timing'
-  | 'contact'
-  | 'shortForm';
+  | 'contact';
 
 export type KitchenShape = 'pryama' | 'kutova' | 'p-podibna' | 'ostriv';
 export type LengthBand = 'lt3' | '3to4' | '4to5' | 'gt5' | 'unknown';
-export type Facade = 'mdf-film' | 'mdf-painted' | 'dsp' | 'advise';
+export type Facade = 'mdf-film' | 'mdf-painted' | 'dsp' | 'acryl' | 'hpl' | 'advise';
 export type Countertop = 'dsp' | 'quartz' | 'undecided';
 export type WardrobeType = 'kupe' | 'rozpashna' | 'harderobna';
 /** id диапазона ширины из facts.quiz.wardrobeWidthBands или 'unknown' */
 export type WidthBand = string;
-export type Timing = 'within3m' | '1to3m' | 'later';
+export type OtherType = 'peredpokii' | 'dytiacha' | 'tumba' | 'tv-zona' | 'biznes' | 'inshe';
+export type Timing = 'within3m' | '3to6m' | 'later' | 'unknown';
 export type ContactMethod = 'call' | 'viber' | 'telegram';
 
 export interface QuizAnswers {
@@ -34,12 +34,12 @@ export interface QuizAnswers {
   kitchenShape?: KitchenShape;
   kitchenLength?: LengthBand;
   facade?: Facade;
+  /** Шага «Стільниця» в квизе нет (ТЗ v2); поле осталось для расчёта экрана А — без ответа считаем «Ще не вирішили» */
   countertop?: Countertop;
   wardrobeType?: WardrobeType;
   wardrobeWidth?: WidthBand;
+  otherType?: OtherType;
   timing?: Timing;
-  /** только для ветки short */
-  task?: string;
 }
 
 /** НЕ пишется в localStorage */
@@ -67,7 +67,7 @@ export interface StepDef {
   tzNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   /** Вопрос на украинском */
   title: string;
-  kind: 'single' | 'contact' | 'short-form';
+  kind: 'single' | 'contact';
   options?: OptionDef[];
   next(a: QuizAnswers): StepId | 'submit';
 }

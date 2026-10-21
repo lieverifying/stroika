@@ -111,9 +111,11 @@ function kitchenOutcome(a: QuizAnswers, input: PriceInput): Outcome {
   const quartz = positive(ct.quartz);
   let sMin: number | null;
   let sMax: number | null;
-  if (a.countertop === 'dsp') sMin = sMax = dsp;
-  else if (a.countertop === 'quartz') sMin = sMax = quartz;
-  else if (a.countertop === 'undecided') {
+  // Шага «Стільниця» в квизе нет (ТЗ v2): без ответа — вилка «Ще не вирішили»
+  const top = a.countertop ?? 'undecided';
+  if (top === 'dsp') sMin = sMax = dsp;
+  else if (top === 'quartz') sMin = sMax = quartz;
+  else if (top === 'undecided') {
     sMin = dsp;
     sMax = quartz;
   } else return { reason: 'no-prices' };
@@ -137,8 +139,9 @@ function wardrobeOutcome(a: QuizAnswers, input: PriceInput): Outcome {
   if (!Array.isArray(bands)) return { reason: 'no-prices' };
   const band = bands.find((b) => b.id === a.wardrobeWidth);
   if (!band) return { reason: 'no-prices' };
-  const wMin = positive(band.min);
-  const wMax = positive(band.max);
+  // Метров у диапазона нет — цену не считаем (0 → null)
+  const wMin = positive(band.min ?? 0);
+  const wMax = positive(band.max ?? 0);
   const rates = input.prices.wardrobePerMeter;
   const rate = a.wardrobeType !== undefined && a.wardrobeType in rates ? positive(rates[a.wardrobeType]) : null;
   if (wMin === null || wMax === null || rate === null) return { reason: 'no-prices' };

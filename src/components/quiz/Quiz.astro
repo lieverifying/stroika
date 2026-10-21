@@ -5,7 +5,6 @@
 import QuizProgress from './QuizProgress.astro';
 import QuizStep from './QuizStep.astro';
 import QuizContact from './QuizContact.astro';
-import QuizShortForm from './QuizShortForm.astro';
 import { STEPS } from '../../lib/quiz/config';
 import type { Goal } from '../../lib/quiz/types';
 
@@ -23,7 +22,6 @@ const { preset } = Astro.props;
     Object.values(STEPS).map((step) => (
       <QuizStep step={step} hidden={step.id !== 'goal'}>
         {step.kind === 'contact' && <QuizContact />}
-        {step.kind === 'short-form' && <QuizShortForm />}
       </QuizStep>
     ))
   }

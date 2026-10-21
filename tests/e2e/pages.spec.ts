@@ -52,10 +52,11 @@ test.describe('/polityka', () => {
 });
 
 test.describe('/kontakty', () => {
-  test('телефон, Viber и Telegram на один номер, Instagram і TikTok, зона виїзду, коротка форма; без фактов — без графіка, адреси, карти', async ({ page }) => {
+  test('крупные кнопки: телефон, Viber, Telegram, Instagram, TikTok; зона виїзду; форма «Нестандартне завдання»; без фактов — без графіка, адреси, карти', async ({ page }) => {
     await page.goto('/kontakty');
     await expect(page.locator('h1')).toHaveText('Контакти');
-    await expect(page.locator('main a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
+    await expect(page.locator('main a.contacts__phone')).toContainText('+380 75 991 48 43');
+    await expect(page.locator('main').getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914843');
     await expect(page.locator('main').getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
     await expect(page.locator('main').getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
     await expect(page.locator('main').getByRole('link', { name: 'Instagram' })).toHaveAttribute('href', 'https://www.instagram.com/vymir.che');
@@ -63,8 +64,8 @@ test.describe('/kontakty', () => {
     await expect(page.locator('main')).not.toContainText(/Графік|Адреса|Пошта/);
     await expect(page.locator('main .ph, main .fact-ph')).toHaveCount(0);
     await expect(page.locator('main')).toContainText('Черкаси та область');
-    await expect(page.locator('main form[data-zamir-form]')).toHaveCount(1);
-    await expect(page.locator('#kontakty-referrer')).toHaveCount(1);
+    await expect(page.locator('main #zapyt form')).toHaveCount(1);
+    await expect(page.locator('#zapyt-referrer')).toHaveCount(1);
   });
 });
 
@@ -74,13 +75,13 @@ test.describe('404', () => {
     expect(res!.status()).toBe(404);
     await expect(page.locator('h1')).toHaveText('Сторінку не знайдено');
     await expect(page.locator('main').getByRole('link', { name: 'На головну' })).toHaveAttribute('href', '/');
-    await expect(page.locator('main').getByRole('link', { name: 'Розрахувати вартість' })).toHaveAttribute('href', '/kukhni#kvyz');
+    await expect(page.locator('main').getByRole('link', { name: 'Порахувати вартість' })).toHaveAttribute('href', '/kukhni#kvyz');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });
 
 test('на новых страницах не больше одного жёлтого элемента на экране', async ({ page }) => {
-  for (const path of ['/mebli', '/kontakty', '/polityka', '/404', '/roboty']) {
+  for (const path of ['/', '/mebli', '/kontakty', '/polityka', '/404', '/roboty', '/dyakuyemo']) {
     await page.goto(path);
     await page.waitForTimeout(100);
     const yellow = await yellowOnScreen(page);

@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-// Поля формы замера (блок 13)
+// Поля форм (маска телефона, ошибки, размеры) — на форме «Нестандартне завдання» (/kontakty#zapyt).
+// С ТЗ v2 короткой формы замера в финале нет; отправку формы проверяет update-2026-10.spec, квиза — quiz.spec.
 test.describe('поля формы', () => {
   test('маска телефона: 0671234567 → +380 67 123 45 67', async ({ page }) => {
-    await page.goto('/kukhni');
-    const phone = page.locator('#zamir-phone');
+    await page.goto('/kontakty');
+    const phone = page.locator('#zapyt-phone');
     await phone.click();
     await expect(phone).toHaveValue('+380 ');
     await phone.pressSequentially('0671234567');
@@ -13,8 +14,8 @@ test.describe('поля формы', () => {
   });
 
   test('Backspace стирает номер вместе с +380, поле не застревает', async ({ page }) => {
-    await page.goto('/kukhni');
-    const phone = page.locator('#zamir-phone');
+    await page.goto('/kontakty');
+    const phone = page.locator('#zapyt-phone');
     await phone.click();
     await phone.pressSequentially('0671');
     for (let i = 0; i < 12; i++) await page.keyboard.press('Backspace');
@@ -22,21 +23,21 @@ test.describe('поля формы', () => {
   });
 
   test('скрытая ошибка не подключена к aria-describedby, показанная — подключена', async ({ page }) => {
-    await page.goto('/kukhni');
-    const name = page.locator('#zamir-name');
-    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
-    await page.locator('#zamir form button[type=submit]').click();
-    await expect(name).toHaveAttribute('aria-describedby', /zamir-name-error/);
+    await page.goto('/kontakty');
+    const name = page.locator('#zapyt-name');
+    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zapyt-name-error');
+    await page.locator('#zapyt form button[type=submit]').click();
+    await expect(name).toHaveAttribute('aria-describedby', /zapyt-name-error/);
     await name.fill('Тест');
-    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
+    expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zapyt-name-error');
   });
 
   for (const pasted of ['0671234567', '+380671234567', '+38 (067) 123-45-67']) {
     test(`вставка из буфера «${pasted}» → +380 67 123 45 67`, async ({ page, context, browserName }) => {
       test.skip(browserName !== 'chromium', 'права на буфер обмена — только Chromium');
       await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-      await page.goto('/kukhni');
-      const phone = page.locator('#zamir-phone');
+      await page.goto('/kontakty');
+      const phone = page.locator('#zapyt-phone');
       await phone.click(); // в поле уже «+380 »
       await page.evaluate((t) => navigator.clipboard.writeText(t), pasted);
       await page.keyboard.press('ControlOrMeta+V');
@@ -45,74 +46,23 @@ test.describe('поля формы', () => {
   }
 
   test('маска привязана к своему полю: у каждого поля телефона своя', async ({ page }) => {
-    await page.goto('/kukhni');
+    await page.goto('/kontakty');
     await expect(page.locator('phone-field input[data-masked]')).toHaveCount(await page.locator('phone-field').count());
   });
 
   test('поля 48 px и шрифт 16 px (iOS не зумит), согласие не отмечено', async ({ page }) => {
-    await page.goto('/kukhni');
-    for (const sel of ['#zamir-name', '#zamir-phone']) {
+    await page.goto('/kontakty');
+    for (const sel of ['#zapyt-name', '#zapyt-phone']) {
       const f = page.locator(sel);
       await expect(f).toHaveCSS('font-size', '16px');
       expect((await f.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     }
-    await expect(page.locator('#zamir-consent')).not.toBeChecked();
-    // полная форма с выбором времени — на /kontakty (на главной короткая)
-    await page.goto('/kontakty');
-    const time = page.locator('#kontakty-time');
-    await expect(time).toHaveCSS('font-size', '16px');
-    expect((await time.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+    await expect(page.locator('#zapyt-consent')).not.toBeChecked();
   });
 
   test('поле-ловушка не попадает в порядок Tab и скрыто от скринридера', async ({ page }) => {
-    await page.goto('/kukhni');
-    await expect(page.locator('#zamir-website')).toHaveAttribute('tabindex', '-1');
+    await page.goto('/kontakty');
+    await expect(page.locator('#zapyt-website')).toHaveAttribute('tabindex', '-1');
     await expect(page.locator('.hp').first()).toHaveAttribute('aria-hidden', 'true');
-  });
-});
-
-test.describe('блок 13: форма замера', () => {
-  test('пустая отправка: ошибки текстом, фокус на первом поле, запросов в сеть нет', async ({ page }) => {
-    const posts: string[] = [];
-    page.on('request', (r) => {
-      if (r.method() !== 'GET') posts.push(r.url());
-    });
-    await page.goto('/kukhni');
-    const form = page.locator('#zamir form');
-    await form.getByRole('button', { name: 'Надіслати заявку' }).click();
-    await expect(page.locator('#zamir-name')).toBeFocused();
-    await expect(page.locator('#zamir-name')).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('#zamir-name-error')).toBeVisible();
-    await expect(page.locator('#zamir-phone-error')).toBeVisible();
-    await expect(page.locator('#zamir-consent-error')).toBeVisible();
-    await expect(page).toHaveURL(/\/kukhni(#.*)?$/);
-    expect(posts).toEqual([]);
-  });
-
-  test('заполненная форма → /dyakuyemo с общим текстом; запросов в сеть нет (заглушка до фазы 6)', async ({ page }) => {
-    const posts: string[] = [];
-    page.on('request', (r) => {
-      if (r.method() !== 'GET') posts.push(r.url());
-    });
-    await page.goto('/kukhni');
-    await page.locator('#zamir-name').fill('Тест');
-    await page.locator('#zamir-phone').click();
-    await page.locator('#zamir-phone').pressSequentially('0671234567');
-    await page.locator('#zamir-consent').check();
-    await page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' }).click();
-    await expect(page).toHaveURL(/\/dyakuyemo$/);
-    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
-    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Тест\. Зателефонуємо у робочий час\.$/);
-    expect(posts).toEqual([]);
-  });
-
-  test('телефон: при фокусе в поле нижняя панель скрыта, кнопка отправки видна', async ({ page, isMobile }) => {
-    test.skip(!isMobile, 'только телефон');
-    await page.goto('/kukhni');
-    await page.locator('#zamir-phone').focus();
-    await expect(page.locator('[data-bottom-bar]')).toHaveAttribute('data-hidden', '');
-    const submit = page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' });
-    await submit.scrollIntoViewIfNeeded();
-    await expect(submit).toBeInViewport();
   });
 });

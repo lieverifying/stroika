@@ -1,11 +1,9 @@
 ---
-// /mebli — посадочная для шаф, гардеробних і інших корпусних меблів (решение владельца, 2026-10-21).
-// Сюжет — шафа-купе, работы — шафи, гардеробні, меблі для бізнесу, дитяча; квиз — с выбранной «Шафа або гардеробна».
-// Структура та же, что у /kukhni (src/components/landing/Landing.astro), тексты свои.
+// /mebli — посадочная для шаф, гардеробних і інших меблів (ТЗ v2, 2026-10-21): фото shafa-01, сюжет — шафа-купе,
+// работы — шафи, гардеробна, ТВ-зона. Структура та же, что у /kukhni (src/components/landing/Landing.astro).
 import Landing from '../components/landing/Landing.astro';
 import type { StoryData } from '../components/story/Story.astro';
 import wardrobe from '../content/stories/wardrobe.json';
-import { FAQ_MEBLI } from '../content/faq';
 import { FEATURED, photoById } from '../lib/portfolio';
 ---
 
@@ -13,18 +11,16 @@ import { FEATURED, photoById } from '../lib/portfolio';
   landing="mebli"
   title="Шафи, гардеробні та корпусні меблі на замовлення в Черкасах — Вимір"
   description="Шафи-купе, гардеробні, передпокої, дитячі та меблі для бізнесу під ваш розмір: Черкаси та область. Замір безкоштовно."
-  h1="Шафи, гардеробні та корпусні меблі під ваш розмір у Черкасах"
+  h1="Шафи, гардеробні та корпусні меблі під ваш розмір"
   lead="Від заміру ніші до монтажу — працюємо самі"
-  heroPhoto={photoById('shafy-02')}
-  heroFocus="50% 40%"
+  heroPhoto={photoById('shafa-01')}
+  heroFocus="50% 55%"
   story={wardrobe as StoryData}
   storyHeading="Як ми створюємо шафу-купе"
   worksTitle="Шафи та меблі, які ми зробили"
   works={FEATURED.mebli}
+  worksCols={[2, 2]}
   worksMoreHref="/roboty#shafy"
-  worksMoreLabel="Усі шафи та меблі"
-  quizTitle="Порахуйте шафу або меблі за 1 хвилину"
-  quizSubtitle="Виберіть, що потрібно, — надішлемо розрахунок у Viber, Telegram або зателефонуємо."
-  faq={FAQ_MEBLI}
-  finalSubtitle="Подзвоніть чи напишіть у Viber — або лишіть ім’я й телефон, і ми домовимося про замір."
+  worksMoreLabel="Усі роботи"
+  quizTitle="Дізнайтесь вартість шафи або меблів"
 />

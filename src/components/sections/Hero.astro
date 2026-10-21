@@ -1,10 +1,10 @@
 ---
-// Блок 1 — первый экран посадочной (/kukhni, /mebli): фото, H1, одна строка, «Розрахувати вартість» и «Написати у Viber».
-// Тексты и фото — из пропсов страницы (тексты /kukhni и /mebli не повторяют друг друга).
-// < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → строка «Замір, дизайн-проєкт і монтаж — наша команда» → кнопки (кнопки могут уйти ниже
-//   первого экрана: «Розрахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
-// ≥ 1024 px: фото справа (рамка по facts.media.heroOrientation: 4:5 или 4:3), текст слева по центру фото.
-// Фото — работа из портфолио (facts.media.hero = id в src/content/portfolio.json), обрезка по facts.media.heroFocus.
+// Блок 1 — первый экран посадочной (/kukhni, /mebli, ТЗ v2): фото, H1, одна строка, «Порахувати вартість» и «Написати у Viber».
+// Тексты и фото — из пропсов страницы.
+// < 1024 px: фото первым во всю ширину, 4:3 → H1 → строка → кнопки (кнопки могут уйти ниже первого экрана:
+//   «Порахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
+// ≥ 1024 px: фото справа (рамка по пропорции фото: вертикальное — 4:5, горизонтальное — 4:3), текст слева по центру фото.
+// Фото по умолчанию — facts.media.hero (id в src/content/portfolio.json), обрезка по focus.
 // Бейдж — facts.flags.seasonalBadge.
 import Badge from '../ui/Badge.astro';
 import Button from '../ui/Button.astro';
@@ -24,7 +24,7 @@ interface Props {
 }
 const { title, lead, photo = HERO, focus = facts.media.heroFocus, quizHref } = Astro.props;
 const { flags } = facts;
-const portrait = facts.media.heroOrientation === 'portrait';
+const portrait = photo.height > photo.width;
 
 ---
 
@@ -51,7 +51,7 @@ const portrait = facts.media.heroOrientation === 'portrait';
       <p class="hero__lead">{lead}</p>
 
       <div class="hero__actions">
-        <Button href={quizHref} size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+        <Button href={quizHref} size="lg" icon="calculator" ctaPriority={3}>Порахувати вартість</Button>
         <Button href={contactLinks.viber} variant="secondary" icon="viber">
           Написати у Viber
         </Button>
@@ -79,7 +79,7 @@ const portrait = facts.media.heroOrientation === 'portrait';
     gap: 1.5rem;
     padding-bottom: var(--space-stack);
   }
-  /* Фото первым и во всю ширину экрана, 16:10 */
+  /* Фото первым и во всю ширину экрана, 4:3 */
   .hero__media {
     order: -1;
     margin-inline: calc(-1 * var(--space-gutter));
@@ -91,7 +91,7 @@ const portrait = facts.media.heroOrientation === 'portrait';
   }
   .hero__media :global(.ph),
   .hero__media :global(img) {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     object-position: var(--hero-focus);
   }
@@ -146,7 +146,10 @@ const portrait = facts.media.heroOrientation === 'portrait';
     }
     .hero__media :global(.ph),
     .hero__media :global(img) {
-      aspect-ratio: var(--ph-ratio, 4 / 5);
+      aspect-ratio: 4 / 3;
+    }
+    .hero__inner--portrait .hero__media :global(img) {
+      aspect-ratio: 4 / 5;
     }
     .hero__actions {
       margin-top: 2.5rem;

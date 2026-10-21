@@ -1,0 +1,86 @@
+---
+// Три обіцянки «Вимір» (ТЗ v2): номера 01–03 цветом дуба, тонкая линия над каждой.
+// list — главная: три строки друг под другом (на десктопе в три колонки).
+// scroll — посадочные: коротко, на телефоне карточки листаются вбок одной строкой.
+import SectionTitle from '../ui/SectionTitle.astro';
+import { PROMISES } from '../../content/brand';
+
+interface Props {
+  variant?: 'list' | 'scroll';
+}
+const { variant = 'list' } = Astro.props;
+---
+
+<section data-block="promises" class:list={['section-pad promises', `promises--${variant}`]} aria-labelledby="promises-title">
+  <div class="container-site">
+    <SectionTitle id="promises-title" eyebrow="Вимір — точність" title="Три обіцянки" />
+    <ol class="promises__list">
+      {
+        PROMISES.map((p, i) => (
+          <li class="promises__item">
+            <span class="promises__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="promises__title">{p.title}</h3>
+            <p class="promises__text">{p.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .promises__list {
+    display: grid;
+    gap: 2rem;
+  }
+  .promises__item {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-line-strong);
+  }
+  .promises__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-lead);
+    color: var(--color-oak);
+  }
+  .promises__title {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+  .promises__text {
+    max-width: 40ch;
+    color: var(--color-ink-muted);
+  }
+
+  /* Посадочные, телефон: одна строка карточек с прокруткой вбок до края экрана */
+  @media (max-width: 47.99rem) {
+    .promises--scroll .promises__list {
+      grid-auto-flow: column;
+      grid-auto-columns: 82%;
+      gap: 1rem;
+      margin-inline: calc(-1 * var(--space-gutter));
+      padding-inline: var(--space-gutter);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--space-gutter);
+      scrollbar-width: none;
+    }
+    .promises--scroll .promises__list::-webkit-scrollbar {
+      display: none;
+    }
+    .promises--scroll .promises__item {
+      scroll-snap-align: start;
+    }
+  }
+  @media (min-width: 48rem) {
+    .promises__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--grid-gap);
+    }
+  }
+</style>

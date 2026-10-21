@@ -1,6 +1,6 @@
 ---
 // Блок 0 — шапка (ТЗ). Закреплена при прокрутке.
-// < 1024 px: логотип, звонок, бургер. ≥ 1024 px: меню, телефон, «Безкоштовний замір».
+// < 1024 px: логотип, звонок, бургер. ≥ 1024 px: меню, телефон, «Порахувати вартість» (ТЗ v2).
 // На посадочных (/kukhni, /mebli) — переключатель «Кухні · Меблі» с выделенным активным пунктом;
 // на телефоне тогда вместо полного логотипа знак (угольник + В), чтобы всё поместилось в одну строку.
 import Button from '../ui/Button.astro';
@@ -10,7 +10,7 @@ import MobileMenu from './MobileMenu.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { NAV } from './nav';
-import { landingOfPath, pagePath, zamirHref } from '../../lib/landing';
+import { landingOfPath, pagePath, quizHref } from '../../lib/landing';
 
 const path = pagePath(Astro.url);
 const landing = landingOfPath(path);
@@ -71,7 +71,7 @@ const SWITCH = [
         <Icon name="phone" size={20} />
         <Fact value={facts.contacts.phoneDisplay} />
       </a>
-      <Button href={zamirHref(landing)} deferPrimary ctaPriority={1} data-zamir-open>Безкоштовний замір</Button>
+      <Button href={quizHref(landing)} deferPrimary ctaPriority={1}>Порахувати вартість</Button>
     </div>
 
     <div class="flex items-center lg:hidden">

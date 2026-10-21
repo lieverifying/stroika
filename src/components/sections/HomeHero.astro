@@ -1,0 +1,121 @@
+---
+// Первый экран главной бренда (ТЗ v2): надпись дубом, H1-слоган, размерная линия «точно під ваш розмір»,
+// подзаголовок, фото kukhnia-05 с отметкой высоты «2700 мм» сбоку, жёлтая «Порахувати вартість» и строка под ней.
+// < 1024 px — текст, затем фото, затем кнопка; ≥ 1024 px — текст и кнопка слева, фото справа.
+import Button from '../ui/Button.astro';
+import DimLine from '../ui/DimLine.astro';
+import { SLOGAN } from '../../content/brand';
+import { photoById, url } from '../../lib/portfolio';
+
+interface Props {
+  quizHref: string;
+}
+const { quizHref } = Astro.props;
+const photo = photoById('kukhnia-05');
+---
+
+<section data-block="1" class="home-hero" aria-labelledby="hero-title">
+  <div class="container-site home-hero__inner">
+    <div class="home-hero__text">
+      <p class="home-hero__eyebrow">Корпусні меблі на замовлення · Черкаси</p>
+      <h1 id="hero-title" class="text-h1">{SLOGAN}</h1>
+      <DimLine label="точно під ваш розмір" class="home-hero__dim" />
+      <p class="home-hero__lead">Кухні, шафи та гардеробні під ваш простір. Замір, дизайн-проєкт і монтаж — наша команда.</p>
+    </div>
+
+    <div class="home-hero__media">
+      <DimLine label="2700 мм" vertical class="home-hero__height" />
+      <img
+        src={url(photo.src)}
+        srcset={`${url(photo.thumb)} 720w, ${url(photo.src)} ${photo.width}w`}
+        sizes="(min-width: 64rem) 45vw, 90vw"
+        width={photo.width}
+        height={photo.height}
+        alt={photo.alt}
+        fetchpriority="high"
+        decoding="async"
+      />
+    </div>
+
+    <div class="home-hero__actions">
+      <Button href={quizHref} size="lg" icon="calculator" ctaPriority={3}>Порахувати вартість</Button>
+      <p class="home-hero__note">Ціну надішлемо у Viber або Telegram</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .home-hero__inner {
+    display: grid;
+    gap: 1.75rem;
+    padding-block: 1.5rem var(--space-stack);
+  }
+  .home-hero__eyebrow {
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-oak);
+  }
+  .home-hero__text :global(.home-hero__dim) {
+    max-width: 22rem;
+    margin-top: 1.25rem;
+  }
+  .home-hero__lead {
+    margin-top: 1rem;
+    max-width: 34rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-ink-muted);
+  }
+  /* Фото с размерной линией высоты слева */
+  .home-hero__media {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+  .home-hero__media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+  }
+  .home-hero__actions {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .home-hero__note {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .home-hero__actions {
+      justify-items: start;
+    }
+  }
+  @media (min-width: 64rem) {
+    .home-hero__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'text media'
+        'actions media';
+      grid-template-rows: auto 1fr;
+      column-gap: 4rem;
+      row-gap: 2.5rem;
+      padding-top: 3rem;
+    }
+    .home-hero__text {
+      grid-area: text;
+      align-self: end;
+    }
+    .home-hero__media {
+      grid-area: media;
+    }
+    .home-hero__actions {
+      grid-area: actions;
+      align-self: start;
+    }
+  }
+</style>

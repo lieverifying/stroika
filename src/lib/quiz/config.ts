@@ -1,8 +1,8 @@
 /**
  * Шаги, варианты и граф переходов квиза (ARCHITECTURE.md 4.1–4.2, ТЗ «Квиз-калькулятор»).
  * В конфиге нет ни цифр ширины, ни цен, ни сроков: всё, что зависит от владельца, — из facts.ts.
- * Пути: кухня goal → kitchenShape → kitchenLength → facade → countertop → timing → contact (7);
- *       шафа goal → wardrobeType → [wardrobeWidth, если есть диапазоны] → timing → contact (5 или 4); інші меблі goal → shortForm (2).
+ * Пути (ТЗ v2, 2026-10-21): кухня goal → kitchenShape → kitchenLength → facade → timing → contact (6);
+ *       шафа goal → wardrobeType → wardrobeWidth → timing → contact (5); інші меблі goal → otherType → timing → contact (4).
  * «Інше, нестандартне» — не ветка: вариант со ссылкой на блок «Нестандартне завдання» (/kontakty#zapyt).
  */
 import { facts, type Fact, type WidthBand as WidthBandFact } from '../../content/facts';
@@ -13,7 +13,7 @@ import type { Branch, Goal, OptionDef, QuizAnswers, StepDef, StepId } from './ty
 export function branchOf(goal: Goal | undefined): Branch | null {
   if (goal === 'kitchen') return 'kitchen';
   if (goal === 'wardrobe') return 'wardrobe';
-  if (goal === 'other') return 'short';
+  if (goal === 'other') return 'other';
   return null;
 }
 
@@ -21,29 +21,27 @@ export function branchOf(goal: Goal | undefined): Branch | null {
 export const HAS_WARDROBE_WIDTH = !isPlaceholder(facts.quiz.wardrobeWidthBands);
 
 export const PATHS: Record<Branch, StepId[]> = {
-  kitchen: ['goal', 'kitchenShape', 'kitchenLength', 'facade', 'countertop', 'timing', 'contact'],
+  kitchen: ['goal', 'kitchenShape', 'kitchenLength', 'facade', 'timing', 'contact'],
   wardrobe: HAS_WARDROBE_WIDTH
     ? ['goal', 'wardrobeType', 'wardrobeWidth', 'timing', 'contact']
     : ['goal', 'wardrobeType', 'timing', 'contact'],
-  short: ['goal', 'shortForm'],
+  other: ['goal', 'otherType', 'timing', 'contact'],
 };
 
 /** Поля ответов каждой ветки (смена ветки на шаге 1 удаляет чужие) */
 export const BRANCH_FIELDS: Record<Branch, (keyof QuizAnswers)[]> = {
-  kitchen: ['kitchenShape', 'kitchenLength', 'facade', 'countertop', 'timing'],
+  kitchen: ['kitchenShape', 'kitchenLength', 'facade', 'timing'],
   wardrobe: ['wardrobeType', 'wardrobeWidth', 'timing'],
-  short: ['task'],
+  other: ['otherType', 'timing'],
 };
 
-// Фасады: дерево убрано до подтверждения материалов. «Порадьте» есть всегда.
+// Фасады — список владельца (ТЗ v2, 2026-10-21). «Порадьте» есть всегда.
 const FACADES: OptionDef[] = [
   { value: 'mdf-film', label: 'МДФ у плівці' },
   { value: 'mdf-painted', label: 'Фарбований МДФ' },
   { value: 'dsp', label: 'ДСП' },
-];
-const COUNTERTOPS: OptionDef[] = [
-  { value: 'dsp', label: 'ДСП' },
-  { value: 'quartz', label: 'Кварц або акрил' },
+  { value: 'acryl', label: 'Акрил' },
+  { value: 'hpl', label: 'HPL' },
 ];
 
 /**
@@ -59,7 +57,7 @@ export function wardrobeWidthOptions(bands: Fact<WidthBandFact[]>): OptionDef[] 
   const list: OptionDef[] = isPlaceholder(bands)
     ? [1, 2, 3].map((n) => ({ value: `band-${n}`, label: bands }))
     : bands.map((b) => ({ value: b.id, label: b.label }));
-  return [...list, { value: 'unknown', label: 'Не знаю — приїдемо заміряти' }];
+  return [...list, { value: 'unknown', label: 'Не знаю' }];
 }
 
 const toTiming: StepDef['next'] = () => 'timing';
@@ -104,7 +102,7 @@ export const STEPS: Record<StepId, StepDef> = {
       { value: '3to4', label: '3–4 м' },
       { value: '4to5', label: '4–5 м' },
       { value: 'gt5', label: 'Більше 5 м' },
-      { value: 'unknown', label: 'Не знаю — приїдемо заміряти' },
+      { value: 'unknown', label: 'Не знаю — заміряємо' },
     ],
     next: () => 'facade',
   },
@@ -114,17 +112,6 @@ export const STEPS: Record<StepId, StepDef> = {
     title: 'Фасади',
     kind: 'single',
     options: [...filterConfirmed(FACADES, facts.quiz.facadeTypesConfirmed), { value: 'advise', label: 'Порадьте' }],
-    next: () => 'countertop',
-  },
-  countertop: {
-    id: 'countertop',
-    tzNumber: 5,
-    title: 'Стільниця',
-    kind: 'single',
-    options: [
-      ...filterConfirmed(COUNTERTOPS, facts.quiz.countertopTypesConfirmed),
-      { value: 'undecided', label: 'Ще не вирішили' },
-    ],
     next: toTiming,
   },
   wardrobeType: {
@@ -133,8 +120,8 @@ export const STEPS: Record<StepId, StepDef> = {
     title: 'Що саме потрібно?',
     kind: 'single',
     options: [
-      { value: 'kupe', label: 'Шафа-купе' },
-      { value: 'rozpashna', label: 'Розпашна шафа' },
+      { value: 'kupe', label: 'Купе' },
+      { value: 'rozpashna', label: 'Розпашна' },
       { value: 'harderobna', label: 'Гардеробна' },
     ],
     next: () => (HAS_WARDROBE_WIDTH ? 'wardrobeWidth' : 'timing'),
@@ -147,6 +134,21 @@ export const STEPS: Record<StepId, StepDef> = {
     options: wardrobeWidthOptions(facts.quiz.wardrobeWidthBands),
     next: toTiming,
   },
+  otherType: {
+    id: 'otherType',
+    tzNumber: 2,
+    title: 'Що саме потрібно?',
+    kind: 'single',
+    options: [
+      { value: 'peredpokii', label: 'Передпокій' },
+      { value: 'dytiacha', label: 'Дитяча' },
+      { value: 'tumba', label: 'Тумба у ванну' },
+      { value: 'tv-zona', label: 'ТВ-зона' },
+      { value: 'biznes', label: 'Меблі для бізнесу' },
+      { value: 'inshe', label: 'Інше' },
+    ],
+    next: toTiming,
+  },
   timing: {
     id: 'timing',
     tzNumber: 6,
@@ -154,8 +156,9 @@ export const STEPS: Record<StepId, StepDef> = {
     kind: 'single',
     options: [
       { value: 'within3m', label: 'Протягом 3 місяців' },
-      { value: '1to3m', label: 'Через 1–3 місяці' },
+      { value: '3to6m', label: 'Через 3–6 місяців' },
       { value: 'later', label: 'Пізніше' },
+      { value: 'unknown', label: 'Ще не знаю' },
     ],
     next: () => 'contact',
   },
@@ -164,13 +167,6 @@ export const STEPS: Record<StepId, StepDef> = {
     tzNumber: 7,
     title: 'Куди надіслати розрахунок?',
     kind: 'contact',
-    next: () => 'submit',
-  },
-  shortForm: {
-    id: 'shortForm',
-    tzNumber: 7,
-    title: 'Опишіть задачу',
-    kind: 'short-form',
     next: () => 'submit',
   },
 };

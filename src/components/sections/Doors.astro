@@ -1,0 +1,109 @@
+---
+// Две двери главной (ТЗ v2): карточки с фото «Кухні» (kukhnia-06) и «Шафи та меблі» (shafa-01),
+// подписи категорий и стрелка. Ведут на посадочные /kukhni и /mebli.
+import Icon from '../ui/Icon.astro';
+import SectionTitle from '../ui/SectionTitle.astro';
+import { photoById, url } from '../../lib/portfolio';
+
+const doors = [
+  { href: '/kukhni', title: 'Кухні', sub: 'Прямі, кутові, П-подібні, з островом', photo: photoById('kukhnia-06'), focus: '55% 55%' },
+  { href: '/mebli', title: 'Шафи та меблі', sub: 'Шафи-купе, гардеробні, передпокої, дитячі, ТВ-зони', photo: photoById('shafa-01'), focus: '50% 55%' },
+];
+---
+
+<section data-block="doors" class="section-pad" aria-labelledby="doors-title">
+  <div class="container-site">
+    <SectionTitle id="doors-title" title="Що вам потрібно?" />
+    <ul class="doors">
+      {
+        doors.map((d) => (
+          <li>
+            <a href={d.href} class="door">
+              <span class="door__media" style={`--focus: ${d.focus}`}>
+                <img
+                  src={url(d.photo.thumb)}
+                  srcset={`${url(d.photo.thumb)} 720w, ${url(d.photo.src)} ${d.photo.width}w`}
+                  sizes="(min-width: 48rem) 45vw, 90vw"
+                  width={d.photo.width}
+                  height={d.photo.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span class="door__body">
+                <span class="door__text">
+                  <span class="door__title">{d.title}</span>
+                  <span class="door__sub">{d.sub}</span>
+                </span>
+                <Icon name="arrow-right" size={28} />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .doors {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .door {
+    display: grid;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .door__media {
+    display: block;
+    overflow: hidden;
+  }
+  .door__media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: var(--focus);
+    transition: transform 0.6s var(--ease-out);
+  }
+  .door__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+  .door__text {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .door__title {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+  .door__sub {
+    color: var(--color-ink-muted);
+  }
+  @media (hover: hover) {
+    .door:hover img {
+      transform: scale(1.03);
+    }
+  }
+  @media (min-width: 48rem) {
+    .doors {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .door__media img {
+      aspect-ratio: 4 / 3;
+    }
+    .door__body {
+      padding: 1.5rem 2rem;
+    }
+  }
+</style>

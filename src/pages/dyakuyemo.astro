@@ -1,24 +1,49 @@
 ---
-// /dyakuyemo — страница после заявки (минимальная, фаза 4; полная — фаза 5). noindex всегда.
+// /dyakuyemo — после заявки (ТЗ v2): текст результата квиза, три шага «Що далі», Instagram и TikTok. noindex всегда.
 // Формы кладут имя, способ связи и результат квиза в sessionStorage (result-store.ts); без них — общий текст.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import QuizResult from '../components/quiz/QuizResult.astro';
 import Button from '../components/ui/Button.astro';
 import SocialLinks from '../components/ui/SocialLinks.astro';
 import { contactLinks } from '../lib/contacts';
+
+const NEXT = [
+  { title: 'Переглянемо заявку', text: 'Подивимося ваші відповіді і, якщо треба, уточнимо деталі.' },
+  { title: 'Надішлемо розрахунок', text: 'У Viber, Telegram або зателефонуємо — як ви обрали, у робочий час.' },
+  { title: 'Приїдемо на замір', text: 'Домовимося про зручний час, заміряємо приміщення і зробимо дизайн-проєкт.' },
+];
 ---
 
 <BaseLayout title="Дякуємо — Вимір" description="Заявку прийнято." noindex>
   <section class="container-site thanks section-pad">
     <h1 class="text-h1">Заявку прийнято</h1>
     <QuizResult />
+
+    <div class="thanks__next">
+      <h2 class="text-h3">Що далі</h2>
+      <ol class="thanks__steps">
+        {
+          NEXT.map((s, i) => (
+            <li class="thanks__step">
+              <span class="thanks__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="thanks__step-title">{s.title}</span>
+              <span class="thanks__step-text">{s.text}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
     <div class="thanks__actions">
       <Button href={contactLinks.tel} variant="secondary" icon="phone">Подзвонити</Button>
       <Button href={contactLinks.viber} variant="secondary" icon="viber">Написати у Viber</Button>
-      <Button href="/" variant="outline">На головну</Button>
     </div>
-    <div class="thanks__actions" aria-label="Соцмережі">
-      <SocialLinks />
+
+    <div class="thanks__social">
+      <p>Поки чекаєте — подивіться наші роботи:</p>
+      <div class="thanks__actions" aria-label="Соцмережі">
+        <SocialLinks />
+      </div>
     </div>
   </section>
 </BaseLayout>
@@ -29,9 +54,37 @@ import { contactLinks } from '../lib/contacts';
     gap: var(--space-stack);
     max-width: calc(48rem + 2 * var(--space-gutter));
   }
+  .thanks__next {
+    display: grid;
+    gap: 1rem;
+  }
+  .thanks__steps {
+    display: grid;
+    gap: 1rem;
+  }
+  .thanks__step {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-line-strong);
+  }
+  .thanks__num {
+    font-family: var(--font-mono);
+    color: var(--color-oak);
+  }
+  .thanks__step-title {
+    font-weight: 600;
+  }
+  .thanks__step-text {
+    color: var(--color-ink-muted);
+  }
   .thanks__actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .thanks__social {
+    display: grid;
     gap: 0.75rem;
   }
 </style>

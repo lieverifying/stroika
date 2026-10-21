@@ -1,6 +1,6 @@
 ---
 // /yak-my-stvoriuiemo — «Як ми створюємо» (решение владельца, 2026-10-21): сюжеты кухни и шафи-купе по этапам,
-// этапы меняются прокруткой (src/components/story/Story.astro), в конце одна кнопка в квиз.
+// этапы меняются прокруткой (src/components/story/Story.astro), в конце кнопка «Хочу так само» в квиз (ТЗ v2).
 // Данные сюжетов — src/content/stories/*.json. Сюжет шафи — за флагом facts.flags.storyWardrobe.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Story, { type StoryData } from '../components/story/Story.astro';
@@ -19,7 +19,7 @@ import { facts } from '../content/facts';
     <Story story={kitchen as StoryData} />
     {facts.flags.storyWardrobe && <Story story={wardrobe as StoryData} />}
     <div class="stvoriuiemo__cta">
-      <Button href="/kukhni#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+      <Button href="/kukhni#kvyz" size="lg" icon="calculator" ctaPriority={3}>Хочу так само</Button>
     </div>
   </div>
 </BaseLayout>

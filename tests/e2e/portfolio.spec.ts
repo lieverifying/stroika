@@ -1,11 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-// «Наші роботи» (решение владельца, 2026-10-21): галерея из src/content/portfolio.json, блок на главной
-interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; thumb?: string; poster?: string; width: number; height: number; alt: string }
+// «Наші роботи» (ТЗ v2, 2026-10-21): галерея из src/content/portfolio.json — фото архива vymir-foto, блоки на главной и посадочных
+interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; thumb?: string; poster?: string; width: number; height: number; focus?: string; alt: string }
 const data = JSON.parse(readFileSync(new URL('../../src/content/portfolio.json', import.meta.url), 'utf8')) as {
   categories: { id: string; title: string }[];
-  featured: { kukhni: string[]; mebli: string[] };
+  featured: { home: string[]; kukhni: string[]; mebli: string[] };
   items: Item[];
 };
 const photos = (cat?: string) => data.items.filter((i) => i.type === 'photo' && (!cat || i.category === cat));
@@ -31,22 +31,29 @@ test.describe('/roboty', () => {
     }
   });
 
-  test('превью без обрезки: пропорции плитки — как у фото', async ({ page }) => {
+  test('карточки: 4:5 на телефоне, 1:1 с 768 px; горизонтальные фото — на две колонки; обрезка по focus', async ({ page, isMobile }) => {
     await page.goto('/roboty');
-    const ratios = await page.locator('.pf__item').evaluateAll((els) =>
+    const boxes = await page.locator('.pf__item').evaluateAll((els) =>
       els.map((e) => {
         const r = e.getBoundingClientRect();
-        const m = e.querySelector('img, video') as HTMLImageElement;
-        return { box: r.width / r.height, own: Number(m.getAttribute('width')) / Number(m.getAttribute('height')) };
+        const img = e.querySelector('img') as HTMLImageElement;
+        return { id: (e as HTMLElement).dataset.id!, ratio: r.width / r.height, wide: e.classList.contains('pf__item--wide'), pos: getComputedStyle(img).objectPosition };
       }),
     );
-    for (const { box, own } of ratios) expect(Math.abs(box / own - 1)).toBeLessThan(0.03);
+    for (const b of boxes) {
+      const item = data.items.find((i) => i.id === b.id)!;
+      expect(b.wide, b.id).toBe(item.width / item.height > 1.2);
+      if (!b.wide) expect(b.ratio, b.id).toBeCloseTo(isMobile ? 0.8 : 1, 1);
+      expect(b.pos, b.id).toBe(item.focus ?? '50% 50%');
+    }
+    const cols = await page.locator('.pf').evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(' ').length);
+    expect(cols).toBe(isMobile ? 2 : 3);
   });
 
-  test('вкладки «Усі» + 4 категории; фильтр и адрес #категорія; на телефоне вкладки листаются вбок', async ({ page, isMobile }) => {
+  test('вкладки «Усі · Кухні · Шафи · Гардеробні · Інші меблі»; фильтр и адрес #категорія; на телефоне вкладки листаются вбок', async ({ page, isMobile }) => {
     await page.goto('/roboty');
     const tabs = page.locator('[data-filter]');
-    await expect(tabs).toHaveText(['Усі', ...data.categories.map((c) => c.title)]);
+    await expect(tabs).toHaveText(['Усі', 'Кухні', 'Шафи', 'Гардеробні', 'Інші меблі']);
     for (const t of await tabs.all()) expect((await t.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     if (isMobile) {
       const strip = page.locator('.roboty__tabs');
@@ -54,8 +61,8 @@ test.describe('/roboty', () => {
       await expect(strip).toHaveCSS('overflow-x', 'auto');
     }
     await page.getByRole('button', { name: 'Кухні', exact: true }).click();
-    await expect(page.locator('.pf__item:visible')).toHaveCount(data.items.filter((i) => i.category === 'kuhni').length);
-    await expect(page).toHaveURL(/#kuhni$/);
+    await expect(page.locator('.pf__item:visible')).toHaveCount(data.items.filter((i) => i.category === 'kukhni').length);
+    await expect(page).toHaveURL(/#kukhni$/);
     await page.goto('/roboty#shafy');
     await expect(page.locator('[data-filter="shafy"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.pf__item:visible')).toHaveCount(data.items.filter((i) => i.category === 'shafy').length);
@@ -96,63 +103,35 @@ test.describe('/roboty', () => {
     await expect(lb(page)).toHaveAttribute('open', ''); // свайп не закрывает
   });
 
-  test('видео: muted, playsinline, loop, controls, preload="none", обложка; запуск только в видимой области', async ({ page }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { played: string[] };
-      w.played = [];
-      HTMLMediaElement.prototype.play = function () {
-        w.played.push(this.getAttribute('src') ?? '');
-        return Promise.resolve();
-      };
-    });
-    await page.goto('/roboty');
-    const videos = page.locator('video[data-pf-video]');
-    await expect(videos).toHaveCount(2);
-    for (const v of await videos.all()) {
-      for (const a of ['muted', 'playsinline', 'loop', 'controls']) await expect(v).toHaveAttribute(a, '');
-      await expect(v).toHaveAttribute('preload', 'none');
-      await expect(v).toHaveAttribute('poster', /\/portfolio\/video\/.+-poster\.webp$/);
-    }
-    expect(await page.evaluate(() => (window as unknown as { played: string[] }).played)).toEqual([]);
-    await videos.first().scrollIntoViewIfNeeded();
-    await expect.poll(() => page.evaluate(() => (window as unknown as { played: string[] }).played.length)).toBeGreaterThan(0);
-  });
-
-  test('отбор: убранных фото нет; в подписях нет «кафе» и «бар»', async ({ page }) => {
-    await page.goto('/roboty');
+  test('только архив vymir-foto: 21 фото, стеновых панелей нет, видео нет; kukhni-klasyka-01 — только в галерее', async () => {
     const ids = data.items.map((i) => i.id);
-    for (const gone of [
-      'kuhni-06', 'kuhni-07', 'kuhni-16', 'kuhni-19', 'shafy-09', 'interier-08', 'komertsiia-06', 'komertsiia-07', 'komertsiia-09', 'komertsiia-10',
-      // второй отбор (2026-10-21): инструменты, мусор, незаконченный потолок, люди, бары, кафе, неон
-      'kuhni-01', 'kuhni-04', 'kuhni-10', 'shafy-01', 'shafy-05', 'shafy-06', 'interier-03', 'interier-05', 'interier-07',
-      'komertsiia-01', 'komertsiia-03', 'komertsiia-04', 'komertsiia-05', 'komertsiia-08',
-    ])
-      expect(ids).not.toContain(gone);
-    const alts = await page.locator('.pf__item img, .pf__item video').evaluateAll((els) => els.map((e) => e.getAttribute('alt') ?? e.getAttribute('aria-label') ?? ''));
-    for (const a of alts) expect(a).not.toMatch(/кафе|ресторан|\bбар\b|барі|бару|лаунж-бар/i);
+    expect(ids).toHaveLength(21);
+    expect(ids.some((id) => id.startsWith('vyklucheno'))).toBe(false);
+    expect(data.items.every((i) => i.type === 'photo')).toBe(true);
+    for (const list of Object.values(data.featured)) expect(list).not.toContain('kukhni-klasyka-01');
   });
 });
 
 test.describe('посадочные: блок работ', () => {
-  test('/kukhni: 6 кухонь из featured.kukhni по порядку, «Усі кухні» → галерея, фото открывается на весь экран', async ({ page }) => {
+  test('/kukhni: 6 кухонь из featured.kukhni по порядку, «Усі роботи» → галерея, фото открывается на весь экран', async ({ page }) => {
     await page.goto('/kukhni');
     const block = page.locator('[data-block="3"]');
     await expect(block.locator('h2')).toHaveText('Наші кухні');
     expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured.kukhni);
-    await expect(block.getByRole('link', { name: 'Усі кухні' })).toHaveAttribute('href', '/roboty#kuhni');
+    await expect(block.getByRole('link', { name: 'Усі роботи' })).toHaveAttribute('href', '/roboty#kukhni');
     await block.locator('.pf__open').first().click();
     await expect(lb(page)).toHaveAttribute('open', '');
     await expect(count(page)).toHaveText('1 / 6');
   });
 
-  test('/mebli: 6 работ из featured.mebli, «Усі шафи та меблі» → галерея', async ({ page }) => {
+  test('/mebli: работы из featured.mebli, «Усі роботи» → галерея', async ({ page }) => {
     await page.goto('/mebli');
     const block = page.locator('[data-block="3"]');
     expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured.mebli);
-    await expect(block.getByRole('link', { name: 'Усі шафи та меблі' })).toHaveAttribute('href', '/roboty#shafy');
+    await expect(block.getByRole('link', { name: 'Усі роботи' })).toHaveAttribute('href', '/roboty#shafy');
   });
 
-  test('ряды заполнены целиком: крупно, по 2 фото в ряду на всех ширинах, высота в ряду одинаковая', async ({ page }) => {
+  test('ряды заполнены целиком: 2 в ряд на телефоне, 3 с 768 px, высота в ряду одинаковая', async ({ page, isMobile }) => {
     await page.goto('/kukhni');
     const rows = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => {
       const map = new Map<number, { h: number; right: number }[]>();
@@ -164,7 +143,7 @@ test.describe('посадочные: блок работ', () => {
       const gridRight = els[0].parentElement!.getBoundingClientRect().right;
       return [...map.values()].map((row) => ({ n: row.length, dh: Math.max(...row.map((x) => x.h)) - Math.min(...row.map((x) => x.h)), gap: gridRight - Math.max(...row.map((x) => x.right)) }));
     });
-    expect(rows.map((r) => r.n)).toEqual([2, 2, 2]);
+    expect(rows.map((r) => r.n)).toEqual(isMobile ? [2, 2, 2] : [3, 3]);
     for (const r of rows) {
       expect(r.dh).toBeLessThan(2);
       expect(r.gap).toBeLessThan(3);

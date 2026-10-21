@@ -1,17 +1,17 @@
 // Юнит-тесты конечного автомата квиза (ARCHITECTURE 4.2): чистые функции, без DOM
 import { describe, expect, test } from 'vitest';
 import { BRANCH_FIELDS, HAS_WARDROBE_WIDTH, PATHS, STEPS, branchOf } from '../../src/lib/quiz/config';
-import { answer, back, currentPath, isLastStep, progress, setTask, start } from '../../src/lib/quiz/machine';
+import { answer, back, currentPath, isLastStep, progress, start } from '../../src/lib/quiz/machine';
 import type { Branch, QuizState, StepId } from '../../src/lib/quiz/types';
 
 const T0 = 1_000;
 
 /** Ответы для прохода каждой ветки: [goal, ...значения single-шагов] */
 const WALKS: Record<string, { branch: Branch; values: string[] }> = {
-  kitchen: { branch: 'kitchen', values: ['kitchen', 'kutova', '3to4', 'mdf-film', 'quartz', '1to3m'] },
+  kitchen: { branch: 'kitchen', values: ['kitchen', 'kutova', '3to4', 'mdf-film', '3to6m'] },
   // шаг ширины есть, только если владелец прислал диапазоны (нет факта — нет шага)
   wardrobe: { branch: 'wardrobe', values: HAS_WARDROBE_WIDTH ? ['wardrobe', 'kupe', 'unknown', 'later'] : ['wardrobe', 'kupe', 'later'] },
-  other: { branch: 'short', values: ['other'] },
+  other: { branch: 'other', values: ['other', 'tumba', 'later'] },
 };
 
 /** Проходит ветку до конца, возвращает пройденные шаги и все промежуточные состояния */
@@ -66,10 +66,10 @@ describe('прохождение веток совпадает с PATHS', () => 
     });
   }
 
-  test('длины: кухня 7, шафа 5 (4 без диапазонов ширины), коротка 2', () => {
-    expect(walk(WALKS.kitchen.values).visited).toHaveLength(7);
+  test('длины (ТЗ v2): кухня 6, шафа 5, інші меблі 4', () => {
+    expect(walk(WALKS.kitchen.values).visited).toHaveLength(6);
     expect(walk(WALKS.wardrobe.values).visited).toHaveLength(HAS_WARDROBE_WIDTH ? 5 : 4);
-    expect(walk(WALKS.other.values).visited).toHaveLength(2);
+    expect(walk(WALKS.other.values).visited).toHaveLength(4);
   });
 
   test('isLastStep false на промежуточных шагах', () => {
@@ -84,8 +84,7 @@ describe('прохождение веток совпадает с PATHS', () => 
       kitchenShape: 'kutova',
       kitchenLength: '3to4',
       facade: 'mdf-film',
-      countertop: 'quartz',
-      timing: '1to3m',
+      timing: '3to6m',
     });
   });
 });
@@ -118,45 +117,45 @@ describe('смена ветки на шаге 1', () => {
   test('удаляет ответы чужих веток', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
-    s = back(back(back(back(back(back(s, 1), 1), 1), 1), 1), 1);
+    s = back(back(back(back(back(s, 1), 1), 1), 1), 1);
     expect(s.stepId).toBe('goal');
     s = answer(s, 'wardrobe', 2);
     expect(s.stepId).toBe('wardrobeType');
     // timing входит в поля обеих веток (kitchen и wardrobe), поэтому общий ответ остаётся
-    expect(s.answers).toEqual({ goal: 'wardrobe', timing: '1to3m' });
+    expect(s.answers).toEqual({ goal: 'wardrobe', timing: '3to6m' });
   });
 
   test('кухня -> шафа: уникальные поля кухни удалены', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
-    for (let i = 0; i < 6; i++) s = back(s, 1);
+    for (let i = 0; i < 5; i++) s = back(s, 1);
     s = answer(s, 'wardrobe', 2);
-    for (const f of ['kitchenShape', 'kitchenLength', 'facade', 'countertop'] as const) {
+    for (const f of ['kitchenShape', 'kitchenLength', 'facade'] as const) {
       expect(s.answers[f]).toBeUndefined();
     }
   });
 
-  test('шафа -> коротка: удаляются ответы шафы, task не трогается', () => {
+  test('шафа -> інші меблі: удаляются ответы шафы, кроме общего timing', () => {
     const { states } = walk(WALKS.wardrobe.values);
     let s = states[states.length - 1];
     for (let i = 0; i < PATHS.wardrobe.length - 1; i++) s = back(s, 1);
     s = answer(s, 'other', 2);
-    expect(s.stepId).toBe('shortForm');
-    expect(s.answers).toEqual({ goal: 'other' });
+    expect(s.stepId).toBe('otherType');
+    expect(s.answers).toEqual({ goal: 'other', timing: 'later' });
   });
 
-  test('other -> назад -> other: task сохраняется', () => {
+  test('other -> назад -> other: ответ «що саме» сохраняется', () => {
     let s = answer(start(T0), 'other', 1);
-    s = setTask(s, 'Тумба в передпокій', 2);
-    s = back(s, 3);
+    s = answer(s, 'tumba', 2);
+    s = back(back(s, 3), 3);
     s = answer(s, 'other', 4);
-    expect(s.answers).toEqual({ goal: 'other', task: 'Тумба в передпокій' });
+    expect(s.answers).toEqual({ goal: 'other', otherType: 'tumba' });
   });
 
   test('тот же goal повторно: ответы ветки сохраняются', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
-    for (let i = 0; i < 6; i++) s = back(s, 1);
+    for (let i = 0; i < 5; i++) s = back(s, 1);
     const before = { ...s.answers };
     s = answer(s, 'kitchen', 2);
     expect(s.answers).toEqual(before);
@@ -168,12 +167,12 @@ describe('смена ветки на шаге 1', () => {
     expect(s.answers).toEqual({ goal: 'kitchen' });
   });
 
-  test('BRANCH_FIELDS: после смены на short нет ни одного поля кухни и шафы', () => {
+  test('BRANCH_FIELDS: после смены на інші меблі нет ни одного поля кухни и шафы, кроме общего timing', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
-    for (let i = 0; i < 6; i++) s = back(s, 1);
+    for (let i = 0; i < 5; i++) s = back(s, 1);
     s = answer(s, 'other', 2);
-    for (const f of [...BRANCH_FIELDS.kitchen, ...BRANCH_FIELDS.wardrobe]) {
+    for (const f of [...BRANCH_FIELDS.kitchen, ...BRANCH_FIELDS.wardrobe].filter((x) => x !== 'timing')) {
       expect(s.answers[f]).toBeUndefined();
     }
   });
@@ -186,43 +185,34 @@ describe('answer: некорректные шаги', () => {
     expect(() => answer(final, 'x', 1)).toThrow();
   });
 
-  test('на shortForm бросает ошибку', () => {
+  test('на contact ветки інших меблів бросает ошибку', () => {
     const { final } = walk(WALKS.other.values);
+    expect(final.stepId).toBe('contact');
     expect(() => answer(final, 'x', 1)).toThrow();
   });
 });
 
-describe('setTask', () => {
-  test('сохраняет текст задачи и updatedAt', () => {
-    const s0 = answer(start(T0), 'other', 1);
-    const s = setTask(s0, 'Шафа в нішу', 50);
-    expect(s.answers.task).toBe('Шафа в нішу');
-    expect(s.updatedAt).toBe(50);
-    expect(s.stepId).toBe('shortForm');
-  });
-});
-
 describe('progress', () => {
-  test('старт: 1/7', () => {
-    expect(progress(start(T0))).toEqual({ current: 1, total: 7 });
+  test('старт: 1/6', () => {
+    expect(progress(start(T0))).toEqual({ current: 1, total: 6 });
   });
 
   test('preset с известной веткой: 1 / длина пути шафы', () => {
     expect(progress(start(T0, { goal: 'wardrobe' }))).toEqual({ current: 1, total: PATHS.wardrobe.length });
   });
 
-  test('шафа: 1/7 -> 2/5', () => {
+  test('шафа: 1/6 -> 2/5', () => {
     const s0 = start(T0);
-    expect(progress(s0)).toEqual({ current: 1, total: 7 });
+    expect(progress(s0)).toEqual({ current: 1, total: 6 });
     expect(progress(answer(s0, 'wardrobe', 1))).toEqual({ current: 2, total: PATHS.wardrobe.length });
   });
 
-  test('кухня: 1/7 -> 2/7', () => {
-    expect(progress(answer(start(T0), 'kitchen', 1))).toEqual({ current: 2, total: 7 });
+  test('кухня: 1/6 -> 2/6', () => {
+    expect(progress(answer(start(T0), 'kitchen', 1))).toEqual({ current: 2, total: 6 });
   });
 
-  test('коротка: 2/2', () => {
-    expect(progress(answer(start(T0), 'other', 1))).toEqual({ current: 2, total: 2 });
+  test('інші меблі: 2/4', () => {
+    expect(progress(answer(start(T0), 'other', 1))).toEqual({ current: 2, total: 4 });
   });
 
   test('последний шаг каждой ветки: current == total', () => {
@@ -240,7 +230,7 @@ describe('currentPath', () => {
 });
 
 describe('иммутабельность', () => {
-  test('answer/back/setTask не мутируют входное состояние', () => {
+  test('answer/back не мутируют входное состояние', () => {
     const s0 = answer(start(T0), 'kitchen', 1);
     const snap = structuredClone(s0);
     const s1 = answer(s0, 'kutova', 2);
@@ -250,16 +240,12 @@ describe('иммутабельность', () => {
     expect(s1.answers).not.toBe(s0.answers);
     back(s1, 3);
     expect(s1.history).toEqual(['goal', 'kitchenShape']);
-    const t0 = answer(start(T0), 'other', 1);
-    const tSnap = structuredClone(t0);
-    setTask(t0, 'x', 2);
-    expect(t0).toEqual(tSnap);
   });
 
   test('смена ветки не мутирует исходные ответы', () => {
     const { states } = walk(WALKS.kitchen.values);
     let s = states[states.length - 1];
-    for (let i = 0; i < 6; i++) s = back(s, 1);
+    for (let i = 0; i < 5; i++) s = back(s, 1);
     const snap = structuredClone(s);
     answer(s, 'wardrobe', 9);
     expect(s).toEqual(snap);

@@ -1,13 +1,13 @@
 ---
-// Нижняя панель на телефоне (< 1024 px): «Подзвонити» / «Viber» / «Розрахувати» (ARCHITECTURE.md 6.8).
+// Нижняя панель на телефоне (< 1024 px): «Подзвонити» / «Viber» / «Порахувати» (ТЗ v2).
 // Не перекрывает контент: body получает нижний отступ на высоту панели (global.css).
 // Прячется при фокусе в поле ввода, открытом меню или <dialog>.
-// «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (src/lib/cta-arbiter.ts).
+// «Порахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (src/lib/cta-arbiter.ts).
 import Icon from '../ui/Icon.astro';
 import { contactLinks } from '../../lib/contacts';
 import { landingOfPath, pagePath, quizHref } from '../../lib/landing';
 
-// «Розрахувати» — в квиз текущей посадочной (на остальных страницах — /kukhni)
+// «Порахувати» — в квиз текущей посадочной (на остальных страницах — /kukhni)
 const landing = landingOfPath(pagePath(Astro.url));
 ---
 
@@ -28,7 +28,7 @@ const landing = landingOfPath(pagePath(Astro.url));
     data-cta-deferred
   >
     <Icon name="calculator" />
-    <span>Розрахувати</span>
+    <span>Порахувати</span>
   </a>
 </nav>
 

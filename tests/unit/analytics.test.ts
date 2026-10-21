@@ -68,15 +68,15 @@ describe('quizStepEvents', () => {
     const contact = quizStepEvents(state, 'contact', 'wardrobe');
     expect(contact.events.map((e) => e.name)).toEqual(['quiz_step_7']);
   });
-  test('кухня даёт шаги 1–7', () => {
-    const { events, state } = walk('kitchen', ['kitchen', 'kutova', '3to4', 'dsp', 'quartz', '1to3m']);
+  test('кухня даёт шаги 1, 2, 3, 4, 6, 7 (шага «Стільниця» нет — ТЗ v2)', () => {
+    const { events, state } = walk('kitchen', ['kitchen', 'kutova', '3to4', 'dsp', '3to6m']);
     const all = [...events, ...quizStepEvents(state, 'contact', 'kitchen').events];
-    expect(all.map((e) => e.name)).toEqual(['quiz_start', ...[1, 2, 3, 4, 5, 6, 7].map((n) => `quiz_step_${n}`)]);
+    expect(all.map((e) => e.name)).toEqual(['quiz_start', ...[1, 2, 3, 4, 6, 7].map((n) => `quiz_step_${n}`)]);
   });
-  test('короткая форма: 1 и 7', () => {
-    const { events, state } = walk('short', ['other']);
-    const all = [...events, ...quizStepEvents(state, 'shortForm', 'short').events];
-    expect(all.map((e) => e.name)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_7']);
+  test('інші меблі: 1, 2, 6 и 7', () => {
+    const { events, state } = walk('other', ['other', 'tumba', 'later']);
+    const all = [...events, ...quizStepEvents(state, 'contact', 'other').events];
+    expect(all.map((e) => e.name)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_6', 'quiz_step_7']);
   });
   test('все шаги ветки покрыты tzNumber из PATHS', () => {
     const { events, state } = walk('wardrobe', wardrobe);
@@ -123,7 +123,7 @@ describe('quizStepEvents', () => {
     expect(r.events.map((e) => e.name)).toEqual(['quiz_step_1']);
   });
   test('в параметрах нет имени и телефона', () => {
-    const { events } = walk('kitchen', ['kitchen', 'kutova', '3to4', 'dsp', 'quartz', '1to3m']);
+    const { events } = walk('kitchen', ['kitchen', 'kutova', '3to4', 'dsp', '3to6m']);
     for (const e of events) {
       expect(Object.keys(e.params).join()).not.toMatch(/name|phone|tel/i);
       expect(Object.values(e.params).join()).not.toMatch(/\+380|\d{9}/);

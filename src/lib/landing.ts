@@ -1,7 +1,7 @@
 /**
- * Две посадочные (решение владельца, 2026-10-21): /kukhni и /mebli. «/» — экран выбора.
- * Посадочная определяет, куда ведут «Розрахувати» и «Безкоштовний замір», какая ветка квиза выбрана
- * и какой страницей-источником помечена заявка в аналитике (kukhni или mebli).
+ * Две посадочные (2026-10-21): /kukhni и /mebli. «/» — главная бренда (ТЗ v2).
+ * Посадочная определяет, куда ведёт «Порахувати вартість» и какой страницей-источником помечена заявка
+ * в аналитике (kukhni или mebli).
  */
 export type Landing = 'kukhni' | 'mebli';
 
@@ -20,9 +20,8 @@ export function landingOfPath(path: string): Landing | null {
   return null;
 }
 
-/** Ссылки «в квиз» и «на замер»: на посадочной — на ней же, на остальных страницах — на /kukhni */
+/** Ссылка «в квиз»: на посадочной — на ней же, на остальных страницах — на /kukhni (шаг 1 квиза — все варианты) */
 export const quizHref = (landing: Landing | null) => `/${landing ?? 'kukhni'}#kvyz`;
-export const zamirHref = (landing: Landing | null) => `/${landing ?? 'kukhni'}#zamir`;
 
 const KEY = 'vymir.landing';
 

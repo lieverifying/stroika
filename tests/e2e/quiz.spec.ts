@@ -24,27 +24,45 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
   });
 
-  test('ветка кухни доходит до шага контакта, прогресс 1/7 … 7/7', async ({ page }) => {
+  test('ветка кухни (ТЗ v2): форма → довжина → фасади → коли → контакт, прогресс 1/6 … 6/6', async ({ page }) => {
     await openQuiz(page);
-    await expect(progressText(page)).toHaveText('Крок 1 з 7');
+    await expect(progressText(page)).toHaveText('Крок 1 з 6');
     await choose(page, 'Кухня');
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
-    await expect(progressText(page)).toHaveText('Крок 2 з 7');
+    await expect(progressText(page)).toHaveText('Крок 2 з 6');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['Пряма', 'Кутова', 'П-подібна', 'З островом']);
     await choose(page, 'Кутова');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['До 3 м', '3–4 м', '4–5 м', 'Більше 5 м', 'Не знаю — заміряємо']);
     await choose(page, '3–4 м');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['МДФ у плівці', 'Фарбований МДФ', 'ДСП', 'Акрил', 'HPL', 'Порадьте']);
     await choose(page, 'Фарбований МДФ');
-    await choose(page, 'Кварц або акрил');
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'timing');
-    await choose(page, 'Через 1–3 місяці');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['Протягом 3 місяців', 'Через 3–6 місяців', 'Пізніше', 'Ще не знаю']);
+    await choose(page, 'Через 3–6 місяців');
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'contact');
-    await expect(progressText(page)).toHaveText('Крок 7 з 7');
+    await expect(progressText(page)).toHaveText('Крок 6 з 6');
   });
 
-  test('шафа: прогресс 1/7 → 2/4 (шага ширины нет, пока нет диапазонов от владельца)', async ({ page }) => {
+  test('шафа (ТЗ v2): тип → ширина → коли → контакт, прогресс 2/5', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
-    await expect(progressText(page)).toHaveText('Крок 2 з 4');
+    await expect(progressText(page)).toHaveText('Крок 2 з 5');
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'wardrobeType');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['Купе', 'Розпашна', 'Гардеробна']);
+    await choose(page, 'Купе');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'wardrobeWidth');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['До 1,5 м', '1,5–2,5 м', 'Більше 2,5 м', 'Не знаю']);
+  });
+
+  test('інші меблі (ТЗ v2): що саме → коли → контакт, прогресс 2/4', async ({ page }) => {
+    await openQuiz(page);
+    await choose(page, 'Інші меблі');
+    await expect(progressText(page)).toHaveText('Крок 2 з 4');
+    await expect(visibleStep(page).getByRole('radio')).toHaveText(['Передпокій', 'Дитяча', 'Тумба у ванну', 'ТВ-зона', 'Меблі для бізнесу', 'Інше']);
+    await choose(page, 'Тумба у ванну');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'timing');
+    await choose(page, 'Пізніше');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'contact');
   });
 
   test('«Назад» дважды — выбранный ответ подсвечен; на шаге 1 «Назад» скрыт', async ({ page }) => {
@@ -78,7 +96,7 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await resume.click();
     await expect(resume).toBeHidden();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'facade');
-    await expect(progressText(page)).toHaveText('Крок 4 з 7');
+    await expect(progressText(page)).toHaveText('Крок 4 з 6');
     // имя и телефон в хранилище не попадают — их там и нет: только ответы
     const saved = await page.evaluate(() => localStorage.getItem('vymir.quiz.v1') ?? '');
     expect(saved).toContain('"kitchenShape":"p-podibna"');
@@ -98,17 +116,16 @@ test.describe('квиз: переходы, «Назад», восстановл�
   test('/?kvyz=shafa#kvyz заранее выбирает шафу', async ({ page }) => {
     await openQuiz(page, '/kukhni?kvyz=shafa#kvyz');
     await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'true');
-    await expect(progressText(page)).toHaveText('Крок 1 з 4');
+    await expect(progressText(page)).toHaveText('Крок 1 з 5');
   });
 
-  test('«Почати заново» сбрасывает ответы — к ветке, выбранной на посадочной', async ({ page }) => {
+  test('«Почати заново» сбрасывает ответы: шаг 1 без выбора', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
-    await choose(page, 'Шафа-купе');
+    await choose(page, 'Купе');
     await quiz(page).locator('[data-quiz-restart]').click();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
-    // на /kukhni заранее выбрана «Кухня», ответы шафы стёрты
-    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'true');
+    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'false');
     await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'false');
     await expect(quiz(page).locator('[data-quiz-restart]')).toBeHidden();
   });
@@ -125,11 +142,12 @@ test.describe('квиз: переходы, «Назад», восстановл�
   });
 });
 
-test.describe('квиз: шаг контакта и коротка форма', () => {
+test.describe('квиз: шаг контакта', () => {
   async function toContact(page: Page) {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
-    await choose(page, 'Шафа-купе');
+    await choose(page, 'Купе');
+    await choose(page, 'Не знаю');
     await choose(page, 'Пізніше');
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'contact');
   }
@@ -177,16 +195,6 @@ test.describe('квиз: шаг контакта и коротка форма', 
     await expect(submit).toBeInViewport();
   });
 
-  test('«Інші меблі» ведёт на короткую форму 2 из 2, задача обязательна', async ({ page }) => {
-    await openQuiz(page);
-    await choose(page, 'Інші меблі');
-    await expect(visibleStep(page)).toHaveAttribute('data-step', 'shortForm');
-    await expect(progressText(page)).toHaveText('Крок 2 з 2');
-    await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
-    await expect(page.locator('#quiz-short-task')).toBeFocused();
-    await expect(page.locator('#quiz-short-task-error')).toBeVisible();
-  });
-
   test('шаг 1: четыре варианта, ремонта нет', async ({ page }) => {
     await openQuiz(page);
     await expect(visibleStep(page).getByRole('radio')).toHaveText(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
@@ -202,8 +210,8 @@ test.describe('квиз: шаг контакта и коротка форма', 
 
   test('шаг сроков: «Протягом 3 місяців» вместо «до Нового року»', async ({ page }) => {
     await openQuiz(page);
-    await choose(page, 'Шафа або гардеробна');
-    await choose(page, 'Шафа-купе');
+    await choose(page, 'Інші меблі');
+    await choose(page, 'Дитяча');
     await expect(visibleStep(page).getByRole('radio').first()).toHaveText('Протягом 3 місяців');
     await expect(visibleStep(page)).not.toContainText('Нового року');
   });
@@ -218,7 +226,8 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
     await choose(page, 'Гардеробна');
-    await choose(page, 'Через 1–3 місяці');
+    await choose(page, '1,5–2,5 м');
+    await choose(page, 'Через 3–6 місяців');
     await page.locator('#quiz-name').fill('Олена');
     await page.locator('#quiz-phone').click();
     await page.locator('#quiz-phone').pressSequentially('0671234567');
@@ -242,13 +251,14 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     ] as const) {
       await openQuiz(page);
       await choose(page, 'Інші меблі');
-      await page.locator('#quiz-short-task').fill('Тумба у ванну');
+      await choose(page, 'Тумба у ванну');
+      await choose(page, 'Ще не знаю');
       await visibleStep(page).getByRole('radio', { name: method }).check();
-      await page.locator('#quiz-short-name').fill('Олена');
-      await page.locator('#quiz-short-phone').click();
-      await page.locator('#quiz-short-phone').pressSequentially('0671234567');
-      await page.locator('#quiz-short-consent').check();
-      await visibleStep(page).getByRole('button', { name: 'Надіслати заявку' }).click();
+      await page.locator('#quiz-name').fill('Олена');
+      await page.locator('#quiz-phone').click();
+      await page.locator('#quiz-phone').pressSequentially('0671234567');
+      await page.locator('#quiz-consent').check();
+      await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
       await expect(page).toHaveURL(/\/dyakuyemo$/);
       await expect(page.locator('[data-thanks]')).toHaveText(text);
     }
@@ -265,7 +275,7 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
   });
 });
 
-test('события: ветка шафы — ровно quiz_start, quiz_step_1/2/6/7 (без шага ширины); «Назад» не дублирует; без имени и телефона', async ({ page }) => {
+test('события: ветка шафы — ровно quiz_start, quiz_step_1/2/3/6/7; «Назад» не дублирует; без имени и телефона', async ({ page }) => {
   // dataLayer пропадает при переходе на /dyakuyemo — копируем события в sessionStorage
   await page.addInitScript(() => {
     const w = window as unknown as { dataLayer: unknown[] };
@@ -280,9 +290,10 @@ test('события: ветка шафы — ровно quiz_start, quiz_step_1
   });
   await openQuiz(page);
   await choose(page, 'Шафа або гардеробна');
-  await choose(page, 'Розпашна шафа');
+  await choose(page, 'Розпашна');
   await quiz(page).locator('[data-quiz-back]').click();
-  await choose(page, 'Шафа-купе'); // повторный выбор шага 2 — без нового quiz_step_2
+  await choose(page, 'Купе'); // повторный выбор шага 2 — без нового quiz_step_2
+  await choose(page, 'Більше 2,5 м');
   await choose(page, 'Пізніше');
   await page.locator('#quiz-name').fill('Олена');
   await page.locator('#quiz-phone').click();
@@ -293,7 +304,7 @@ test('события: ветка шафы — ровно quiz_start, quiz_step_1
   const events = (await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.dl') ?? '[]') as { event: string }[])).filter((e) =>
     e.event.startsWith('quiz_'),
   );
-  expect(events.map((e) => e.event)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_6', 'quiz_step_7']);
+  expect(events.map((e) => e.event)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_3', 'quiz_step_6', 'quiz_step_7']);
   const dump = JSON.stringify(events);
   expect(dump).not.toContain('Олена');
   expect(dump).not.toMatch(/671234567|phone|name/);
@@ -318,7 +329,7 @@ test.describe('квиз за 60 секунд (критерий фазы 4)', () 
     };
 
     const t0 = Date.now();
-    for (const label of ['Кухня', 'Кутова', '3–4 м', 'Фарбований МДФ', 'Кварц або акрил', 'Через 1–3 місяці']) {
+    for (const label of ['Кухня', 'Кутова', '3–4 м', 'Фарбований МДФ', 'Через 3–6 місяців']) {
       await checkScreen();
       await think(page);
       await choose(page, label);
@@ -347,7 +358,7 @@ test('320 px: ни на одном шаге квиза страница не е�
   const noOverflow = async () =>
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   await openQuiz(page);
-  for (const label of ['Кухня', 'З островом', 'Не знаю — приїдемо заміряти', 'Порадьте', 'Ще не вирішили', 'Пізніше']) {
+  for (const label of ['Кухня', 'З островом', 'Не знаю — заміряємо', 'Порадьте', 'Пізніше']) {
     await noOverflow();
     await choose(page, label);
   }
@@ -355,8 +366,8 @@ test('320 px: ни на одном шаге квиза страница не е�
   await quiz(page).locator('[data-quiz-restart]').click();
   await choose(page, 'Шафа або гардеробна');
   await choose(page, 'Гардеробна');
-  await noOverflow(); // шаг сроков (шага ширины нет, пока нет диапазонов)
+  await noOverflow(); // шаг ширины
   await quiz(page).locator('[data-quiz-restart]').click();
   await choose(page, 'Інші меблі');
-  await noOverflow(); // коротка форма
+  await noOverflow(); // «що саме»
 });

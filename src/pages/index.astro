@@ -1,167 +1,28 @@
 ---
-// «/» — экран выбора (решение владельца, 2026-10-21): логотип и строка, две большие фотоплитки на весь экран
-// («Кухні» → /kukhni, «Шафи та меблі» → /mebli; на телефоне одна под другой), внизу телефон и Viber. Больше ничего:
-// без шапки, подвала и нижней панели (BaseLayout bare).
+// «/» — главная бренда (ТЗ v2, 2026-10-21): кто мы, три обіцянки, вход в «Кухні» и «Шафи та меблі».
+// 1 первый экран → 2 три обіцянки → 3 две двери → 4 «Як ми створюємо» (тёмный блок) → 5 роботи (6 фото разных категорий)
+// → 6 «Без колл-центру» → 7 финал. Шапка, подвал и нижняя панель — в BaseLayout.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Button from '../components/ui/Button.astro';
-import Icon from '../components/ui/Icon.astro';
-import { facts } from '../content/facts';
-import { contactLinks } from '../lib/contacts';
-import { photoById, url } from '../lib/portfolio';
-
-const tiles = [
-  { href: '/kukhni', label: 'Кухні', photo: photoById('kuhni-21'), focus: '50% 55%' },
-  { href: '/mebli', label: 'Шафи та меблі', photo: photoById('shafy-08'), focus: '50% 45%' },
-];
+import HomeHero from '../components/sections/HomeHero.astro';
+import Promises from '../components/sections/Promises.astro';
+import Doors from '../components/sections/Doors.astro';
+import StoryTeaser from '../components/sections/StoryTeaser.astro';
+import Portfolio from '../components/sections/Portfolio.astro';
+import NoCallCenter from '../components/sections/NoCallCenter.astro';
+import FinalCta from '../components/sections/FinalCta.astro';
+import { quizHref } from '../lib/landing';
+import { FEATURED } from '../lib/portfolio';
 ---
 
 <BaseLayout
   title="Вимір — кухні та корпусні меблі під ваш розмір у Черкасах"
-  description="Кухні, шафи, гардеробні та корпусні меблі на замовлення: Черкаси та область. Оберіть, що вам потрібно."
-  bare
+  description="Меблі, які точно підходять: кухні, шафи та гардеробні на замовлення. Замір, дизайн-проєкт і монтаж — Черкаси та область."
 >
-  <div class="choice">
-    <header class="choice__top container-site">
-      <img src="/brand/logo.svg" alt="Вимір" width="148" height="32" class="choice__logo" />
-      <h1 class="choice__title">Корпусні меблі під ваш розмір у Черкасах</h1>
-    </header>
-
-    <nav class="choice__tiles" aria-label="Оберіть, що потрібно">
-      {
-        tiles.map((t, i) => (
-          <a href={t.href} class="choice__tile" style={`--focus: ${t.focus}`}>
-            <img
-              src={url(t.photo.src)}
-              srcset={`${url(t.photo.thumb)} 640w, ${url(t.photo.src)} ${t.photo.width}w`}
-              sizes="(min-width: 64rem) 50vw, 100vw"
-              width={t.photo.width}
-              height={t.photo.height}
-              alt=""
-              fetchpriority={i === 0 ? 'high' : undefined}
-              decoding="async"
-            />
-            <span class="choice__label">
-              {t.label}
-              <Icon name="arrow-right" size={28} />
-            </span>
-          </a>
-        ))
-      }
-    </nav>
-
-    <footer class="choice__bottom container-site">
-      <a href={contactLinks.tel} class="choice__phone">
-        <Icon name="phone" />
-        {facts.contacts.phoneDisplay}
-      </a>
-      <Button href={contactLinks.viber} variant="secondary" icon="viber">Viber</Button>
-    </footer>
-  </div>
+  <HomeHero quizHref={quizHref(null)} />
+  <Promises />
+  <Doors />
+  <StoryTeaser />
+  <Portfolio title="Наші роботи" items={FEATURED.home} moreHref="/roboty" moreLabel="Усі роботи" />
+  <NoCallCenter />
+  <FinalCta />
 </BaseLayout>
-
-<style>
-  /* Весь экран: строка сверху, плитки, строка снизу */
-  .choice {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    min-height: 100svh;
-  }
-  .choice__top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem 1.5rem;
-    padding-block: 1rem;
-  }
-  .choice__logo {
-    height: 2rem;
-    width: auto;
-  }
-  .choice__title {
-    font-size: var(--text-lead);
-    line-height: var(--text-lead--line-height);
-    font-weight: 600;
-  }
-  .choice__tiles {
-    display: grid;
-    grid-auto-rows: minmax(15rem, 1fr);
-    gap: 0.5rem;
-    padding-inline: var(--space-gutter);
-  }
-  .choice__tile {
-    position: relative;
-    display: block;
-    overflow: hidden;
-    border-radius: var(--radius-lg);
-    background: var(--color-graphite);
-  }
-  .choice__tile img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: var(--focus);
-    transition: transform 0.6s var(--ease-out);
-  }
-  /* Затемнение снизу — подпись белым читается на любом фото (контраст AA) */
-  .choice__tile::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgb(30 33 36 / 0.85) 0%, rgb(30 33 36 / 0.35) 40%, transparent 70%);
-  }
-  .choice__label {
-    position: absolute;
-    left: 1.25rem;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--color-white);
-    font-family: var(--font-display);
-    font-size: var(--text-h2);
-    line-height: var(--text-h2--line-height);
-    font-weight: var(--font-display-weight);
-  }
-  .choice__tile:focus-visible {
-    outline: 3px solid var(--color-graphite);
-    outline-offset: 3px;
-  }
-  @media (hover: hover) {
-    .choice__tile:hover img {
-      transform: scale(1.03);
-    }
-  }
-  .choice__bottom {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding-block: 1rem calc(1rem + env(safe-area-inset-bottom));
-  }
-  .choice__phone {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: var(--control-h);
-    font-family: var(--font-mono);
-    font-size: var(--text-lead);
-    font-weight: 500;
-  }
-  @media (min-width: 64rem) {
-    .choice__tiles {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-auto-rows: 1fr;
-      gap: 0.75rem;
-    }
-    .choice__label {
-      left: 2rem;
-      bottom: 2rem;
-    }
-  }
-</style>

@@ -1,56 +1,53 @@
 ---
-// Блок 13 — финал главной (решение владельца, 2026-10-21): крупные «Подзвонити» и «Viber» + короткая форма замера
-// (ім'я, телефон, согласие). Якорь #zamir — сюда ведёт кнопка шапки без JS.
-import ZamirForm from '../forms/ZamirForm.astro';
+// Финал главной и посадочных (ТЗ v2): тёмный блок «Скажіть розмір — ми скажемо ціну» и кнопки Viber, Telegram, Подзвонити.
+// Якорь #zamir — сюда ведут старые ссылки «на замір».
 import Button from '../ui/Button.astro';
-import SectionTitle from '../ui/SectionTitle.astro';
+import DimLine from '../ui/DimLine.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
-
-interface Props {
-  subtitle: string;
-  /** Откуда заявка — уходит в заявке (source) */
-  source: string;
-}
-const { subtitle, source } = Astro.props;
 ---
 
-<section id="zamir" data-block="13" class="section-pad" aria-labelledby="final-title">
-  <div class="container-site final">
-    <div class="final__contact">
-      <SectionTitle id="final-title" title="Безкоштовний замір" subtitle={subtitle} />
-      <div class="final__buttons">
-        <Button href={contactLinks.tel} variant="secondary" size="lg" icon="phone" fullWidth>Подзвонити</Button>
-        <Button href={contactLinks.viber} variant="secondary" size="lg" icon="viber" fullWidth>Viber</Button>
-      </div>
-      <p class="final__phone"><a href={contactLinks.tel}>{facts.contacts.phoneDisplay}</a></p>
+<section id="zamir" data-block="13" class="final on-dark section-pad" aria-labelledby="final-title">
+  <div class="container-site final__inner">
+    <DimLine label="ваш розмір, мм" class="final__dim" />
+    <h2 id="final-title" class="text-h2">Скажіть розмір — ми скажемо ціну</h2>
+    <p class="final__lead">Надішліть розміри або фото приміщення — розрахунок прийде в месенджер.</p>
+    <div class="final__buttons">
+      <Button href={contactLinks.viber} variant="light" icon="viber" fullWidth>Viber</Button>
+      <Button href={contactLinks.telegram} variant="light" icon="telegram" fullWidth>Telegram</Button>
+      <Button href={contactLinks.tel} variant="outline" icon="phone" fullWidth>Подзвонити</Button>
     </div>
-    <div class="final__form">
-      <ZamirForm compact source={source} />
-    </div>
+    <p class="final__phone"><a href={contactLinks.tel}>{facts.contacts.phoneDisplay}</a></p>
   </div>
 </section>
 
 <style>
   .final {
-    display: grid;
-    gap: var(--space-stack);
+    background: var(--color-graphite);
+    color: var(--color-plaster);
   }
-  .final__contact {
+  .final__inner {
     display: grid;
-    align-content: start;
+    gap: 1.25rem;
+    justify-items: start;
+  }
+  .final__inner :global(.final__dim) {
+    max-width: 16rem;
+    color: var(--color-ink-muted-dark);
+  }
+  .final__lead {
+    max-width: 40rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-ink-muted-dark);
   }
   .final__buttons {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
-  }
-  .final__buttons :global(.btn) {
-    min-height: 4rem;
-    font-size: var(--text-lead);
+    width: 100%;
+    margin-top: 0.5rem;
   }
   .final__phone {
-    margin-top: 1rem;
     font-family: var(--font-mono);
     font-size: var(--text-lead);
   }
@@ -59,21 +56,10 @@ const { subtitle, source } = Astro.props;
     align-items: center;
     min-height: var(--control-h);
   }
-  .final__form {
-    padding: 1.25rem;
-    border-radius: var(--radius-lg);
-    background: var(--color-white);
-  }
   @media (min-width: 48rem) {
-    .final__form {
-      padding: 2rem;
-    }
-  }
-  @media (min-width: 64rem) {
-    .final {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 4rem;
-      align-items: start;
+    .final__buttons {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 44rem;
     }
   }
 </style>

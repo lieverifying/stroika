@@ -2,340 +2,277 @@
   "base": "/portfolio/",
   "categories": [
     {
-      "id": "kuhni",
+      "id": "kukhni",
       "title": "Кухні"
     },
     {
       "id": "shafy",
-      "title": "Шафи та гардеробні"
+      "title": "Шафи"
     },
     {
-      "id": "interier",
-      "title": "Меблі та інтер’єр"
+      "id": "garderobni",
+      "title": "Гардеробні"
     },
     {
-      "id": "komertsiia",
-      "title": "Комерційні об’єкти"
+      "id": "inshi",
+      "title": "Інші меблі"
     }
   ],
   "featured": {
+    "home": [
+      "kukhnia-09",
+      "shafa-03",
+      "kukhnia-11",
+      "garderobna-01",
+      "kukhnia-14",
+      "tv-zona-01"
+    ],
     "kukhni": [
-      "kuhni-18",
-      "kuhni-21",
-      "kuhni-15",
-      "kuhni-03",
-      "kuhni-14",
-      "kuhni-17"
+      "kukhnia-05",
+      "kukhnia-09",
+      "kukhnia-11",
+      "kukhnia-02",
+      "kukhnia-10",
+      "kukhnia-14"
     ],
     "mebli": [
-      "interier-01",
-      "komertsiia-02",
-      "shafy-08",
-      "komertsiia-11",
-      "shafy-10",
-      "shafy-03"
+      "shafa-03",
+      "garderobna-01",
+      "tv-zona-01",
+      "shafa-02"
     ]
   },
   "items": [
     {
-      "id": "kuhni-02",
+      "id": "kukhnia-01",
       "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-02.webp",
-      "thumb": "img/kuhni/kuhni-02-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Кутова кухня в бежевих тонах зі стільницею під мармур"
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-01.webp",
+      "thumb": "img/kukhni/kukhnia-01-thumb.webp",
+      "width": 1254,
+      "height": 1254,
+      "focus": "50% 60%",
+      "alt": "Пряма кухня з фасадами під бетон і білими верхніми шафами"
     },
     {
-      "id": "kuhni-03",
+      "id": "kukhnia-02",
       "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-03.webp",
-      "thumb": "img/kuhni/kuhni-03-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Кухня з бежевими фасадами, підсвіткою та мармуровим фартухом"
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-02.webp",
+      "thumb": "img/kukhni/kukhnia-02-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 50%",
+      "alt": "Кутова кухня з бежевими фасадами і стільницею під мармур"
     },
     {
-      "id": "kuhni-05",
+      "id": "kukhnia-03",
       "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-05.webp",
-      "thumb": "img/kuhni/kuhni-05-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Кухня з фасадами під дерево і барною стійкою"
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-03.webp",
+      "thumb": "img/kukhni/kukhnia-03-thumb.webp",
+      "width": 941,
+      "height": 1672,
+      "focus": "50% 55%",
+      "alt": "Пряма кухня з білими верхніми шафами і сірими нижніми"
     },
     {
-      "id": "kuhni-08",
+      "id": "kukhnia-04",
       "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-08.webp",
-      "thumb": "img/kuhni/kuhni-08-thumb.webp",
-      "width": 1280,
-      "height": 960,
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-04.webp",
+      "thumb": "img/kukhni/kukhnia-04-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 55%",
+      "alt": "Кухня з високими шафами до стелі і білими верхніми фасадами"
+    },
+    {
+      "id": "kukhnia-05",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-05.webp",
+      "thumb": "img/kukhni/kukhnia-05-thumb.webp",
+      "width": 1254,
+      "height": 1254,
+      "focus": "50% 50%",
+      "alt": "Кутова графітова кухня з фартухом під дерево і підсвіткою"
+    },
+    {
+      "id": "kukhnia-06",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-06.webp",
+      "thumb": "img/kukhni/kukhnia-06-thumb.webp",
+      "width": 1122,
+      "height": 1402,
+      "focus": "55% 55%",
+      "alt": "Кухня з островом, графітовими фасадами і полицями під дерево"
+    },
+    {
+      "id": "kukhnia-07",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-07.webp",
+      "thumb": "img/kukhni/kukhnia-07-thumb.webp",
+      "width": 1675,
+      "height": 939,
+      "focus": "50% 50%",
+      "alt": "Пряма графітова кухня зі вставкою під дерево"
+    },
+    {
+      "id": "kukhnia-08",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-08.webp",
+      "thumb": "img/kukhni/kukhnia-08-thumb.webp",
+      "width": 1254,
+      "height": 1254,
+      "focus": "45% 50%",
+      "alt": "Біла кухня з глянцевими фасадами і стільницею під дерево"
+    },
+    {
+      "id": "kukhnia-09",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-09.webp",
+      "thumb": "img/kukhni/kukhnia-09-thumb.webp",
+      "width": 1122,
+      "height": 1402,
+      "focus": "50% 55%",
+      "alt": "Кухня з барною стійкою під дерево і відкритими полицями"
+    },
+    {
+      "id": "kukhnia-10",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-10.webp",
+      "thumb": "img/kukhni/kukhnia-10-thumb.webp",
+      "width": 1105,
+      "height": 1424,
+      "focus": "50% 55%",
+      "alt": "Кутова біла кухня з вітриною і верхніми шафами під дерево"
+    },
+    {
+      "id": "kukhnia-11",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-11.webp",
+      "thumb": "img/kukhni/kukhnia-11-thumb.webp",
+      "width": 1231,
+      "height": 1278,
+      "focus": "50% 55%",
+      "alt": "Кухня-вітальня з графітовими шафами до стелі і фасадами під дерево"
+    },
+    {
+      "id": "kukhnia-12",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-12.webp",
+      "thumb": "img/kukhni/kukhnia-12-thumb.webp",
+      "width": 1448,
+      "height": 1086,
+      "focus": "50% 55%",
+      "alt": "Кутова сіра кухня з вбудованою духовою шафою"
+    },
+    {
+      "id": "kukhnia-13",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-13.webp",
+      "thumb": "img/kukhni/kukhnia-13-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 50%",
+      "alt": "Сіра кухня з фартухом під мармур"
+    },
+    {
+      "id": "kukhnia-14",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-14.webp",
+      "thumb": "img/kukhni/kukhnia-14-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 55%",
+      "alt": "Кутова біла кухня з вбудованою технікою"
+    },
+    {
+      "id": "kukhnia-15",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhnia-15.webp",
+      "thumb": "img/kukhni/kukhnia-15-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 50%",
+      "alt": "Колона шаф під дерево з вбудованою технікою"
+    },
+    {
+      "id": "kukhni-klasyka-01",
+      "type": "photo",
+      "category": "kukhni",
+      "src": "img/kukhni/kukhni-klasyka-01.webp",
+      "thumb": "img/kukhni/kukhni-klasyka-01-thumb.webp",
+      "width": 1448,
+      "height": 1086,
+      "focus": "50% 55%",
       "alt": "Класична біла кухня з фрезерованими фасадами"
     },
     {
-      "id": "kuhni-09",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-09.webp",
-      "thumb": "img/kuhni/kuhni-09-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Темна кухня з фартухом під камінь"
-    },
-    {
-      "id": "kuhni-11",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-11.webp",
-      "thumb": "img/kuhni/kuhni-11-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Оливкова кухня з дерев'яною стільницею"
-    },
-    {
-      "id": "kuhni-12",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-12.webp",
-      "thumb": "img/kuhni/kuhni-12-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Сіра кухня з колонами під дерево для техніки"
-    },
-    {
-      "id": "kuhni-13",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-13.webp",
-      "thumb": "img/kuhni/kuhni-13-thumb.webp",
-      "width": 750,
-      "height": 750,
-      "alt": "Кухня з чорною стільницею під мармур і дерев'яними верхніми шафами"
-    },
-    {
-      "id": "kuhni-14",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-14.webp",
-      "thumb": "img/kuhni/kuhni-14-thumb.webp",
-      "width": 1080,
-      "height": 1079,
-      "alt": "Графітова кутова кухня з дерев'яною нішею та підсвіткою"
-    },
-    {
-      "id": "kuhni-15",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-15.webp",
-      "thumb": "img/kuhni/kuhni-15-thumb.webp",
-      "width": 1280,
-      "height": 852,
-      "alt": "Темна кухня з жовтими акцентами та обідньою зоною"
-    },
-    {
-      "id": "kuhni-17",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-17.webp",
-      "thumb": "img/kuhni/kuhni-17-thumb.webp",
-      "width": 1080,
-      "height": 1080,
-      "alt": "Сіра кухня з фартухом під цеглу"
-    },
-    {
-      "id": "kuhni-18",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-18.webp",
-      "thumb": "img/kuhni/kuhni-18-thumb.webp",
-      "width": 1079,
-      "height": 1079,
-      "alt": "Кухня під бетон з білими верхніми шафами"
-    },
-    {
-      "id": "kuhni-20",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-20.webp",
-      "thumb": "img/kuhni/kuhni-20-thumb.webp",
-      "width": 1024,
-      "height": 1280,
-      "alt": "Кухня з островом і відкритими полицями"
-    },
-    {
-      "id": "kuhni-21",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-21.webp",
-      "thumb": "img/kuhni/kuhni-21-thumb.webp",
-      "width": 1080,
-      "height": 1115,
-      "alt": "Темна кухня з фасадами під горіх і підсвіткою"
-    },
-    {
-      "id": "kuhni-22",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-22.webp",
-      "thumb": "img/kuhni/kuhni-22-thumb.webp",
-      "width": 867,
-      "height": 1080,
-      "alt": "Сіра кутова кухня з фасадами під дуб"
-    },
-    {
-      "id": "shafy-02",
+      "id": "shafa-01",
       "type": "photo",
       "category": "shafy",
-      "src": "img/shafy/shafy-02.webp",
-      "thumb": "img/shafy/shafy-02-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Шафа з фасадами під темне дерево"
+      "src": "img/shafy/shafa-01.webp",
+      "thumb": "img/shafy/shafa-01-thumb.webp",
+      "width": 1473,
+      "height": 1068,
+      "focus": "50% 55%",
+      "alt": "Шафа на всю стіну з фасадами під дерево"
     },
     {
-      "id": "shafy-03",
+      "id": "shafa-02",
       "type": "photo",
       "category": "shafy",
-      "src": "img/shafy/shafy-03.webp",
-      "thumb": "img/shafy/shafy-03-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Шафа з продуманим внутрішнім наповненням"
+      "src": "img/shafy/shafa-02.webp",
+      "thumb": "img/shafy/shafa-02-thumb.webp",
+      "width": 1448,
+      "height": 1086,
+      "focus": "30% 55%",
+      "alt": "Сірі розпашні шафи до стелі з довгими ручками"
     },
     {
-      "id": "shafy-04",
+      "id": "shafa-03",
       "type": "photo",
       "category": "shafy",
-      "src": "img/shafy/shafy-04.webp",
-      "thumb": "img/shafy/shafy-04-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Біла шафа з робочим місцем"
+      "src": "img/shafy/shafa-03.webp",
+      "thumb": "img/shafy/shafa-03-thumb.webp",
+      "width": 1086,
+      "height": 1448,
+      "focus": "50% 50%",
+      "alt": "Шафа до стелі з фасадами під камінь"
     },
     {
-      "id": "shafy-07",
+      "id": "garderobna-01",
       "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-07.webp",
-      "thumb": "img/shafy/shafy-07-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Сіра кутова шафа до стелі"
+      "category": "garderobni",
+      "src": "img/garderobni/garderobna-01.webp",
+      "thumb": "img/garderobni/garderobna-01-thumb.webp",
+      "width": 1122,
+      "height": 1402,
+      "focus": "50% 50%",
+      "alt": "Гардеробна з відкритими полицями і шухлядами"
     },
     {
-      "id": "shafy-08",
+      "id": "tv-zona-01",
       "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-08.webp",
-      "thumb": "img/shafy/shafy-08-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Шафа під дерево з вбудованим письмовим столом"
-    },
-    {
-      "id": "shafy-10",
-      "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-10.webp",
-      "thumb": "img/shafy/shafy-10-thumb.webp",
-      "width": 865,
-      "height": 1080,
-      "alt": "Гардеробна кімната з полицями та шухлядами"
-    },
-    {
-      "id": "interier-01",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-01.webp",
-      "thumb": "img/interier/interier-01-thumb.webp",
-      "width": 982,
-      "height": 1200,
-      "alt": "ТВ-зона з підсвіткою та стелажем"
-    },
-    {
-      "id": "interier-02",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-02.webp",
-      "thumb": "img/interier/interier-02-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "ТВ-панель і підвісна тумба під дерево"
-    },
-    {
-      "id": "interier-04",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-04.webp",
-      "thumb": "img/interier/interier-04-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Вітрина-буфет з дерев'яною стільницею"
-    },
-    {
-      "id": "interier-06",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-06.webp",
-      "thumb": "img/interier/interier-06-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Рейкові стінові панелі в коридорі"
-    },
-    {
-      "id": "interier-09",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-09.webp",
-      "thumb": "img/interier/interier-09-thumb.webp",
-      "width": 1000,
-      "height": 1334,
-      "alt": "Довгий дерев'яний стіл на терасі"
-    },
-    {
-      "id": "komertsiia-02",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-02.webp",
-      "thumb": "img/komertsiia/komertsiia-02-thumb.webp",
-      "width": 1280,
-      "height": 921,
-      "alt": "Рецепція з зеленим фасадом"
-    },
-    {
-      "id": "komertsiia-11",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-11.webp",
-      "thumb": "img/komertsiia/komertsiia-11-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Дитячі будиночки-шафки для ігрової зони"
-    },
-    {
-      "id": "wardrobe-tour",
-      "type": "video",
-      "category": "shafy",
-      "src": "video/wardrobe-tour.mp4",
-      "poster": "video/wardrobe-tour-poster.webp",
-      "width": 720,
-      "height": 1280,
-      "alt": "Відео: сіра шафа до стелі"
-    },
-    {
-      "id": "apartment-tour",
-      "type": "video",
-      "category": "interier",
-      "src": "video/apartment-tour.mp4",
-      "poster": "video/apartment-tour-poster.webp",
-      "width": 720,
-      "height": 1280,
-      "alt": "Відео: огляд квартири — приховані двері, ванна, кухня"
+      "category": "inshi",
+      "src": "img/inshi/tv-zona-01.webp",
+      "thumb": "img/inshi/tv-zona-01-thumb.webp",
+      "width": 1135,
+      "height": 1386,
+      "focus": "50% 55%",
+      "alt": "ТВ-зона з підсвіткою і відкритими полицями"
     }
   ]
 }

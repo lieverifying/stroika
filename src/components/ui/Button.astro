@@ -6,7 +6,7 @@
 import type { HTMLAttributes } from 'astro/types';
 import Icon, { type IconName } from './Icon.astro';
 
-type Variant = 'primary' | 'secondary' | 'outline';
+type Variant = 'primary' | 'secondary' | 'outline' | 'light';
 
 interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> {
   href?: string;
@@ -76,7 +76,7 @@ const ctaAttrs = isCta
     min-height: var(--control-h);
     padding-inline: var(--control-px);
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-btn);
     font-family: var(--font-body);
     font-size: var(--text-button);
     font-weight: 600;
@@ -106,6 +106,14 @@ const ctaAttrs = isCta
   }
   .btn--secondary:hover {
     background: var(--color-graphite-2);
+  }
+  /* Светлая кнопка на тёмном блоке (финал): штукатурка + графитовый текст */
+  .btn--light {
+    background: var(--color-plaster);
+    color: var(--color-graphite);
+  }
+  .btn--light:hover {
+    background: var(--color-white);
   }
   .btn--outline {
     background: transparent;

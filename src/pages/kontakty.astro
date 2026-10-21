@@ -1,19 +1,16 @@
 ---
-// /kontakty (ТЗ): телефон, месенджери, графік, зона виїзду (Черкаси та область) з картою, коротка форма,
-// «Нестандартне завдання» (#zapyt) — перенесено с главной 2026-10-21, сюда ведёт вариант квиза «Інше, нестандартне».
+// /kontakty (ТЗ v2, 2026-10-21): крупные кнопки телефона, Viber, Telegram, Instagram, TikTok; «Черкаси та область»;
+// форма «Нестандартне завдання» (#zapyt) — сюда ведёт вариант квиза «Інше, нестандартне».
 // Ссылки — src/lib/contacts.ts (единый источник). Режим запуска: строки без фактов скрыты.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ZamirForm from '../components/forms/ZamirForm.astro';
 import Button from '../components/ui/Button.astro';
-import Fact from '../components/ui/Fact.astro';
 import Icon from '../components/ui/Icon.astro';
 import PlaceholderImage from '../components/ui/PlaceholderImage.astro';
-import SectionTitle from '../components/ui/SectionTitle.astro';
+import SocialLinks from '../components/ui/SocialLinks.astro';
+import CustomRequest from '../components/sections/CustomRequest.astro';
 import { facts } from '../content/facts';
 import { contactLinks } from '../lib/contacts';
 import { has } from '../lib/facts';
-import SocialLinks from '../components/ui/SocialLinks.astro';
-import CustomRequest from '../components/sections/CustomRequest.astro';
 
 const { contacts: c, serviceArea, flags } = facts;
 // Нет факта — нет строки: график, почта, адрес, условия выезда и карта — только когда есть данные
@@ -28,35 +25,33 @@ const rows = [
   <div class="container-site section-pad contacts">
     <h1 class="text-h1">Контакти</h1>
 
-    <div class="contacts__grid">
-      <section class="contacts__card" aria-labelledby="contacts-call">
-        <h2 id="contacts-call" class="contacts__title">Зателефонуйте або напишіть</h2>
-        <a href={contactLinks.tel} class="contacts__phone">
-          <Icon name="phone" size={24} />
-          <Fact value={c.phoneDisplay} />
-        </a>
-        <div class="contacts__messengers">
-          <Button href={contactLinks.viber} variant="secondary" icon="viber">Viber</Button>
-          <Button href={contactLinks.telegram} variant="secondary" icon="telegram">Telegram</Button>
-          <SocialLinks />
-        </div>
-        {
-          rows.length > 0 && (
-            <dl class="contacts__list">
-              {rows.map((r) => (
-                <div>
-                  <dt>{r.label}</dt>
-                  <dd>{r.href ? <a href={r.href}>{r.text}</a> : r.text}</dd>
-                </div>
-              ))}
-            </dl>
-          )
-        }
-      </section>
-
-      <section class="contacts__card" aria-labelledby="contacts-area">
-        <h2 id="contacts-area" class="contacts__title">Зона виїзду</h2>
-        <p class="contacts__area">{serviceArea.text}</p>
+    <section class="contacts__card" aria-labelledby="contacts-call">
+      <h2 id="contacts-call" class="contacts__title">Зателефонуйте або напишіть</h2>
+      <a href={contactLinks.tel} class="contacts__phone">
+        <Icon name="phone" size={28} />
+        {c.phoneDisplay}
+      </a>
+      <div class="contacts__buttons">
+        <Button href={contactLinks.tel} variant="secondary" icon="phone" fullWidth>Подзвонити</Button>
+        <Button href={contactLinks.viber} variant="secondary" icon="viber" fullWidth>Viber</Button>
+        <Button href={contactLinks.telegram} variant="secondary" icon="telegram" fullWidth>Telegram</Button>
+        <SocialLinks variant="secondary" />
+      </div>
+      {
+        rows.length > 0 && (
+          <dl class="contacts__list">
+            {rows.map((r) => (
+              <div>
+                <dt>{r.label}</dt>
+                <dd>{r.href ? <a href={r.href}>{r.text}</a> : r.text}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+      <div class="contacts__area">
+        <p class="contacts__area-label">Зона виїзду</p>
+        <p class="contacts__area-text">{serviceArea.text}</p>
         {has(serviceArea.terms) && <p class="contacts__muted">{serviceArea.terms}</p>}
         {
           flags.serviceAreaMap && (
@@ -65,12 +60,7 @@ const rows = [
             </div>
           )
         }
-      </section>
-    </div>
-
-    <section id="zamir" class="contacts__form" aria-labelledby="contacts-form-title">
-      <SectionTitle id="contacts-form-title" title="Безкоштовний замір" subtitle="Залиште номер — передзвонимо й домовимося про час." />
-      <ZamirForm idPrefix="kontakty" source="kontakty" />
+      </div>
     </section>
   </div>
   <CustomRequest />
@@ -80,15 +70,12 @@ const rows = [
   .contacts {
     display: grid;
     gap: var(--space-stack);
-  }
-  .contacts__grid {
-    display: grid;
-    gap: var(--grid-gap);
+    padding-bottom: 0;
   }
   .contacts__card {
     display: grid;
     align-content: start;
-    gap: 1rem;
+    gap: 1.25rem;
     padding: 1.25rem;
     border-radius: var(--radius-lg);
     background: var(--color-white);
@@ -105,21 +92,26 @@ const rows = [
     gap: 0.75rem;
     min-height: var(--control-h);
     font-family: var(--font-mono);
-    font-size: var(--text-lead);
+    font-size: var(--text-h3);
     font-weight: 500;
   }
-  .contacts__messengers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  /* Крупные кнопки: на телефоне по одной в строку, с 768 px — сеткой */
+  .contacts__buttons {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .contacts__buttons :global(.btn) {
+    width: 100%;
   }
   .contacts__list {
     display: grid;
     gap: 0.75rem;
   }
-  .contacts__list dt {
+  .contacts__list dt,
+  .contacts__area-label {
+    font-family: var(--font-mono);
     font-size: var(--text-small);
-    color: var(--color-ink-muted);
+    color: var(--color-oak);
   }
   .contacts__list a {
     display: inline-flex;
@@ -129,6 +121,12 @@ const rows = [
     text-underline-offset: 3px;
   }
   .contacts__area {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-line);
+  }
+  .contacts__area-text {
     font-size: var(--text-lead);
     font-weight: 600;
   }
@@ -138,19 +136,12 @@ const rows = [
   .contacts__map :global(.ph) {
     border-radius: var(--radius-md);
   }
-  .contacts__form {
-    display: grid;
-    gap: 0;
-    max-width: 40rem;
-  }
   @media (min-width: 48rem) {
     .contacts__card {
-      padding: 2rem;
+      padding: 2.5rem;
     }
-  }
-  @media (min-width: 64rem) {
-    .contacts__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .contacts__buttons {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 </style>

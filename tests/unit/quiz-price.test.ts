@@ -39,7 +39,7 @@ const kitchen = (over: QuizAnswers = {}): QuizAnswers => ({
   kitchenLength: '3to4',
   facade: 'mdf-film',
   countertop: 'quartz',
-  timing: '1to3m',
+  timing: '3to6m',
   ...over,
 });
 const wardrobe = (over: QuizAnswers = {}): QuizAnswers => ({
@@ -58,8 +58,8 @@ describe('computeResult: причины отката', () => {
       reason: 'variant-b',
     });
   });
-  test.each(['other', 'custom'] as const)('короткая ветка %s', (goal) => {
-    const r = computeResult({ goal, task: 'щось' }, input());
+  test.each(['other', 'custom'] as const)('ветка без цены %s', (goal) => {
+    const r = computeResult({ goal, otherType: 'tumba' }, input());
     expect(r).toEqual({ variant: 'B', configured: 'A', reason: 'short-branch' });
   });
   test('длина кухни unknown — no-length', () => {

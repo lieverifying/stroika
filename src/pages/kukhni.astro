@@ -1,10 +1,9 @@
 ---
-// /kukhni — посадочная для кухонь (решение владельца, 2026-10-21). Только про кухни: сюжет — кухня,
-// работы — кухни, квиз — с выбранной «Кухня». Структура — src/components/landing/Landing.astro.
+// /kukhni — посадочная для кухонь (ТЗ v2, 2026-10-21): фото kukhnia-06, сюжет — кухня, работы — только кухни.
+// Структура — src/components/landing/Landing.astro.
 import Landing from '../components/landing/Landing.astro';
 import type { StoryData } from '../components/story/Story.astro';
 import kitchen from '../content/stories/kitchen.json';
-import { FAQ_KUKHNI } from '../content/faq';
 import { FEATURED } from '../lib/portfolio';
 ---
 
@@ -18,10 +17,7 @@ import { FEATURED } from '../lib/portfolio';
   storyHeading="Як ми створюємо кухню"
   worksTitle="Наші кухні"
   works={FEATURED.kukhni}
-  worksMoreHref="/roboty#kuhni"
-  worksMoreLabel="Усі кухні"
-  quizTitle="Дізнайтесь вартість вашої кухні за 1 хвилину"
-  quizSubtitle="Оберіть, яку кухню хочете, — ми порахуємо і надішлемо ціну у зручний для вас месенджер."
-  faq={FAQ_KUKHNI}
-  finalSubtitle="Зателефонуйте, напишіть у Viber або залиште номер — приїдемо заміряти кухню у зручний для вас час."
+  worksMoreHref="/roboty#kukhni"
+  worksMoreLabel="Усі роботи"
+  quizTitle="Дізнайтесь вартість вашої кухні"
 />

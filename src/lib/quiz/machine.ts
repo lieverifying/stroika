@@ -5,7 +5,7 @@
 import { BRANCH_FIELDS, PATHS, STEPS, branchOf } from './config';
 import type { Branch, QuizAnswers, QuizState, StepId } from './types';
 
-const BRANCHES: Branch[] = ['kitchen', 'wardrobe', 'short'];
+const BRANCHES: Branch[] = ['kitchen', 'wardrobe', 'other'];
 /** Пока ветка не выбрана, прогресс считаем по самому длинному пути (кухня) */
 const DEFAULT_BRANCH: Branch = 'kitchen';
 
@@ -34,7 +34,7 @@ function dropForeignFields(answers: QuizAnswers, keep: Branch): QuizAnswers {
   return result;
 }
 
-/** Записывает ответ на текущий single-шаг и переходит дальше. На contact / shortForm бросает ошибку. */
+/** Записывает ответ на текущий single-шаг и переходит дальше. На contact бросает ошибку. */
 export function answer(state: QuizState, value: string, now: number): QuizState {
   const step = STEPS[state.stepId];
   if (step.kind !== 'single') {
@@ -49,7 +49,7 @@ export function answer(state: QuizState, value: string, now: number): QuizState 
   }
 
   const target = step.next(answers);
-  // single-шаги всегда ведут на другой шаг; 'submit' достижим только с contact / shortForm
+  // single-шаги всегда ведут на другой шаг; 'submit' достижим только с contact
   if (target === 'submit') throw new Error(`Шаг «${state.stepId}» завершает квиз`);
 
   return {
@@ -59,11 +59,6 @@ export function answer(state: QuizState, value: string, now: number): QuizState 
     answers,
     updatedAt: now,
   };
-}
-
-/** Текст задачи короткой формы */
-export function setTask(state: QuizState, text: string, now: number): QuizState {
-  return { ...state, answers: { ...state.answers, task: text }, updatedAt: now };
 }
 
 /** Шаг назад; ответы сохраняются, чтобы выбранный вариант остался отмеченным */

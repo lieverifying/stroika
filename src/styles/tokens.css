@@ -8,12 +8,12 @@
   --color-*: initial;
   --color-graphite: #1e2124;
   --color-graphite-2: #2a2e32;
-  --color-tape: #e3b12c; /* только кнопки заявки, максимум один жёлтый элемент на экран */
+  --color-tape: #e3b12c; /* только главная кнопка заявки, максимум один жёлтый элемент на экран */
   --color-tape-hover: #cc9c1f;
   --color-plaster: #f1f1ee;
   --color-white: #ffffff;
-  --color-oak: #8a5a33;
-  --color-ink-muted: #5c6166;
+  --color-oak: #8a5a33; /* надписи над заголовками, номера шагов, размерные линии (ТЗ v2) */
+  --color-ink-muted: #55534d;
   --color-ink-muted-dark: #a3a8ad;
   --color-line: #dcdcd7;
   --color-line-strong: #7a7f85;
@@ -66,6 +66,7 @@
   --radius-*: initial;
   --radius-sm: 4px;
   --radius-md: 8px;
+  --radius-btn: 10px; /* кнопки (ТЗ v2) */
   --radius-lg: 16px;
   --radius-full: 9999px;
   --shadow-*: initial;
@@ -91,8 +92,9 @@
   --space-gutter: 1.25rem;
   --grid-gap: 1rem;
 
-  --control-h: 3rem;
-  --control-h-lg: 3.5rem;
+  /* Кнопки 52 px (ТЗ v2) */
+  --control-h: 3.25rem;
+  --control-h-lg: 3.25rem;
   --control-px: 1.25rem;
 
   --header-h: 4rem;

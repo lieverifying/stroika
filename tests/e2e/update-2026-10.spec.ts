@@ -20,8 +20,8 @@ test.describe('факты бригады на главной', () => {
     const main = page.locator('main');
     await expect(main).not.toContainText(/місяц[іья] від авансу|\d+\s*днів|від \d[\d\s]* грн/);
     await expect(main.locator('[data-placeholder^="PRICE_"], [data-placeholder^="TERM_"], [data-placeholder="PROMISE_MEASURE_3D_HOURS"]')).toHaveCount(0);
-    await expect(page.locator('[data-block="12"]')).toContainText('Назвемо їх після заміру разом із ціною');
-    await expect(page.locator('[data-block="12"]')).toContainText('Черкаси та область');
+    await expect(page.locator('[data-block="12"]')).toContainText('Розрахуємо під ваше завдання і надішлемо у месенджер.');
+    await expect(page.locator('[data-block="12"]')).toContainText('Так, працюємо в Черкасах та області.');
     await expect(page.locator('[data-block="1"] .hero__badge')).toHaveCount(0); // сезонный бейдж выключен
     await expect(page.locator('footer')).not.toContainText(/ФОП|ІПН|РНОКПП/);
   });
@@ -30,7 +30,7 @@ test.describe('факты бригады на главной', () => {
 test('над квизом — подзаголовок про месенджер', async ({ page }) => {
   await page.goto('/kukhni');
   await expect(page.locator('#kvyz .section-title__subtitle')).toHaveText(
-    'Оберіть, яку кухню хочете, — ми порахуємо і надішлемо ціну у зручний для вас месенджер.',
+    'Оберіть, що вам потрібно, — ми порахуємо і надішлемо ціну у зручний для вас месенджер',
   );
 });
 
@@ -104,16 +104,16 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
 
 test.describe('реферальная программа', () => {
   test('поле «Хто вас порекомендував?» есть во всех формах и необязательное', async ({ page }) => {
-    // короткая форма финала главной — только ім’я и телефон (решение владельца 2026-10-21), поле есть в остальных
+    // формы ТЗ v2: квиз и «Нестандартне завдання»
     await page.goto('/kukhni');
-    for (const id of ['modal-referrer', 'quiz-referrer', 'quiz-short-referrer']) {
+    for (const id of ['quiz-referrer']) {
       const field = page.locator(`#${id}`);
       await expect(field).toHaveCount(1);
       await expect(field).not.toHaveAttribute('required', /.*/);
       await expect(page.locator(`label[for="${id}"]`)).toContainText('Хто вас порекомендував?');
     }
     await page.goto('/kontakty');
-    for (const id of ['kontakty-referrer', 'zapyt-referrer']) await expect(page.locator(`#${id}`)).toHaveCount(1);
+    await expect(page.locator('#zapyt-referrer')).toHaveCount(1);
   });
 
   test('блок «Рекомендуйте нас» скрыт, пока флаг referralEnabled выключен', async ({ page }) => {

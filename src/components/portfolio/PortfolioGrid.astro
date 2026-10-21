@@ -1,5 +1,7 @@
 ---
-// Сетка работ: ровные ряды одной высоты, ширина плитки — по пропорции фото (width / height), без обрезки.
+// Сетка работ (ТЗ v2): карточки одной пропорции — 4:5 на телефоне, 1:1 с 768 px; обрезка по полю focus из portfolio.json,
+// чтобы мебель оставалась в кадре. cols — колонок на телефоне и с 768 px. wide — горизонтальные фото (шире 6:5)
+// занимают две колонки, чтобы не терять мебель по бокам (галерея /roboty).
 // Фото — кнопка, открывает просмотр на весь экран (Lightbox.astro). Видео — muted, playsinline, loop, controls,
 // preload="none"; запускается без звука, только когда видно на экране (скрипт portfolio.ts).
 // Первые eager превью грузятся сразу, остальные — loading="lazy".
@@ -8,26 +10,23 @@ import { url, type PortfolioItem } from '../../lib/portfolio';
 interface Props {
   items: PortfolioItem[];
   eager?: number;
-  /** Ряды заполнены целиком: [фото в ряд на телефоне, с 768 px], например [2, 3]. Без него — свободные ряды. */
-  perRow?: [number, number];
+  cols?: [number, number];
+  wide?: boolean;
   class?: string;
 }
-const { items, eager = 4, perRow, class: className } = Astro.props;
-const fill = Boolean(perRow);
-const ratio = (i: PortfolioItem) => i.width / i.height;
-// Доля ширины ряда: пропорция фото / сумма пропорций в его ряду — высота у всех фото ряда одинаковая
-const share = (i: number, per: number) => {
-  const row = items.slice(Math.floor(i / per) * per, Math.floor(i / per) * per + per);
-  return ratio(items[i]) / row.reduce((a, it) => a + ratio(it), 0);
-};
-const fillVars = (i: number) => (perRow ? `; --wm: ${share(i, perRow[0]).toFixed(4)}; --wd: ${share(i, perRow[1]).toFixed(4)}` : '');
-const gridVars = perRow ? `--gaps-m: ${perRow[0] - 1}; --gaps-d: ${perRow[1] - 1}` : undefined;
+const { items, eager = 4, cols = [2, 3], wide = false, class: className } = Astro.props;
+const isWide = (i: PortfolioItem) => wide && i.width / i.height > 1.2;
 ---
 
-<ul class:list={['pf', { 'pf--fill': fill }, className]} style={gridVars} data-pf-grid>
+<ul class:list={['pf', className]} style={`--cols-m: ${cols[0]}; --cols-d: ${cols[1]}`} data-pf-grid>
   {
     items.map((item, i) => (
-      <li class="pf__item" data-category={item.category} data-id={item.id} style={`--r: ${ratio(item).toFixed(4)}${fillVars(i)}`}>
+      <li
+        class:list={['pf__item', { 'pf__item--wide': isWide(item) }]}
+        data-category={item.category}
+        data-id={item.id}
+        style={`--focus: ${item.focus ?? '50% 50%'}`}
+      >
         {item.type === 'photo' ? (
           <button
             type="button"
@@ -68,25 +67,23 @@ const gridVars = perRow ? `--gaps-m: ${perRow[0] - 1}; --gaps-d: ${perRow[1] - 1
 </ul>
 
 <style>
-  /* Ровные ряды: flex-grow и flex-basis пропорциональны соотношению сторон, высота плитки — от aspect-ratio */
   .pf {
-    --row: 9rem;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(var(--cols-m), minmax(0, 1fr));
+    grid-auto-flow: row dense;
     gap: 0.5rem;
   }
-  /* Последний ряд не растягивается на всю ширину */
-  .pf::after {
-    content: '';
-    flex-grow: 1000;
-  }
   .pf__item {
-    flex: var(--r) 1 calc(var(--r) * var(--row));
-    aspect-ratio: var(--r);
+    aspect-ratio: 4 / 5;
     min-width: 0;
     overflow: hidden;
     border-radius: var(--radius-md);
     background: var(--color-white);
+  }
+  /* Горизонтальное фото на две колонки той же высоты, что и соседи в ряду */
+  .pf__item--wide {
+    grid-column: span 2;
+    aspect-ratio: 8 / 5;
   }
   .pf__item[hidden] {
     display: none;
@@ -110,6 +107,7 @@ const gridVars = perRow ? `--gaps-m: ${perRow[0] - 1}; --gaps-d: ${perRow[1] - 1
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: var(--focus);
     transition: transform 0.4s var(--ease-out);
   }
   .pf__video {
@@ -120,29 +118,16 @@ const gridVars = perRow ? `--gaps-m: ${perRow[0] - 1}; --gaps-d: ${perRow[1] - 1
       transform: scale(1.03);
     }
   }
-  /* Ряды заполнены целиком (perRow): число фото в ряду на телефоне и с 768 px.
-     Ширина плитки = доля её пропорции в сумме ряда (--wm / --wd считаются при сборке) за вычетом зазоров. */
-  .pf--fill::after {
-    display: none;
-  }
-  .pf--fill .pf__item {
-    flex: none;
-    width: calc(var(--wm) * (100% - var(--gaps-m) * 0.5rem) - 0.5px);
-  }
   @media (min-width: 48rem) {
     .pf {
-      --row: 13rem;
+      grid-template-columns: repeat(var(--cols-d), minmax(0, 1fr));
       gap: 0.75rem;
     }
-  }
-  @media (min-width: 80rem) {
-    .pf {
-      --row: 15rem;
+    .pf__item {
+      aspect-ratio: 1;
     }
-  }
-  @media (min-width: 48rem) {
-    .pf--fill .pf__item {
-      width: calc(var(--wd) * (100% - var(--gaps-d) * 0.75rem) - 0.5px);
+    .pf__item--wide {
+      aspect-ratio: 2;
     }
   }
 </style>
