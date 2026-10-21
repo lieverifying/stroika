@@ -2,7 +2,7 @@
 // Посадочная (ТЗ v2, 2026-10-21): /kukhni и /mebli по одной структуре, тексты у каждой свои.
 // Порядок (правка 2026-10-22, квиз выше): 1 фото, H1, строка, «Порахувати вартість» и «Написати у Viber»
 // → 2 квиз (шаг выбора пропущен: /kukhni — с формы кухни, /mebli — с типа шафы) → 3 «Роботи нашої команди»
-// → 4 три обіцянки → 5 сюжет сборки (візуалізація етапів) → 6 питання і відповіді → 7 финал.
+// → 4 три обіцянки → 5 сюжет сборки (візуалізація етапів; на телефоне 35 % экрана на этап) → 6 питання і відповіді → 7 финал.
 // Шапка с переключателем «Кухні · Меблі» и подвал — в BaseLayout.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../sections/Hero.astro';
@@ -43,7 +43,7 @@ const HERO_SIZES = '(min-width: 64rem) 40vw, 100vw';
   <Portfolio title={p.worksTitle} items={p.works} cols={p.worksCols} moreHref={p.worksMoreHref} moreLabel={p.worksMoreLabel} />
   <Promises variant="scroll" />
   <div class="container-site section-pad">
-    <Story story={p.story} heading={p.storyHeading} moreHref="/yak-my-stvoriuiemo" />
+    <Story story={p.story} heading={p.storyHeading} moreHref="/yak-my-stvoriuiemo" mobileStep={0.35} />
   </div>
   <Faq items={FAQ} />
   <FinalCta />

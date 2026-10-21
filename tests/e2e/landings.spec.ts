@@ -146,18 +146,21 @@ test('title, description и H1 у /kukhni и /mebli разные', async ({ page
   expect(k.desc).not.toBe(m.desc);
 });
 
-test('сюжет сборки на телефоне короче: ~35 % экрана прокрутки на этап (на десктопе ~70 %)', async ({ page, isMobile }) => {
-  await page.goto('/kukhni');
-  const story = page.locator('[data-story="kitchen"]');
-  await story.scrollIntoViewIfNeeded();
-  await expect(story).toHaveClass(/story--scroll/);
-  const { track, sticky, vh } = await story.evaluate((el) => ({
-    track: el.querySelector<HTMLElement>('.story__track')!.offsetHeight,
-    sticky: el.querySelector<HTMLElement>('.story__sticky')!.offsetHeight,
-    vh: innerHeight,
-  }));
-  const perStage = (track - sticky) / 7;
-  expect(perStage / vh).toBeCloseTo(isMobile ? 0.35 : 0.7, 1);
+test('скорость сюжета — параметр: на посадочной ~35 % экрана на этап на телефоне, на /yak-my-stvoriuiemo ~70 %', async ({ page, isMobile }) => {
+  const perStage = async (path: string) => {
+    await page.goto(path);
+    const story = page.locator('[data-story="kitchen"]');
+    await story.scrollIntoViewIfNeeded();
+    await expect(story).toHaveClass(/story--scroll/);
+    const { track, sticky, vh } = await story.evaluate((el) => ({
+      track: el.querySelector<HTMLElement>('.story__track')!.offsetHeight,
+      sticky: el.querySelector<HTMLElement>('.story__sticky')!.offsetHeight,
+      vh: innerHeight,
+    }));
+    return (track - sticky) / 7 / vh;
+  };
+  expect(await perStage('/kukhni')).toBeCloseTo(isMobile ? 0.35 : 0.7, 1);
+  expect(await perStage('/yak-my-stvoriuiemo')).toBeCloseTo(0.7, 1);
 });
 
 test('квиз шафы: схемы у «Купе», «Розпашна», «Гардеробна»; на телефоне — одна колонка', async ({ page, isMobile }) => {

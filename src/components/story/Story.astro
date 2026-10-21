@@ -5,7 +5,7 @@
 // Режимы:
 // — по умолчанию (без JS и при prefers-reduced-motion) этапы идут друг под другом, статично;
 // — скрипт включает .story--scroll: сцена закреплена (sticky) на высоту экрана, этап сменяется каждые 70svh прокрутки
-//   (на телефоне, < 768 px, — каждые 35svh: сюжет короче, правка 2026-10-22),
+//   на телефоне (< 768 px) — каждые mobileStep × высота экрана (параметр; посадочные — 0.35, «Як ми створюємо» — 0.7),
 //   кадр и подпись — перекрёстным затуханием (только opacity и transform). Сбоку индикатор этапов — он же кнопки
 //   перехода (клик, стрелки). Грузится текущий и следующий кадр; без JS кадры — из <noscript>.
 // Кадр — WebP при сборке, до 200 КБ.
@@ -33,8 +33,10 @@ interface Props {
   heading?: string;
   /** Ссылка «Детальніше» рядом с заголовком (на главной — на /yak-my-stvoriuiemo) */
   moreHref?: string;
+  /** Прокрутка на один этап на телефоне (< 768 px), доля высоты экрана. На десктопе всегда 0.7 */
+  mobileStep?: number;
 }
-const { story, heading = story.title, moreHref } = Astro.props;
+const { story, heading = story.title, moreHref, mobileStep = 0.7 } = Astro.props;
 const n = story.stages.length;
 const pad = (i: number) => String(i).padStart(2, '0');
 
@@ -52,7 +54,13 @@ const stages = await Promise.all(
 );
 ---
 
-<section class="story" data-story={story.id} aria-labelledby={`story-${story.id}-title`} style={`--n: ${n}`}>
+<section
+  class="story"
+  data-story={story.id}
+  data-mobile-step={mobileStep}
+  aria-labelledby={`story-${story.id}-title`}
+  style={`--n: ${n}; --step-h-mobile: ${mobileStep * 100}svh`}
+>
   <div class="story__head">
     <h2 id={`story-${story.id}-title`} class="text-h2 story__heading">{heading}</h2>
     {moreHref && <a href={moreHref} class="story__more">Детальніше</a>}
@@ -224,7 +232,7 @@ const stages = await Promise.all(
   }
   @media (max-width: 47.99rem) {
     .story {
-      --step-h: 35svh;
+      --step-h: var(--step-h-mobile, 70svh);
     }
   }
   .story--scroll .story__sticky {
@@ -356,8 +364,9 @@ const stages = await Promise.all(
     root.classList.add('story--scroll');
     root.querySelector<HTMLElement>('.story__progress')!.hidden = false;
 
-    // Та же доля экрана, что и --step-h в CSS: 35 % на телефоне, 70 % с 768 px
-    const stepPx = () => innerHeight * (matchMedia('(max-width: 47.99rem)').matches ? 0.35 : 0.7);
+    // Та же доля экрана, что и --step-h в CSS: на телефоне — data-mobile-step, с 768 px — 0.7
+    const mobileStep = Number(root.dataset.mobileStep) || 0.7;
+    const stepPx = () => innerHeight * (matchMedia('(max-width: 47.99rem)').matches ? mobileStep : 0.7);
     const stickyTop = () => parseFloat(getComputedStyle(sticky).top) || 0;
 
     // Сцена закреплена на экране — посетитель действительно видит этапы (а не проскочил сюжет по якорю)
