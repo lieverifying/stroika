@@ -16,6 +16,10 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# Конфиг заявок с токенами (api/lead.php читает его вне публичной папки); в репозитории — только пример
+config/*
+!config/lead.example.php
+
 # Vercel
 .vercel/
 
