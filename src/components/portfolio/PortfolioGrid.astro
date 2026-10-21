@@ -1,0 +1,146 @@
+---
+// Сетка работ: ровные ряды одной высоты, ширина плитки — по пропорции фото (width / height), без обрезки.
+// Фото — кнопка, открывает просмотр на весь экран (Lightbox.astro). Видео — muted, playsinline, loop, controls,
+// preload="none"; запускается без звука, только когда видно на экране (скрипт portfolio.ts).
+// Первые eager превью грузятся сразу, остальные — loading="lazy".
+import { url, type PortfolioItem } from '../../lib/portfolio';
+
+interface Props {
+  items: PortfolioItem[];
+  eager?: number;
+  /** Ряды заполнены целиком: 2 фото в ряд на телефоне, 3 — с 768 px (блок на главной) */
+  fill?: boolean;
+  class?: string;
+}
+const { items, eager = 4, fill = false, class: className } = Astro.props;
+const ratio = (i: PortfolioItem) => i.width / i.height;
+// Доля ширины ряда: пропорция фото / сумма пропорций в его ряду — высота у всех фото ряда одинаковая
+const share = (i: number, per: number) => {
+  const row = items.slice(Math.floor(i / per) * per, Math.floor(i / per) * per + per);
+  return ratio(items[i]) / row.reduce((a, it) => a + ratio(it), 0);
+};
+const fillVars = (i: number) => (fill ? `; --w2: ${share(i, 2).toFixed(4)}; --w3: ${share(i, 3).toFixed(4)}` : '');
+---
+
+<ul class:list={['pf', { 'pf--fill': fill }, className]} data-pf-grid>
+  {
+    items.map((item, i) => (
+      <li class="pf__item" data-category={item.category} data-id={item.id} style={`--r: ${ratio(item).toFixed(4)}${fillVars(i)}`}>
+        {item.type === 'photo' ? (
+          <button
+            type="button"
+            class="pf__open"
+            data-full={url(item.src)}
+            data-w={item.width}
+            data-h={item.height}
+            aria-label={`Відкрити на весь екран: ${item.alt}`}
+          >
+            <img
+              src={url(item.thumb)}
+              width={item.width}
+              height={item.height}
+              alt={item.alt}
+              loading={i < eager ? undefined : 'lazy'}
+              decoding="async"
+            />
+          </button>
+        ) : (
+          <video
+            class="pf__video"
+            src={url(item.src)}
+            poster={url(item.poster)}
+            width={item.width}
+            height={item.height}
+            muted
+            playsinline
+            loop
+            controls
+            preload="none"
+            aria-label={item.alt}
+            data-pf-video
+          />
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  /* Ровные ряды: flex-grow и flex-basis пропорциональны соотношению сторон, высота плитки — от aspect-ratio */
+  .pf {
+    --row: 9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  /* Последний ряд не растягивается на всю ширину */
+  .pf::after {
+    content: '';
+    flex-grow: 1000;
+  }
+  .pf__item {
+    flex: var(--r) 1 calc(var(--r) * var(--row));
+    aspect-ratio: var(--r);
+    min-width: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+  }
+  .pf__item[hidden] {
+    display: none;
+  }
+  .pf__open {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .pf__open:focus-visible {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: -2px;
+  }
+  .pf__open img,
+  .pf__video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s var(--ease-out);
+  }
+  .pf__video {
+    background: var(--color-graphite);
+  }
+  @media (hover: hover) {
+    .pf__open:hover img {
+      transform: scale(1.03);
+    }
+  }
+  /* Блок на главной: ряды заполнены целиком — по 2 фото на телефоне, по 3 с 768 px.
+     Ширина плитки = доля её пропорции в сумме ряда (--w2 / --w3 считаются при сборке) за вычетом зазоров. */
+  .pf--fill::after {
+    display: none;
+  }
+  .pf--fill .pf__item {
+    flex: none;
+    width: calc(var(--w2) * (100% - 0.5rem) - 0.5px);
+  }
+  @media (min-width: 48rem) {
+    .pf {
+      --row: 13rem;
+      gap: 0.75rem;
+    }
+  }
+  @media (min-width: 80rem) {
+    .pf {
+      --row: 15rem;
+    }
+  }
+  @media (min-width: 48rem) {
+    .pf--fill .pf__item {
+      width: calc(var(--w3) * (100% - 1.5rem) - 0.5px);
+    }
+  }
+</style>

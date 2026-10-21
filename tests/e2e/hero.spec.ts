@@ -30,8 +30,14 @@ test.describe('первый экран', () => {
     await expect(page.locator('h1')).toHaveCSS('font-weight', '500');
   });
 
-  test('плейсхолдер фото скрыт от скринридера', async ({ page }) => {
+  test('фото — настоящая работа из портфолио (facts.media.hero), с alt, грузится сразу', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.ph').first()).toHaveAttribute('aria-hidden', 'true');
+    const img = page.locator('.hero__media img');
+    await expect(img).toHaveAttribute('src', /\/portfolio\/img\/kuhni\/kuhni-20\.webp$/);
+    await expect(img).toHaveAttribute('alt', /.+/);
+    await expect(img).toHaveAttribute('fetchpriority', 'high');
+    await expect(img).not.toHaveAttribute('loading', 'lazy');
+    await expect(page.locator('.hero__media .ph')).toHaveCount(0);
+    expect(await img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0)).toBe(true);
   });
 });

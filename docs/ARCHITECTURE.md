@@ -627,6 +627,15 @@ interface LeadPayload {
 
 ---
 
+## 4.9. Портфолио (решение владельца, 2026-10-21)
+
+Модель кейсов (раздел 3, `src/content/cases/`, страницы `/roboty/<slug>`) на сайте пока не используется: вместо неё галерея фото.
+Данные — `src/content/portfolio.json` (категории, файлы в `public/portfolio/`, размеры, `alt`, `featured`), типы и помощники — `src/lib/portfolio.ts`,
+разметка — `src/components/portfolio/{PortfolioGrid,Lightbox}.astro`, поведение (фильтр, просмотр, видео) — `src/scripts/portfolio.ts`.
+Используется на `/roboty` и в блоке 3 главной; `facts.media.hero` — id фото первого экрана.
+
+---
+
 ## 5. `src/content/facts.ts` — все заглушки
 
 ### 5.1. Форма файла

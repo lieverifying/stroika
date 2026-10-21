@@ -1,0 +1,91 @@
+---
+// /roboty — «Наші роботи» (решение владельца, 2026-10-21): галерея из src/content/portfolio.json.
+// Вкладки «Усі» + 4 категории (на телефоне — горизонтальная прокрутка), ровные ряды превью без обрезки,
+// просмотр на весь экран, видео с автозапуском в видимой области. Без JS видны все работы, фото открываются ссылкой.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PortfolioGrid from '../components/portfolio/PortfolioGrid.astro';
+import Lightbox from '../components/portfolio/Lightbox.astro';
+import Button from '../components/ui/Button.astro';
+import { CATEGORIES, ITEMS } from '../lib/portfolio';
+
+const tabs = [{ id: 'all', title: 'Усі' }, ...CATEGORIES];
+---
+
+<BaseLayout
+  title="Наші роботи — кухні, шафи та меблі на замовлення — Вимір"
+  description="Фото кухонь, шаф, гардеробних і меблів для бізнесу, які ми зробили: Черкаси та область."
+>
+  <div class="container-site section-pad roboty" data-gallery>
+    <h1 class="text-h1">Наші роботи</h1>
+    <div class="roboty__tabs" role="group" aria-label="Категорії робіт">
+      {
+        tabs.map((t) => (
+          <button type="button" class="roboty__tab" data-filter={t.id} aria-pressed={t.id === 'all' ? 'true' : 'false'}>
+            {t.title}
+          </button>
+        ))
+      }
+    </div>
+    <PortfolioGrid items={ITEMS} />
+    <div class="roboty__cta">
+      <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+    </div>
+  </div>
+  <Lightbox />
+</BaseLayout>
+
+<style>
+  .roboty {
+    display: grid;
+    gap: 1.5rem;
+  }
+  /* Вкладки: на телефоне — горизонтальная прокрутка до края экрана, без полосы */
+  .roboty__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline: calc(-1 * var(--space-gutter));
+    padding-inline: var(--space-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .roboty__tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .roboty__tab {
+    flex: none;
+    min-height: var(--control-h);
+    padding-inline: 1.125rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    background: var(--color-white);
+    color: var(--color-graphite);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .roboty__tab[aria-pressed='true'] {
+    border-color: var(--color-graphite);
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .roboty__tab:focus-visible {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  .roboty__cta {
+    display: grid;
+    margin-top: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .roboty__tabs {
+      flex-wrap: wrap;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+    .roboty__cta {
+      justify-content: start;
+    }
+  }
+</style>

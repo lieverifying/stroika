@@ -3,20 +3,17 @@
 // < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → выгоды → кнопки (кнопки могут уйти ниже
 //   первого экрана: «Розрахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
 // ≥ 1024 px: фото справа (рамка по facts.media.heroOrientation: 4:5 или 4:3), текст слева по центру фото.
-// Обрезка фото — по facts.media.heroFocus (object-position). Бейдж — facts.flags.seasonalBadge.
+// Фото — работа из портфолио (facts.media.hero = id в src/content/portfolio.json), обрезка по facts.media.heroFocus.
+// Бейдж — facts.flags.seasonalBadge.
 import Badge from '../ui/Badge.astro';
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
-import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
+import { HERO, url } from '../../lib/portfolio';
 
 const { promises, warranty, flags } = facts;
 const portrait = facts.media.heroOrientation === 'portrait';
-// Размер фото, которое нужно прислать: вертикальное 4:5 или горизонтальное 4:3
-const photo = portrait
-  ? { width: 1200, height: 1500, label: 'кухня, перший екран, вертикальне 4:5' }
-  : { width: 1600, height: 1200, label: 'кухня, перший екран, горизонтальне 4:3' };
 ---
 
 <section
@@ -57,7 +54,16 @@ const photo = portrait
     </div>
 
     <div class="hero__media">
-      <PlaceholderImage {...photo} />
+      <img
+        src={url(HERO.src)}
+        srcset={`${url(HERO.thumb)} ${Math.round((HERO.width * 640) / Math.max(HERO.width, HERO.height))}w, ${url(HERO.src)} ${HERO.width}w`}
+        sizes="(min-width: 64rem) 40vw, 100vw"
+        width={HERO.width}
+        height={HERO.height}
+        alt={HERO.alt}
+        fetchpriority="high"
+        decoding="async"
+      />
     </div>
   </div>
 </section>
@@ -72,6 +78,11 @@ const photo = portrait
   .hero__media {
     order: -1;
     margin-inline: calc(-1 * var(--space-gutter));
+  }
+  .hero__media img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
   .hero__media :global(.ph),
   .hero__media :global(img) {

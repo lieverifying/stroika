@@ -209,7 +209,8 @@ export const facts = {
   ),
 
   media: {
-    hero: '{{HERO_MEDIA}}',
+    // Фото первого экрана — id работы из src/content/portfolio.json (вертикальная 4:5, получено 2026-10-21)
+    hero: 'kuhni-20',
     // Не заглушка, а настройка: рамка фото первого экрана на десктопе.
     // 'portrait' — 4:5 (реальные фото кухонь в основном вертикальные), 'landscape' — 4:3.
     heroOrientation: 'portrait' as HeroOrientation,

@@ -1,0 +1,126 @@
+---
+// Просмотр фото на весь экран: <dialog>, большой файл, стрелки и свайп между фото текущей категории,
+// закрытие по Esc (родное поведение dialog), по тапу вне фото и кнопкой. Логика — src/scripts/portfolio.ts.
+import Icon from '../ui/Icon.astro';
+---
+
+<dialog class="lb" data-lightbox aria-label="Перегляд фото">
+  <div class="lb__stage" data-lb-stage>
+    <img class="lb__img" data-lb-img alt="" draggable="false" />
+  </div>
+  <p class="lb__bar">
+    <span class="lb__caption" data-lb-caption></span>
+    <span class="lb__count" data-lb-count></span>
+  </p>
+  <button type="button" class="lb__btn lb__close" data-lb-close aria-label="Закрити"><Icon name="close" /></button>
+  <button type="button" class="lb__btn lb__prev" data-lb-prev aria-label="Попереднє фото">
+    <Icon name="arrow-right" class="lb__flip" />
+  </button>
+  <button type="button" class="lb__btn lb__next" data-lb-next aria-label="Наступне фото"><Icon name="arrow-right" /></button>
+</dialog>
+
+<style>
+  .lb {
+    width: 100vw;
+    max-width: none;
+    height: 100svh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+    overscroll-behavior: contain;
+  }
+  .lb::backdrop {
+    background: rgb(30 33 36 / 0.6);
+  }
+  .lb[open] {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .lb__stage {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    padding: 4rem 0.5rem 0.5rem;
+    touch-action: pan-y;
+  }
+  .lb__img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .lb__bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem var(--space-gutter) calc(1rem + env(safe-area-inset-bottom));
+    font-size: var(--text-small);
+  }
+  .lb__count {
+    flex: none;
+    font-family: var(--font-mono);
+    color: var(--color-ink-muted-dark);
+  }
+  .lb__btn {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: rgb(30 33 36 / 0.6);
+    color: var(--color-plaster);
+    cursor: pointer;
+  }
+  .lb__btn:focus-visible {
+    outline: 2px solid var(--color-plaster);
+    outline-offset: 2px;
+  }
+  .lb__close {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .lb__prev,
+  .lb__next {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lb__prev {
+    left: 0.5rem;
+  }
+  .lb__next {
+    right: 0.5rem;
+  }
+  .lb__prev[hidden],
+  .lb__next[hidden] {
+    display: none;
+  }
+  .lb__prev :global(.lb__flip) {
+    transform: scaleX(-1);
+  }
+  @media (min-width: 64rem) {
+    .lb__stage {
+      padding: 4rem 5rem 1rem;
+    }
+    .lb__prev {
+      left: 1.5rem;
+    }
+    .lb__next {
+      right: 1.5rem;
+    }
+    .lb__close {
+      top: 1rem;
+      right: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  import { initPortfolio } from '../../scripts/portfolio';
+  initPortfolio();
+</script>
