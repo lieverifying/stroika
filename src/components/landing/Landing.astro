@@ -36,7 +36,7 @@ const p = Astro.props;
 const HERO_SIZES = '(min-width: 64rem) 40vw, 100vw';
 ---
 
-<BaseLayout title={p.title} description={p.description} lcpImage={{ srcset: responsive(p.heroPhoto ?? HERO).srcset, sizes: HERO_SIZES }}>
+<BaseLayout title={p.title} description={p.description} compactH2 lcpImage={{ srcset: responsive(p.heroPhoto ?? HERO).srcset, sizes: HERO_SIZES }}>
   <Hero title={p.h1} lead={p.lead} photo={p.heroPhoto} focus={p.heroFocus} quizHref={quizHref(p.landing)} />
   <div class="container-site section-pad">
     <Story story={p.story} heading={p.storyHeading} moreHref="/yak-my-stvoriuiemo" />

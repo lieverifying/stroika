@@ -1,7 +1,7 @@
 import { expect, test, type Page } from './fixtures';
 import { readFileSync } from 'node:fs';
 
-// «Наші роботи» (ТЗ v2, 2026-10-21): галерея из src/content/portfolio.json — фото архива vymir-foto, блоки на главной и посадочных
+// «Роботи нашої команди» (ТЗ v2, 2026-10-21): галерея из src/content/portfolio.json — фото архива vymir-foto, блоки на главной и посадочных
 interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; poster?: string; width: number; height: number; focus?: string; alt: string }
 const data = JSON.parse(readFileSync(new URL('../../src/content/portfolio.json', import.meta.url), 'utf8')) as {
   categories: { id: string; title: string }[];
@@ -15,7 +15,7 @@ const count = (page: Page) => lb(page).locator('[data-lb-count]');
 test.describe('/roboty', () => {
   test('сетка строится из portfolio.json: все работы, подписи, размеры, первые 4 без lazy', async ({ page }) => {
     await page.goto('/roboty');
-    await expect(page.locator('h1')).toHaveText('Наші роботи');
+    await expect(page.locator('h1')).toHaveText('Роботи нашої команди');
     const items = page.locator('.pf__item');
     await expect(items).toHaveCount(data.items.length);
     expect(await items.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.items.map((i) => i.id));
@@ -117,7 +117,7 @@ test.describe('посадочные: блок работ', () => {
   test('/kukhni: 6 кухонь из featured.kukhni по порядку, «Усі роботи» → галерея, фото открывается на весь экран', async ({ page }) => {
     await page.goto('/kukhni');
     const block = page.locator('[data-block="3"]');
-    await expect(block.locator('h2')).toHaveText('Наші кухні');
+    await expect(block.locator('h2')).toHaveText('Роботи нашої команди');
     expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured.kukhni);
     await expect(block.getByRole('link', { name: 'Усі роботи' })).toHaveAttribute('href', '/roboty#kukhni');
     await block.locator('.pf__open').first().click();

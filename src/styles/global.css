@@ -111,3 +111,8 @@ html[data-cta-ready] [data-cta='primary'][data-cta-on]:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Главная и посадочные: H2 на 15 % мельче на телефоне (24 → 20,4 px) и на 25 % на десктопе (40 → 30 px). H1 не меняется. */
+.h2-compact {
+  --text-h2: clamp(1.275rem, 1.0264rem + 1.0608vw, 1.875rem);
+}

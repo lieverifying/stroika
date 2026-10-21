@@ -15,7 +15,7 @@ test.describe('главная бренда', () => {
   test('первый экран: надпись, слоган, размерные линии, подзаголовок, kukhnia-05, жёлтая кнопка и строка под ней', async ({ page }) => {
     await page.goto('/');
     const hero = page.locator('[data-block="1"]');
-    await expect(hero.locator('.home-hero__eyebrow')).toHaveText('Корпусні меблі на замовлення · Черкаси');
+    await expect(hero.locator('.home-hero__eyebrow')).toHaveText('Кухні, шафи та гардеробні · Черкаси');
     await expect(hero.locator('h1')).toHaveText('Меблі, які точно підходять');
     await expect(hero.locator('.dim__label')).toHaveText(['точно під ваш розмір', '2700 мм']);
     await expect(hero.locator('.home-hero__lead')).toHaveText(
@@ -28,13 +28,19 @@ test.describe('главная бренда', () => {
     await expect(hero).toContainText('Ціну надішлемо у Viber або Telegram');
   });
 
-  test('три обіцянки 01–03', async ({ page }) => {
+  test('три обіцянки: белые карточки, над каждой размерная линия на всю ширину с подписью «01 · розмір»', async ({ page }) => {
     await page.goto('/');
     const p = page.locator('[data-block="promises"]');
-    await expect(p.locator('.promises__num')).toHaveText(['01', '02', '03']);
+    await expect(p.locator('.dim__label')).toHaveText(['01 · розмір', '02 · ціна', '03 · месенджер']);
     await expect(p.locator('h3')).toHaveText(['Точно під ваш розмір', 'Точна ціна', 'Точно у ваш месенджер']);
     await expect(p).toContainText('Ціну фіксуємо в договорі. Без доплат у процесі.');
-    await expect(p.locator('.promises__num').first()).toHaveCSS('color', 'rgb(138, 90, 51)');
+    await expect(p.locator('.dim').first()).toHaveCSS('color', 'rgb(138, 90, 51)');
+    await expect(p.locator('.dim__label').first()).toHaveCSS('font-family', /JetBrains Mono/);
+    for (const item of await p.locator('.promises__item').all()) {
+      await expect(item).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+      const [card, dim] = await Promise.all([item.boundingBox(), item.locator('.dim').boundingBox()]);
+      expect(Math.abs(dim!.width - (card!.width - 40))).toBeLessThan(2); // на всю ширину колонки за вычетом отступов
+    }
   });
 
   test('две двери: «Кухні» (kukhnia-06) → /kukhni, «Шафи та меблі» (shafa-01) → /mebli', async ({ page }) => {
@@ -49,14 +55,54 @@ test.describe('главная бренда', () => {
     await expect(page).toHaveURL(/\/mebli$/);
   });
 
-  test('«Як ми створюємо»: тёмный блок, «04 / 07», подпись «Візуалізація етапів», ссылка', async ({ page }) => {
+  test('«Як ми створюємо»: 7 кадров сменяются сами (~2,5 с), точки и подпись этапа, пауза на наведении', async ({ page, isMobile }) => {
     await page.goto('/');
     const t = page.locator('[data-block="story-teaser"]');
     await expect(t).toHaveCSS('background-color', 'rgb(30, 33, 36)');
-    await expect(t.locator('.teaser__count')).toHaveText('04 / 07');
+    await expect(t.locator('[data-frame]')).toHaveCount(7);
+    await expect(t.locator('[data-dot]')).toHaveCount(7);
+    await t.scrollIntoViewIfNeeded();
+    await expect(t.locator('.teaser__count')).toHaveText('01 / 07');
+    await expect(t.locator('.teaser__stage')).toHaveText('Почнемо з вашого розміру');
+    await expect(t.locator('.teaser__count')).toHaveText('02 / 07', { timeout: 4000 });
+    await expect(t.locator('.teaser__stage')).toHaveText('Дизайн-проєкт');
+    await expect(t.locator('[data-frame].is-on')).toHaveCount(1);
+    await expect(t.locator('[data-dot].is-on')).toHaveAttribute('data-dot', '1');
+    if (!isMobile) {
+      await t.locator('.teaser__frames').hover();
+      const paused = await t.locator('.teaser__count').innerText();
+      await page.waitForTimeout(3000);
+      await expect(t.locator('.teaser__count')).toHaveText(paused);
+    }
     await expect(t.locator('h2')).toHaveText('Подивіться, як ми створюємо меблі — від порожньої стіни до готової кухні');
     await expect(t).toContainText('Візуалізація етапів');
     await expect(t.getByRole('link')).toHaveAttribute('href', '/yak-my-stvoriuiemo');
+  });
+
+  test('«Як ми створюємо» при prefers-reduced-motion: финальный кадр «Готово», без смены', async ({ browser }) => {
+    const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    const t = page.locator('[data-block="story-teaser"]');
+    await t.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(3000);
+    await expect(t.locator('.teaser__count')).toHaveText('07 / 07');
+    await expect(t.locator('.teaser__stage')).toHaveText('Готово');
+    await expect(t.locator('[data-frame].is-on')).toHaveAttribute('data-frame', '6');
+    await ctx.close();
+  });
+
+  test('H2 мельче: −15 % на телефоне, −25 % на десктопе; H1 прежний', async ({ page, isMobile }) => {
+    for (const path of ['/', '/kukhni', '/mebli']) {
+      await page.goto(path);
+      const h2 = parseFloat(await page.locator('main h2').first().evaluate((e) => getComputedStyle(e).fontSize));
+      expect(h2, path).toBeCloseTo(isMobile ? 20.4 : 30, 0);
+      const h1 = parseFloat(await page.locator('h1').evaluate((e) => getComputedStyle(e).fontSize));
+      expect(h1, path).toBeCloseTo(isMobile ? 28 : 46, 0);
+    }
+    await page.goto('/kontakty');
+    const other = parseFloat(await page.locator('#zapyt-title').evaluate((e) => getComputedStyle(e).fontSize));
+    expect(other).toBeGreaterThan(isMobile ? 21 : 33); // на остальных страницах размер прежний
   });
 
   test('роботи: 6 фото разных категорий, «Усі роботи» → /roboty', async ({ page }) => {

@@ -1,40 +1,56 @@
 ---
-// «Як ми створюємо» на главной (ТЗ v2): тёмный блок — кадр сюжета кухни (этап 4 из 7), точки этапов «04 / 07»,
-// заголовок и ссылка на /yak-my-stvoriuiemo. Статичный: сам сюжет по прокрутке — на своей странице и посадочных.
+// «Як ми створюємо» на главной (правки владельца, 2026-10-21): тёмный блок, 7 кадров сюжета кухни сменяются сами
+// по кругу (перекрёстное затухание, ~2,5 с на кадр), на наведении — пауза. Точки этапов и подпись текущего этапа.
+// При prefers-reduced-motion и без JS — финальный кадр «Готово». Сам сюжет по прокрутке — на /yak-my-stvoriuiemo.
 import { getImage } from 'astro:assets';
 import Icon from '../ui/Icon.astro';
-import frame from '../../assets/stories/kitchen/kitchen-04-fronts.png';
 import kitchen from '../../content/stories/kitchen.json';
 
-const STAGE = 4;
-const total = kitchen.stages.length;
-const stage = kitchen.stages[STAGE - 1];
-const img = await getImage({ src: frame, widths: [480, 800, 1200], format: 'webp', quality: 72 });
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/stories/kitchen/*.png', { eager: true });
+const stages = await Promise.all(
+  kitchen.stages.map(async (s) => {
+    const meta = files[`../../assets/stories/${s.image}`].default;
+    const img = await getImage({ src: meta, widths: [480, 800, 1200], format: 'webp', quality: 72 });
+    return { title: s.title, alt: s.alt, src: img.src, srcset: img.srcSet.attribute, width: meta.width, height: meta.height };
+  }),
+);
+const total = stages.length;
+const last = total - 1;
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
 <section data-block="story-teaser" class="teaser on-dark section-pad" aria-labelledby="teaser-title">
   <div class="container-site teaser__inner">
-    <figure class="teaser__media">
-      <img
-        src={img.src}
-        srcset={img.srcSet.attribute}
-        sizes="(min-width: 64rem) 50vw, 90vw"
-        width={frame.width}
-        height={frame.height}
-        alt={stage.alt}
-        loading="lazy"
-        decoding="async"
-      />
+    <figure class="teaser__media" data-teaser>
+      <div class="teaser__frames">
+        {
+          stages.map((s, i) => (
+            <img
+              src={s.src}
+              srcset={s.srcset}
+              sizes="(min-width: 64rem) 50vw, 90vw"
+              width={s.width}
+              height={s.height}
+              alt={s.alt}
+              loading="lazy"
+              decoding="async"
+              class:list={['teaser__frame', { 'is-on': i === last }]}
+              data-frame={i}
+              aria-hidden={i === last ? undefined : 'true'}
+            />
+          ))
+        }
+      </div>
       <figcaption class="teaser__caption">Візуалізація етапів</figcaption>
     </figure>
     <div class="teaser__text">
-      <div class="teaser__stages" aria-label={`Етап ${STAGE} з ${total}`}>
-        <span class="teaser__count">{pad(STAGE)} / {pad(total)}</span>
+      <div class="teaser__stages">
+        <span class="teaser__count" data-teaser-count>{pad(total)} / {pad(total)}</span>
         <span class="teaser__dots" aria-hidden="true">
-          {kitchen.stages.map((_, i) => <span class:list={['teaser__dot', { 'is-on': i + 1 === STAGE }]} />)}
+          {stages.map((_, i) => <span class:list={['teaser__dot', { 'is-on': i === last }]} data-dot={i} />)}
         </span>
       </div>
+      <p class="teaser__stage" data-teaser-stage aria-live="off">{stages[last].title}</p>
       <h2 id="teaser-title" class="text-h2">Подивіться, як ми створюємо меблі — від порожньої стіни до готової кухні</h2>
       <a href="/yak-my-stvoriuiemo" class="teaser__link">
         Дивитися всі етапи
@@ -42,7 +58,58 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </a>
     </div>
   </div>
+  <script type="application/json" data-teaser-titles set:html={JSON.stringify(stages.map((s) => s.title))} />
 </section>
+
+<script>
+  // Автосмена кадров: только когда блок виден и нет reduced-motion; на наведении и при фокусе внутри — пауза
+  const root = document.querySelector<HTMLElement>('[data-block="story-teaser"]');
+  const STEP_MS = 2500;
+  if (root && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const frames = [...root.querySelectorAll<HTMLImageElement>('[data-frame]')];
+    const dots = [...root.querySelectorAll<HTMLElement>('[data-dot]')];
+    const count = root.querySelector<HTMLElement>('[data-teaser-count]')!;
+    const stage = root.querySelector<HTMLElement>('[data-teaser-stage]')!;
+    const titles: string[] = JSON.parse(root.querySelector('[data-teaser-titles]')!.textContent ?? '[]');
+    const pad = (n: number) => String(n).padStart(2, '0');
+    let i = 0;
+    let timer = 0;
+    let visible = false;
+    let paused = false;
+
+    const show = (n: number) => {
+      i = n;
+      frames.forEach((f, k) => {
+        f.classList.toggle('is-on', k === n);
+        f.toggleAttribute('aria-hidden', k !== n);
+      });
+      dots.forEach((d, k) => d.classList.toggle('is-on', k === n));
+      count.textContent = `${pad(n + 1)} / ${pad(frames.length)}`;
+      stage.textContent = titles[n] ?? '';
+      // следующий кадр — заранее, чтобы смена была без вспышки
+      const next = frames[(n + 1) % frames.length];
+      if (next.loading === 'lazy') next.loading = 'eager';
+    };
+    const tick = () => {
+      stop();
+      if (visible && !paused) timer = window.setTimeout(() => (show((i + 1) % frames.length), tick()), STEP_MS);
+    };
+    const stop = () => window.clearTimeout(timer);
+
+    show(0);
+    root.addEventListener('pointerenter', () => ((paused = true), stop()));
+    root.addEventListener('pointerleave', () => ((paused = false), tick()));
+    root.addEventListener('focusin', () => ((paused = true), stop()));
+    root.addEventListener('focusout', () => ((paused = false), tick()));
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) {
+        frames.forEach((f) => (f.loading = 'eager'));
+        tick();
+      } else stop();
+    }).observe(root);
+  }
+</script>
 
 <style>
   .teaser {
@@ -54,12 +121,26 @@ const pad = (n: number) => String(n).padStart(2, '0');
     gap: var(--space-stack);
     align-items: center;
   }
-  .teaser__media img {
-    display: block;
-    width: 100%;
-    height: auto;
+  /* Кадры друг на друге, видим один; смена — затухание opacity */
+  .teaser__frames {
+    position: relative;
     aspect-ratio: 4 / 3;
+    max-width: 100%;
+    overflow: hidden;
     border-radius: var(--radius-lg);
+    background: var(--color-graphite-2);
+  }
+  .teaser__frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+  .teaser__frame.is-on {
+    opacity: 1;
   }
   .teaser__caption {
     margin-top: 0.5rem;
@@ -68,7 +149,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
   .teaser__text {
     display: grid;
-    gap: 1.25rem;
+    gap: 1rem;
     justify-items: start;
   }
   .teaser__stages {
@@ -80,6 +161,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     font-family: var(--font-mono);
     font-size: var(--text-lead);
     color: var(--color-plaster);
+    font-variant-numeric: tabular-nums;
   }
   .teaser__dots {
     display: flex;
@@ -91,10 +173,17 @@ const pad = (n: number) => String(n).padStart(2, '0');
     border-radius: var(--radius-full);
     background: var(--color-ink-muted-dark);
     opacity: 0.5;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
   }
   .teaser__dot.is-on {
     background: var(--color-plaster);
     opacity: 1;
+  }
+  .teaser__stage {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-size: var(--text-h4);
+    color: var(--color-ink-muted-dark);
   }
   .teaser__link {
     display: inline-flex;
@@ -104,6 +193,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .teaser__frame,
+    .teaser__dot {
+      transition: none;
+    }
   }
   @media (min-width: 64rem) {
     .teaser__inner {

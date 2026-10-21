@@ -18,9 +18,11 @@ interface Props {
   bare?: boolean;
   /** Фото первого экрана (LCP): предзагрузка в <head>, чтобы браузер начал качать его до разбора CSS */
   lcpImage?: { srcset: string; sizes: string };
+  /** H2 мельче (главная и посадочные, правки 2026-10-21): −15 % на телефоне, −25 % на десктопе */
+  compactH2?: boolean;
 }
 
-const { title, description, noindex, bare = false, lcpImage } = Astro.props;
+const { title, description, noindex, bare = false, lcpImage, compactH2 = false } = Astro.props;
 const landing = landingOfPath(pagePath(Astro.url));
 ---
 
@@ -36,7 +38,7 @@ const landing = landingOfPath(pagePath(Astro.url));
     <Fonts />
     {lcpImage && <link rel="preload" as="image" imagesrcset={lcpImage.srcset} imagesizes={lcpImage.sizes} fetchpriority="high" />}
   </head>
-  <body data-landing={landing ?? undefined} class:list={{ 'is-bare': bare }}>
+  <body data-landing={landing ?? undefined} class:list={{ 'is-bare': bare, 'h2-compact': compactH2 }}>
     <SkipLink />
     {!bare && <Header />}
     <main id="main">
