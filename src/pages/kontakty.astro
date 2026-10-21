@@ -1,0 +1,143 @@
+---
+// /kontakty (ТЗ): телефон, месенджери, графік, зона виїзду (Черкаси та область) з картою, коротка форма.
+// Контакты — заглушки facts.ts, ссылки — src/lib/contacts.ts (единый источник).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ZamirForm from '../components/forms/ZamirForm.astro';
+import Button from '../components/ui/Button.astro';
+import Fact from '../components/ui/Fact.astro';
+import Icon from '../components/ui/Icon.astro';
+import PlaceholderImage from '../components/ui/PlaceholderImage.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import { facts } from '../content/facts';
+import { contactLinks } from '../lib/contacts';
+
+const { contacts: c, serviceArea } = facts;
+---
+
+<BaseLayout title="Контакти — Вимір, кухні та меблі на замовлення в Черкасах" description="Телефон, Viber, Telegram і графік роботи «Вимір». Замір і монтаж — Черкаси та область.">
+  <div class="container-site section-pad contacts">
+    <h1 class="text-h1">Контакти</h1>
+
+    <div class="contacts__grid">
+      <section class="contacts__card" aria-labelledby="contacts-call">
+        <h2 id="contacts-call" class="contacts__title">Зателефонуйте або напишіть</h2>
+        <a href={contactLinks.tel} class="contacts__phone">
+          <Icon name="phone" size={24} />
+          <Fact value={c.phoneDisplay} />
+        </a>
+        <div class="contacts__messengers">
+          <Button href={contactLinks.viber} variant="secondary" icon="viber">Viber</Button>
+          <Button href={contactLinks.telegram} variant="secondary" icon="telegram">Telegram</Button>
+          <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">Instagram</Button>
+        </div>
+        <dl class="contacts__list">
+          <div>
+            <dt>Графік</dt>
+            <dd><Fact value={c.scheduleText} /></dd>
+          </div>
+          <div>
+            <dt>Пошта</dt>
+            <dd><a href={contactLinks.email}><Fact value={c.emailPublic} /></a></dd>
+          </div>
+          <div>
+            <dt>Адреса</dt>
+            <dd><Fact value={c.address} /></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="contacts__card" aria-labelledby="contacts-area">
+        <h2 id="contacts-area" class="contacts__title">Зона виїзду</h2>
+        <p class="contacts__area">{serviceArea.text}</p>
+        <p class="contacts__muted"><Fact value={serviceArea.terms} /></p>
+        <div class="contacts__map">
+          <PlaceholderImage width={1200} height={900} label="карта зони виїзду" />
+        </div>
+      </section>
+    </div>
+
+    <section id="zamir" class="contacts__form" aria-labelledby="contacts-form-title">
+      <SectionTitle id="contacts-form-title" title="Безкоштовний замір" subtitle="Залиште номер — передзвонимо й домовимося про час." />
+      <ZamirForm idPrefix="kontakty" source="kontakty" />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .contacts {
+    display: grid;
+    gap: var(--space-stack);
+  }
+  .contacts__grid {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .contacts__card {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .contacts__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    font-weight: var(--font-display-weight);
+  }
+  .contacts__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--control-h);
+    font-family: var(--font-mono);
+    font-size: var(--text-lead);
+    font-weight: 500;
+  }
+  .contacts__messengers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .contacts__list {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .contacts__list dt {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  .contacts__list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .contacts__area {
+    font-size: var(--text-lead);
+    font-weight: 600;
+  }
+  .contacts__muted {
+    color: var(--color-ink-muted);
+  }
+  .contacts__map :global(.ph) {
+    border-radius: var(--radius-md);
+  }
+  .contacts__form {
+    display: grid;
+    gap: 0;
+    max-width: 40rem;
+  }
+  @media (min-width: 48rem) {
+    .contacts__card {
+      padding: 2rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .contacts__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

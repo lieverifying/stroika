@@ -1,11 +1,11 @@
 /**
- * Вопросы и ответы (ТЗ, блок 12): сроки, какие меблі, цена, материалы, гарантия, техника, выезд в область, оплата, замер;
+ * Вопросы и ответы (ТЗ, блок 12): сроки и цена — без цифр (считаем под задачу, 2026-10-21), какие меблі, материалы, гарантия, техника, выезд в область, оплата, замер;
  * вопрос о рекомендациях — только при facts.flags.referralEnabled.
  * Ответы собираются только из facts.ts: факт — отдельная часть ответа, пока заглушка — видна плашкой.
  * Текст между фактами — шаблон без цифр и обещаний.
  */
 import { facts, type Brand, type Fact } from './facts';
-import { formatUAH, isPlaceholder, pluralUk } from '../lib/facts';
+import { isPlaceholder, pluralUk } from '../lib/facts';
 
 /** Часть ответа: обычный текст или факт (с форматом для настоящего значения) */
 export type AnswerPart = string | { fact: Fact<string | number>; format?: (v: never) => string };
@@ -19,14 +19,12 @@ export interface FaqItem {
 const brandNames = (brands: Fact<Brand[]>): Fact<string> =>
   isPlaceholder(brands) ? brands : brands.map((b) => b.name).join(', ');
 
-const { terms, prices, warranty, payment, serviceArea, materials, services, referral } = facts;
+const { warranty, payment, serviceArea, materials, services, referral } = facts;
 
 export const FAQ: FaqItem[] = [
   {
     q: 'Скільки часу займає виготовлення?',
-    a: [
-      `Кухня — ${terms.kitchenProductionMonths} місяці від авансу. Шафи та інші меблі — ${terms.furnitureProductionMonths} місяці від авансу.`,
-    ],
+    a: ['Терміни залежать від проєкту. Назвемо їх після заміру разом із ціною.'],
   },
   {
     q: 'Які меблі ви робите?',
@@ -36,15 +34,7 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: 'Скільки коштує кухня?',
-    a: [
-      'Пряма кухня — від ',
-      { fact: prices.from.kitchenPryama, format: formatUAH },
-      ', кутова — від ',
-      { fact: prices.from.kitchenKutova, format: formatUAH },
-      ', з островом — від ',
-      { fact: prices.from.kitchenOstriv, format: formatUAH },
-      '. Точну ціну рахуємо після заміру.',
-    ],
+    a: ['Ціна залежить від розмірів, матеріалів і наповнення. Розрахуємо її під ваше завдання після безкоштовного заміру.'],
   },
   {
     q: 'З яких матеріалів і з якою фурнітурою робите?',

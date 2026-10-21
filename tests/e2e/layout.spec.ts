@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // CLAUDE.md: «Ничего не уезжает вбок». Проверяем 320 / 360 / 375 / 768 / 1280 px.
-const PAGES = ['/', '/styleguide', '/dyakuyemo', '/yak-my-stvoriuiemo', '/roboty'];
+const PAGES = ['/', '/styleguide', '/dyakuyemo', '/yak-my-stvoriuiemo', '/roboty', '/mebli', '/kontakty', '/polityka', '/404'];
 const WIDTHS = [320, 360, 375, 768, 1280];
 
 for (const path of PAGES) {

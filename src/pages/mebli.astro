@@ -1,0 +1,156 @@
+---
+// /mebli (ТЗ): шафи-купе, гардеробні, передпокої та інші корпусні меблі — та же структура, что у главной, но короче:
+// первый экран, работы, «Скільки коштує» (без цен — считаем под задачу), форма замера.
+// Фото — из src/content/portfolio.json; кнопка «Розрахувати» ведёт сразу в ветку шафы квиза (/?kvyz=shafa#kvyz).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ZamirForm from '../components/forms/ZamirForm.astro';
+import Lightbox from '../components/portfolio/Lightbox.astro';
+import PortfolioGrid from '../components/portfolio/PortfolioGrid.astro';
+import Prices from '../components/sections/Prices.astro';
+import Button from '../components/ui/Button.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import { facts } from '../content/facts';
+import { contactLinks } from '../lib/contacts';
+import { ITEMS, url, type PortfolioPhoto } from '../lib/portfolio';
+
+const QUIZ = '/?kvyz=shafa#kvyz';
+const pick = (id: string) => ITEMS.find((i) => i.id === id)!;
+const hero = pick('shafy-05') as PortfolioPhoto;
+// 6 работ, все около 3:4 — ряды по 3 (по 2 на телефоне) выходят ровными
+const works = ['shafy-03', 'shafy-06', 'shafy-08', 'interier-02', 'shafy-10', 'interier-04'].map(pick);
+const furniture = facts.services.furniture.filter((f) => f !== 'кухні');
+---
+
+<BaseLayout
+  title="Шафи, гардеробні та меблі на замовлення в Черкасах — Вимір"
+  description="Шафи-купе, гардеробні, передпокої, дитячі, ТВ-зони та меблі для бізнесу на замовлення: Черкаси та область. Безкоштовний замір."
+>
+  <section class="container-site mebli-hero" aria-labelledby="mebli-title">
+    <div class="mebli-hero__text">
+      <h1 id="mebli-title" class="text-h1">Шафи та меблі на замовлення в Черкасах</h1>
+      <p class="mebli-hero__lead">{furniture.join(', ')[0].toUpperCase() + furniture.join(', ').slice(1)}.</p>
+      <p class="mebli-hero__muted">Для квартир, будинків, офісів, магазинів і салонів. Замір, дизайн-проєкт і монтаж — наша команда.</p>
+      <div class="mebli-hero__actions">
+        <Button href={QUIZ} size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+        <Button href={contactLinks.viber} variant="secondary" icon="viber">Написати у Viber</Button>
+      </div>
+    </div>
+    <div class="mebli-hero__media">
+      <img
+        src={url(hero.src)}
+        srcset={`${url(hero.thumb)} 480w, ${url(hero.src)} ${hero.width}w`}
+        sizes="(min-width: 64rem) 40vw, 100vw"
+        width={hero.width}
+        height={hero.height}
+        alt={hero.alt}
+        fetchpriority="high"
+        decoding="async"
+      />
+    </div>
+  </section>
+
+  <section class="section-pad" aria-labelledby="mebli-works" data-gallery>
+    <div class="container-site">
+      <SectionTitle id="mebli-works" title="Наші роботи" />
+      <PortfolioGrid items={works} eager={0} fill />
+      <div class="mebli__more">
+        <Button href="/roboty#shafy" variant="secondary" icon="arrow-right">Усі шафи та меблі</Button>
+        <a href="/yak-my-stvoriuiemo" class="mebli__link">Подивитися, як ми створюємо шафу-купе</a>
+      </div>
+    </div>
+    <Lightbox />
+  </section>
+
+  <Prices quizHref={QUIZ} />
+
+  <section id="zamir" class="section-pad" aria-labelledby="mebli-form-title">
+    <div class="container-site mebli-form">
+      <SectionTitle id="mebli-form-title" title="Безкоштовний замір" subtitle="Залиште номер — передзвонимо й домовимося про час." />
+      <ZamirForm idPrefix="mebli" source="mebli" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .mebli-hero {
+    display: grid;
+    gap: 1.5rem;
+    padding-bottom: var(--space-stack);
+  }
+  .mebli-hero__media {
+    order: -1;
+    margin-inline: calc(-1 * var(--space-gutter));
+  }
+  .mebli-hero__media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: 50% 45%;
+  }
+  .mebli-hero__lead {
+    margin-top: 1.25rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+  }
+  .mebli-hero__muted {
+    margin-top: 0.75rem;
+    color: var(--color-ink-muted);
+    max-width: 48ch;
+  }
+  .mebli-hero__actions {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .mebli__more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: var(--space-stack);
+  }
+  .mebli__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .mebli-form {
+    max-width: calc(40rem + 2 * var(--space-gutter));
+  }
+  @media (min-width: 48rem) {
+    .mebli-hero {
+      padding-top: 2rem;
+    }
+    .mebli-hero__media {
+      margin-inline: 0;
+    }
+    .mebli-hero__media img {
+      border-radius: var(--radius-lg);
+    }
+    .mebli-hero__actions {
+      grid-auto-flow: column;
+      justify-content: start;
+    }
+  }
+  @media (min-width: 64rem) {
+    .mebli-hero {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: center;
+      column-gap: 4rem;
+      padding-top: 3rem;
+    }
+    .mebli-hero__media {
+      order: 0;
+    }
+    .mebli-hero__media img {
+      aspect-ratio: 4 / 5;
+      max-height: calc(100svh - var(--header-h) - 6rem);
+    }
+  }
+</style>

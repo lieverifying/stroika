@@ -15,12 +15,15 @@ test.describe('факты бригады на главной', () => {
     await expect(page.locator('a[href="/remont"]')).toHaveCount(0);
   });
 
-  test('сроки изготовления и зона — подтверждённые факты', async ({ page }) => {
+  test('цен и сроков нет (решение владельца, 2026-10-21); зона — подтверждённый факт', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('[data-block="7"]')).toContainText('2–3 місяці від авансу');
-    await expect(page.locator('[data-block="12"]')).toContainText('Кухня — 2–3 місяці від авансу. Шафи та інші меблі — 1–2 місяці від авансу.');
+    const main = page.locator('main');
+    await expect(main).not.toContainText(/місяц[іья] від авансу|\d+\s*днів|від \d[\d\s]* грн/);
+    await expect(main.locator('[data-placeholder^="PRICE_"], [data-placeholder^="TERM_"], [data-placeholder="PROMISE_MEASURE_3D_HOURS"]')).toHaveCount(0);
+    await expect(page.locator('[data-block="12"]')).toContainText('Назвемо їх після заміру разом із ціною');
     await expect(page.locator('[data-block="13"]')).toContainText('Черкаси та область');
     await expect(page.locator('[data-block="1"] .hero__badge')).toHaveCount(0); // сезонный бейдж выключен
+    await expect(page.locator('footer')).not.toContainText(/ФОП|ІПН|РНОКПП/);
   });
 });
 

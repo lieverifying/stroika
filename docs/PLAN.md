@@ -341,6 +341,11 @@
 - **Файлы:** `src/pages/roboty.astro`, `src/components/portfolio/*`, `src/scripts/portfolio.ts`, `src/lib/portfolio.ts`, `src/components/sections/{Portfolio,Hero}.astro`, `tests/e2e/portfolio.spec.ts`.
 - **Скриншоты:** `docs/screens/pf-*.png`.
 
+### Без цен, сроков и ФОП; страницы «Меблі», «Контакти», «Політика», 404 (2026-10-21)
+
+- **Что:** цены и сроки убраны со всего сайта (блок 8 «Скільки коштує» без цифр, блок 7 и FAQ без сроков, первый экран — «Безкоштовний замір»); реквизиты ФОП убраны из футера и фактов; новые страницы `/mebli`, `/kontakty`, `/polityka`, 404; `public/.htaccess` (404, 301 с /kukhni и /remont); тест обхода всех внутренних ссылок.
+- **Скриншоты:** `docs/screens/pages-*.png`.
+
 ---
 
 ## Что блокирует фазы 5+ (нужно от владельца)

@@ -59,6 +59,8 @@ export const facts = {
     photo: '{{OWNER_PHOTO}}',
   },
 
+  // Цен и сроков на сайте нет (решение владельца, 2026-10-21): считаем под задачу клиента.
+  // Цены за метр ниже нужны только выключенному экрану квиза с ценой (вариант А), на сайте не показываются.
   prices: {
     perMeter: {
       mdfFilm: '{{PRICE_PER_M_MDF_FILM}}',
@@ -75,14 +77,6 @@ export const facts = {
       rozpashna: '{{WARDROBE_PRICE_PER_M_ROZPASHNA}}',
       harderobna: '{{WARDROBE_PRICE_PER_M_HARDEROBNA}}',
     },
-    from: {
-      kitchenPryama: '{{PRICE_FROM_KITCHEN_PRYAMA}}',
-      kitchenKutova: '{{PRICE_FROM_KITCHEN_KUTOVA}}',
-      kitchenOstriv: '{{PRICE_FROM_KITCHEN_OSTRIV}}',
-      wardrobeKupe: '{{PRICE_FROM_WARDROBE_KUPE}}',
-      harderobna: '{{PRICE_FROM_HARDEROBNA}}',
-      peredpokii: '{{PRICE_FROM_PEREDPOKII}}',
-    },
   },
 
   quiz: {
@@ -98,21 +92,11 @@ export const facts = {
   // Обещания из ТЗ: на сайт попадут только после подтверждения владельцем
   promises: {
     callbackMinutes: '{{PROMISE_CALLBACK_MINUTES}}',
-    measure3dHours: '{{PROMISE_MEASURE_3D_HOURS}}',
     priceFixedText: '{{PROMISE_PRICE_FIXED_TEXT}}',
     gift3dText: '{{PROMISE_3D_GIFT_TEXT}}',
     oneTeam: '{{PROMISE_ONE_TEAM}}',
   },
 
-  terms: {
-    stepMeasureDays: '{{TERM_STEP_MEASURE_DAYS}}',
-    stepProjectDays: '{{TERM_STEP_PROJECT_DAYS}}',
-    stepInstallDays: '{{TERM_STEP_INSTALL_DAYS}}',
-    // Подтверждено владельцем (2026-10-20). Срочное изготовление не обещаем.
-    // Месяцы изготовления от авансу: кухня и шафи / інші меблі
-    kitchenProductionMonths: '2–3',
-    furnitureProductionMonths: '1–2',
-  },
 
   trust: {
     kitchensDone: '{{TRUST_KITCHENS_DONE}}',
@@ -157,12 +141,12 @@ export const facts = {
     mapsUrl: '{{GOOGLE_MAPS_URL}}',
   },
 
+  // Политика конфиденциальности. Реквизитов ФОП на сайте нет (решение владельца, 2026-10-21).
   legal: {
-    fopName: '{{FOP_NAME}}',
-    fopTaxId: '{{FOP_TAX_ID}}',
-    fopAddress: '{{FOP_ADDRESS}}',
     privacyContactEmail: '{{PRIVACY_CONTACT_EMAIL}}',
     privacyUpdatedAt: '{{PRIVACY_UPDATED_AT}}',
+    // Сколько храним заявки, например «12 місяців після останнього звернення»
+    privacyRetention: '{{PRIVACY_RETENTION}}',
   },
 
   // Карточки мастеров — за флагом flags.teamCards (выключен): без имён и личных фото до согласия мастеров.
@@ -249,15 +233,13 @@ interface FactsSchema {
   brand: { name: string; nameUpper: string; descriptor: string };
   services: { furniture: string[]; objects: string[]; install: string[] };
   owner: { name: Fact<string>; photo: Fact<string> };
+  // Цен и сроков на сайте нет (решение владельца, 2026-10-21): считаем под задачу клиента.
+  // Цены за метр ниже нужны только выключенному экрану квиза с ценой (вариант А), на сайте не показываются.
   prices: {
     perMeter: Record<'mdfFilm' | 'mdfPainted' | 'dsp', Fact<number>>;
     countertopPerMeter: Record<'dsp' | 'quartz', Fact<number>>;
     islandSurcharge: Fact<number>;
     wardrobePerMeter: Record<'kupe' | 'rozpashna' | 'harderobna', Fact<number>>;
-    from: Record<
-      'kitchenPryama' | 'kitchenKutova' | 'kitchenOstriv' | 'wardrobeKupe' | 'harderobna' | 'peredpokii',
-      Fact<number>
-    >;
   };
   quiz: {
     kitchenLenMinM: Fact<number>;
@@ -270,13 +252,10 @@ interface FactsSchema {
   };
   promises: {
     callbackMinutes: Fact<number>;
-    measure3dHours: Fact<number>;
     priceFixedText: Fact<string>;
     gift3dText: Fact<string>;
     oneTeam: Fact<string>;
   };
-  terms: Record<'stepMeasureDays' | 'stepProjectDays' | 'stepInstallDays', Fact<number>> &
-    Record<'kitchenProductionMonths' | 'furnitureProductionMonths', string>;
   trust: { kitchensDone: Fact<number>; years: Fact<number> };
   warranty: { years: Fact<number>; terms: Fact<string> };
   payment: { prepayPercent: Fact<number>; schedule: Fact<string>; methods: Fact<string> };

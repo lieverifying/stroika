@@ -1,5 +1,6 @@
 ---
-// Блок 14 — футер (ТЗ): контакты, график, соцсети, ФОП, ссылка на политику. Все данные — заглушки facts.ts.
+// Блок 14 — футер (ТЗ): контакты, график, соцсети, ссылка на политику. Реквизитов ФОП нет (решение владельца, 2026-10-21).
+// Контакты — заглушки facts.ts.
 // Тёмный фон; все ссылки — зоны нажатия ≥ 48 px. Нижнюю панель телефона футер не прячет: body уже с отступом под неё.
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
@@ -7,7 +8,7 @@ import Icon from '../ui/Icon.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 
-const { contacts: c, legal, brand } = facts;
+const { contacts: c, brand } = facts;
 const year = new Date().getFullYear();
 ---
 
@@ -45,19 +46,10 @@ const year = new Date().getFullYear();
       </div>
     </div>
 
-    <div class="site-footer__col">
-      <h2 class="site-footer__title">Реквізити</h2>
-      <ul class="site-footer__list site-footer__muted">
-        <li><Fact value={legal.fopName} /></li>
-        <li>ІПН <Fact value={legal.fopTaxId} /></li>
-        <li>
-          <a href="/polityka" class="site-footer__link">Політика конфіденційності</a>
-        </li>
-      </ul>
-    </div>
   </div>
   <div class="container-site site-footer__bottom">
     <p class="site-footer__muted">© {year} {brand.name}</p>
+    <a href="/polityka" class="site-footer__link site-footer__muted">Політика конфіденційності</a>
   </div>
 </footer>
 
@@ -127,7 +119,12 @@ const year = new Date().getFullYear();
     gap: 0.5rem;
   }
   .site-footer__bottom {
-    padding-block: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 1.5rem;
+    padding-block: 1rem;
     border-top: 1px solid var(--color-graphite-2);
     font-size: var(--text-small);
   }
@@ -138,7 +135,7 @@ const year = new Date().getFullYear();
   }
   @media (min-width: 64rem) {
     .site-footer__grid {
-      grid-template-columns: 1fr 1.2fr 1.2fr 1fr;
+      grid-template-columns: 1fr 1.2fr 1.2fr;
       gap: 2rem;
       padding-block: 4.5rem 3rem;
     }
