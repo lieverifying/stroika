@@ -12,14 +12,14 @@ const PATH = '/yak-my-stvoriuiemo';
 const K = '[data-story="kitchen"]';
 const W = '[data-story="wardrobe"]';
 
-/** Прокрутить к середине участка этапа k (участок — 70 % высоты окна) */
+/** Прокрутить к середине участка этапа k (участок — 70 % высоты окна, на телефоне < 768 px — 35 %) */
 async function scrollToStage(page: Page, sel: string, k: number) {
   await page.evaluate(
     ({ sel, k }) => {
       const root = document.querySelector(sel)!;
       const track = root.querySelector('.story__track')!;
       const top = parseFloat(getComputedStyle(root.querySelector('.story__sticky')!).top) || 0;
-      window.scrollTo(0, track.getBoundingClientRect().top + scrollY - top + (k + 0.5) * innerHeight * 0.7);
+      window.scrollTo(0, track.getBoundingClientRect().top + scrollY - top + (k + 0.5) * innerHeight * (innerWidth < 768 ? 0.35 : 0.7));
     },
     { sel, k },
   );

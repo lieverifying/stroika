@@ -17,7 +17,10 @@ const titleId = `quiz-q-${step.id}`;
   {
     step.options ? (
       <div
-        class:list={['quiz-step__options', { 'quiz-step__options--four': step.options.length === 4 }]}
+        class:list={[
+          'quiz-step__options',
+          { 'quiz-step__options--four': step.options.length === 4, 'quiz-step__options--three': step.options.length === 3 },
+        ]}
         role="radiogroup"
         aria-labelledby={titleId}
       >
@@ -51,6 +54,17 @@ const titleId = `quiz-q-${step.id}`;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
+  }
+  /* 3 варианта на телефоне — в одну колонку, без одиночной карточки во втором ряду */
+  @media (max-width: 63.99rem) {
+    .quiz-step__options--three {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .quiz-step__options--three :global(.quiz-option--icon) {
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+    }
   }
   @media (min-width: 64rem) {
     .quiz-step__options {

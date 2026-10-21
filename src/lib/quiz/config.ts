@@ -120,9 +120,9 @@ export const STEPS: Record<StepId, StepDef> = {
     title: 'Що саме потрібно?',
     kind: 'single',
     options: [
-      { value: 'kupe', label: 'Купе' },
-      { value: 'rozpashna', label: 'Розпашна' },
-      { value: 'harderobna', label: 'Гардеробна' },
+      { value: 'kupe', label: 'Купе', icon: 'kupe' },
+      { value: 'rozpashna', label: 'Розпашна', icon: 'rozpashna' },
+      { value: 'harderobna', label: 'Гардеробна', icon: 'harderobna' },
     ],
     next: () => (HAS_WARDROBE_WIDTH ? 'wardrobeWidth' : 'timing'),
   },

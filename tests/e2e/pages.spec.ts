@@ -106,7 +106,7 @@ test('телефон +380 75 991 48 43 и ссылки tel / Viber / Telegram: �
   } else {
     await expect(page.locator('[data-header] a[href="tel:+380759914843"]').first()).toContainText('+380 75 991 48 43');
   }
-  await expect(page.locator('footer a[href="tel:+380759914843"]')).toHaveCount(1);
+  await expect(page.locator('footer a[href="tel:+380759914843"]:visible')).toHaveCount(1);
   await page.goto('/dyakuyemo');
   await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
   await expect(page.locator('main a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);

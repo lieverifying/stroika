@@ -56,8 +56,8 @@ export interface OptionDef {
   value: string;
   /** Подпись; пока факт не подтверждён — заглушка {{…}}, видна плашкой */
   label: Fact<string>;
-  /** Схема-картинка (inline SVG по имени) */
-  icon?: KitchenShape;
+  /** Схема-картинка (inline SVG по имени): форма кухни или тип шафы */
+  icon?: KitchenShape | WardrobeType;
   /** Вариант не выбирается в квизе, а ведёт по ссылке (например, «Інше, нестандартне» → #zapyt) */
   href?: string;
 }

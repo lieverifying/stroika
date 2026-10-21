@@ -1,9 +1,9 @@
 ---
 // Финал главной и посадочных (ТЗ v2): тёмный блок «Скажіть розмір — ми скажемо ціну» и кнопки Viber, Telegram, Подзвонити.
+// Отдельного крупного номера под кнопками нет (правка 2026-10-22): звонок — кнопкой «Подзвонити».
 // Якорь #zamir — сюда ведут старые ссылки «на замір».
 import Button from '../ui/Button.astro';
 import DimLine from '../ui/DimLine.astro';
-import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 ---
 
@@ -17,7 +17,6 @@ import { contactLinks } from '../../lib/contacts';
       <Button href={contactLinks.telegram} variant="light" icon="telegram" fullWidth>Telegram</Button>
       <Button href={contactLinks.tel} variant="outline" icon="phone" fullWidth>Подзвонити</Button>
     </div>
-    <p class="final__phone"><a href={contactLinks.tel}>{facts.contacts.phoneDisplay}</a></p>
   </div>
 </section>
 
@@ -46,15 +45,6 @@ import { contactLinks } from '../../lib/contacts';
     gap: 0.75rem;
     width: 100%;
     margin-top: 0.5rem;
-  }
-  .final__phone {
-    font-family: var(--font-mono);
-    font-size: var(--text-lead);
-  }
-  .final__phone a {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--control-h);
   }
   @media (min-width: 48rem) {
     .final__buttons {

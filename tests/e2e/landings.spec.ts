@@ -42,9 +42,13 @@ for (const l of [
       const order = await page.locator('main [data-block], main [data-story]').evaluateAll((els) =>
         els.map((e) => e.getAttribute('data-block') ?? `story:${e.getAttribute('data-story')}`),
       );
-      expect(order).toEqual(['1', `story:${l.story}`, '3', '5', 'promises', '12', '13']);
+      // квиз выше (правка 2026-10-22): первый экран → квиз → роботи → обіцянки → сюжет → вопросы → финал
+      expect(order).toEqual(['1', '5', '3', 'promises', `story:${l.story}`, '12', '13']);
       await expect(page.locator('main')).toContainText('Візуалізація етапів');
       await expect(page.locator('[data-block="13"] h2')).toHaveText('Скажіть розмір — ми скажемо ціну');
+      // в финале нет отдельного крупного номера — только кнопки
+      await expect(page.locator('[data-block="13"] .final__phone')).toHaveCount(0);
+      await expect(page.locator('[data-block="13"] a[href^="tel:"]')).toHaveCount(1);
     });
 
     test('работы — только своей категории, крупные фото', async ({ page }) => {
@@ -140,6 +144,30 @@ test('title, description и H1 у /kukhni и /mebli разные', async ({ page
   expect(k.h1).not.toBe(m.h1);
   expect(k.title).not.toBe(m.title);
   expect(k.desc).not.toBe(m.desc);
+});
+
+test('сюжет сборки на телефоне короче: ~35 % экрана прокрутки на этап (на десктопе ~70 %)', async ({ page, isMobile }) => {
+  await page.goto('/kukhni');
+  const story = page.locator('[data-story="kitchen"]');
+  await story.scrollIntoViewIfNeeded();
+  await expect(story).toHaveClass(/story--scroll/);
+  const { track, sticky, vh } = await story.evaluate((el) => ({
+    track: el.querySelector<HTMLElement>('.story__track')!.offsetHeight,
+    sticky: el.querySelector<HTMLElement>('.story__sticky')!.offsetHeight,
+    vh: innerHeight,
+  }));
+  const perStage = (track - sticky) / 7;
+  expect(perStage / vh).toBeCloseTo(isMobile ? 0.35 : 0.7, 1);
+});
+
+test('квиз шафы: схемы у «Купе», «Розпашна», «Гардеробна»; на телефоне — одна колонка', async ({ page, isMobile }) => {
+  await page.goto('/mebli#kvyz');
+  await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
+  const step = page.locator('[data-step="wardrobeType"]');
+  await expect(step.locator('.shape-icon')).toHaveCount(3);
+  const lefts = await step.locator('[role="radio"]').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)));
+  if (isMobile) expect(new Set(lefts).size).toBe(1);
+  else expect(new Set(lefts).size).toBe(3);
 });
 
 test('/kukhni — отдельная страница, без перенаправления на «/»', async ({ page }) => {

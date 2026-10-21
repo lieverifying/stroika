@@ -1,10 +1,11 @@
 ---
-// Схема формы кухни, вид сверху (ТЗ, шаг 2): графитовые линии, без жёлтого. Декор — aria-hidden.
-// Стены — тонкая линия, корпуса кухни — заливка с обводкой.
-import type { KitchenShape } from '../../lib/quiz/types';
+// Схема варианта квиза, вид сверху: форма кухни (шаг 2 ветки кухни) и тип шафы (купе, розпашна, гардеробна).
+// Графитовые линии, без жёлтого. Декор — aria-hidden. Стены — тонкая линия, корпуса — заливка с обводкой.
+// Купе — две двери внахлёст со стрелкой сдвига; розпашна — створки с дугой открывания; гардеробна — П-образные полки.
+import type { KitchenShape, WardrobeType } from '../../lib/quiz/types';
 
 interface Props {
-  shape: KitchenShape;
+  shape: KitchenShape | WardrobeType;
 }
 const { shape } = Astro.props;
 ---
@@ -23,6 +24,25 @@ const { shape } = Astro.props;
       </>
     )
   }
+  {
+    shape === 'kupe' && (
+      <>
+        <rect x="8" y="8" width="48" height="10" />
+        <path class="shape-icon__door" d="M8 21h26M30 24h26" />
+        <path class="shape-icon__move" d="M22 33h20M38 30l4 3-4 3M26 30l-4 3 4 3" />
+      </>
+    )
+  }
+  {
+    shape === 'rozpashna' && (
+      <>
+        <rect x="8" y="8" width="48" height="10" />
+        <path class="shape-icon__door" d="M8 18l10 16M56 18l-10 16" />
+        <path class="shape-icon__arc" d="M32 18a14 14 0 0 1-14 16M32 18a14 14 0 0 0 14 16" />
+      </>
+    )
+  }
+  {shape === 'harderobna' && <path d="M8 8h48v32h-7V15H15v25H8z" />}
 </svg>
 
 <style>
@@ -33,6 +53,21 @@ const { shape } = Astro.props;
     stroke: var(--color-graphite);
     stroke-width: 1.5;
     stroke-linejoin: round;
+  }
+  .shape-icon__door {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .shape-icon__move,
+  .shape-icon__arc {
+    fill: none;
+    stroke: var(--color-line-strong);
+    stroke-width: 1.25;
+    stroke-linecap: round;
+  }
+  .shape-icon__arc {
+    stroke-dasharray: 2 2;
   }
   .shape-icon__wall {
     fill: none;

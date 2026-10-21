@@ -4,7 +4,8 @@
 // нет кадра — серый плейсхолдер с подписью этапа.
 // Режимы:
 // — по умолчанию (без JS и при prefers-reduced-motion) этапы идут друг под другом, статично;
-// — скрипт включает .story--scroll: сцена закреплена (sticky) на высоту экрана, этап сменяется каждые 70svh прокрутки,
+// — скрипт включает .story--scroll: сцена закреплена (sticky) на высоту экрана, этап сменяется каждые 70svh прокрутки
+//   (на телефоне, < 768 px, — каждые 35svh: сюжет короче, правка 2026-10-22),
 //   кадр и подпись — перекрёстным затуханием (только opacity и transform). Сбоку индикатор этапов — он же кнопки
 //   перехода (клик, стрелки). Грузится текущий и следующий кадр; без JS кадры — из <noscript>.
 // Кадр — WebP при сборке, до 200 КБ.
@@ -136,6 +137,7 @@ const stages = await Promise.all(
 <style>
   .story {
     --sticky-h: calc(100svh - var(--header-h) - var(--bottom-bar-h));
+    --step-h: 70svh; /* прокрутка на один этап */
     display: grid;
     gap: 1.5rem;
   }
@@ -218,7 +220,12 @@ const stages = await Promise.all(
 
   /* ——— Режим прокрутки (включает скрипт) ——— */
   .story--scroll .story__track {
-    height: calc(var(--sticky-h) + var(--n) * 70svh);
+    height: calc(var(--sticky-h) + var(--n) * var(--step-h));
+  }
+  @media (max-width: 47.99rem) {
+    .story {
+      --step-h: 35svh;
+    }
   }
   .story--scroll .story__sticky {
     position: sticky;
@@ -349,7 +356,8 @@ const stages = await Promise.all(
     root.classList.add('story--scroll');
     root.querySelector<HTMLElement>('.story__progress')!.hidden = false;
 
-    const stepPx = () => innerHeight * 0.7;
+    // Та же доля экрана, что и --step-h в CSS: 35 % на телефоне, 70 % с 768 px
+    const stepPx = () => innerHeight * (matchMedia('(max-width: 47.99rem)').matches ? 0.35 : 0.7);
     const stickyTop = () => parseFloat(getComputedStyle(sticky).top) || 0;
 
     // Сцена закреплена на экране — посетитель действительно видит этапы (а не проскочил сюжет по якорю)

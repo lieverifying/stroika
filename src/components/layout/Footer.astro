@@ -2,6 +2,8 @@
 // Блок 14 — футер (ТЗ): контакты, график, соцсети, ссылка на политику. Реквизитов ФОП нет (решение владельца, 2026-10-21).
 // Режим запуска: почта, график и адрес — только когда есть факт и включён флаг. Instagram и TikTok — SocialLinks.
 // Тёмный фон; все ссылки — зоны нажатия ≥ 48 px. Нижнюю панель телефона футер не прячет: body уже с отступом под неё.
+// Телефон (< 768 px, правка 2026-10-22) — компактный подвал: логотип, одна строка иконок (телефон, Viber, Telegram,
+// Instagram, TikTok), «Черкаси та область», политика; без крупных кнопок и слогана. С 768 px — полный подвал.
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
@@ -13,10 +15,35 @@ import { SLOGAN } from '../../content/brand';
 
 const { contacts: c, brand } = facts;
 const year = new Date().getFullYear();
+// Строка иконок компактного подвала; Instagram и TikTok — только когда включён флаг и есть ссылка
+const icons = [
+  { href: contactLinks.tel, icon: 'phone' as const, label: `Подзвонити ${c.phoneDisplay}` },
+  { href: contactLinks.viber, icon: 'viber' as const, label: 'Viber' },
+  { href: contactLinks.telegram, icon: 'telegram' as const, label: 'Telegram' },
+  ...(facts.flags.instagram && contactLinks.instagram ? [{ href: contactLinks.instagram, icon: 'instagram' as const, label: 'Instagram', ext: true }] : []),
+  ...(facts.flags.instagram && contactLinks.tiktok ? [{ href: contactLinks.tiktok, icon: 'tiktok' as const, label: 'TikTok', ext: true }] : []),
+];
 ---
 
 <footer data-block="14" class="site-footer on-dark">
-  <div class="container-site site-footer__grid">
+  <div class="container-site site-footer__compact" data-footer-compact>
+    <img src="/brand/logo-dark.svg" alt="Вимір" width="148" height="32" class="site-footer__logo" />
+    <ul class="site-footer__icons">
+      {
+        icons.map((i) => (
+          <li>
+            <a href={i.href} class="site-footer__icon" aria-label={i.label} target={i.ext ? '_blank' : undefined} rel={i.ext ? 'noopener' : undefined}>
+              <Icon name={i.icon} size={22} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="site-footer__muted">{facts.serviceArea.text}</p>
+    <a href="/polityka" class="site-footer__link site-footer__muted">Політика конфіденційності</a>
+  </div>
+
+  <div class="container-site site-footer__grid" data-footer-full>
     <div class="site-footer__brand">
       <img src="/brand/logo-dark.svg" alt="Вимір" width="148" height="32" class="site-footer__logo" />
       <p class="site-footer__slogan">{SLOGAN}</p>
@@ -57,7 +84,7 @@ const year = new Date().getFullYear();
     </div>
 
   </div>
-  <div class="container-site site-footer__bottom">
+  <div class="container-site site-footer__bottom" data-footer-full>
     <p class="site-footer__muted">© {year} {brand.name}</p>
     <a href="/polityka" class="site-footer__link site-footer__muted">Політика конфіденційності</a>
   </div>
@@ -146,7 +173,36 @@ const year = new Date().getFullYear();
     border-top: 1px solid var(--color-graphite-2);
     font-size: var(--text-small);
   }
+  /* Компактный подвал телефона */
+  .site-footer__compact {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    padding-block: 2.5rem 1.5rem;
+  }
+  .site-footer__icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .site-footer__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--color-ink-muted-dark);
+    border-radius: var(--radius-full);
+    color: var(--color-plaster);
+  }
+  @media (max-width: 47.99rem) {
+    [data-footer-full] {
+      display: none;
+    }
+  }
   @media (min-width: 48rem) {
+    .site-footer__compact {
+      display: none;
+    }
     .site-footer__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
