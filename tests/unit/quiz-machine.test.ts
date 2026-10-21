@@ -271,9 +271,9 @@ describe('шаг 1 и сроки (решение владельца, 2026-10-20)
     expect(STEPS.goal.options?.map((o) => o.label)).toEqual(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
   });
 
-  test('«Інше, нестандартне» — не ветка квиза, а ссылка на блок #zapyt', () => {
+  test('«Інше, нестандартне» — не ветка квиза, а ссылка на блок /kontakty#zapyt', () => {
     const custom = STEPS.goal.options?.find((o) => o.value === 'custom');
-    expect(custom?.href).toBe('#zapyt');
+    expect(custom?.href).toBe('/kontakty#zapyt');
     expect(branchOf('custom')).toBeNull();
     expect(STEPS.goal.options?.filter((o) => o.href)).toHaveLength(1);
   });

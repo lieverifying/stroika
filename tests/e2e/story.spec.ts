@@ -198,17 +198,19 @@ test.describe('содержимое', () => {
 });
 
 test.describe('ссылки на страницу', () => {
-  test('меню шапки: после «Роботи»; футер; главная — после блока «Як ми працюємо»', async ({ page, isMobile }) => {
+  test('меню шапки: после «Роботи»; футер; на главной — сюжет кухни со ссылкой «Детальніше»', async ({ page, isMobile }) => {
     await page.goto('/');
     if (!isMobile) {
       const items = page.getByRole('navigation', { name: 'Головне меню' }).getByRole('link');
       await expect(items).toHaveText(['Кухні', 'Меблі', 'Роботи', 'Як ми створюємо', 'Контакти']);
     }
     await expect(page.locator('footer a[href="/yak-my-stvoriuiemo"]')).toHaveText('Як ми створюємо');
-    const more = page.locator('[data-block="7"] a[href="/yak-my-stvoriuiemo"]');
-    await expect(more).toHaveText('Подивитися, як ми створюємо кухню');
-    const stepsBottom = await page.locator('[data-block="7"] ol').evaluate((e) => e.getBoundingClientRect().bottom);
-    expect((await more.boundingBox())!.y).toBeGreaterThanOrEqual(stepsBottom);
+    // на главной — сам сюжет кухни с подписью «Візуалізація етапів» и ссылкой «Детальніше»
+    const home = page.locator('main [data-story="kitchen"]');
+    await expect(home.locator('h2')).toHaveText('Як ми створюємо кухню');
+    await expect(home.locator('.story__note').first()).toHaveText('Візуалізація етапів');
+    const more = home.getByRole('link', { name: 'Детальніше' });
+    await expect(more).toHaveAttribute('href', '/yak-my-stvoriuiemo');
     await more.click();
     await expect(page).toHaveURL(/\/yak-my-stvoriuiemo$/);
   });

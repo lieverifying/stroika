@@ -1,6 +1,6 @@
 ---
 // Блок 3 — «Наші роботи» (решение владельца, 2026-10-21): 6 лучших работ из src/content/portfolio.json (featured),
-// ровные ряды без обрезки, фото открывается на весь экран, внизу «Усі роботи» → /roboty.
+// крупно, по 2 в ряд (ряды целиком, без обрезки), без подписей, фото открывается на весь экран; «Усі роботи» → /roboty.
 import Lightbox from '../portfolio/Lightbox.astro';
 import PortfolioGrid from '../portfolio/PortfolioGrid.astro';
 import Button from '../ui/Button.astro';
@@ -11,7 +11,7 @@ import { FEATURED } from '../../lib/portfolio';
 <section data-block="3" class="section-pad" aria-labelledby="portfolio-title" data-gallery>
   <div class="container-site">
     <SectionTitle id="portfolio-title" title="Наші роботи" />
-    <PortfolioGrid items={FEATURED} eager={0} fill />
+    <PortfolioGrid items={FEATURED} eager={0} perRow={[2, 2]} />
     <div class="portfolio__more">
       <Button href="/roboty" variant="secondary" icon="arrow-right">Усі роботи</Button>
     </div>

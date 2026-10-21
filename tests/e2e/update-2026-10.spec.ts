@@ -21,7 +21,7 @@ test.describe('факты бригады на главной', () => {
     await expect(main).not.toContainText(/місяц[іья] від авансу|\d+\s*днів|від \d[\d\s]* грн/);
     await expect(main.locator('[data-placeholder^="PRICE_"], [data-placeholder^="TERM_"], [data-placeholder="PROMISE_MEASURE_3D_HOURS"]')).toHaveCount(0);
     await expect(page.locator('[data-block="12"]')).toContainText('Назвемо їх після заміру разом із ціною');
-    await expect(page.locator('[data-block="13"]')).toContainText('Черкаси та область');
+    await expect(page.locator('[data-block="12"]')).toContainText('черкаси та область');
     await expect(page.locator('[data-block="1"] .hero__badge')).toHaveCount(0); // сезонный бейдж выключен
     await expect(page.locator('footer')).not.toContainText(/ФОП|ІПН|РНОКПП/);
   });
@@ -35,10 +35,9 @@ test('над квизом — подзаголовок про месенджер
 });
 
 test.describe('блок «Нестандартне завдання» (#zapyt)', () => {
-  test('стоит сразу после «Скільки коштує», подзаголовок без имени и минут, без фото владельца', async ({ page }) => {
-    await page.goto('/');
-    const next = await page.locator('[data-block="8"]').evaluate((el) => el.nextElementSibling?.id);
-    expect(next).toBe('zapyt');
+  test('на /kontakty (с главной перенесён 2026-10-21), подзаголовок без имени и минут, без фото владельца', async ({ page }) => {
+    await page.goto('/kontakty');
+    await expect(page.locator('#zapyt')).toHaveCount(1);
     const block = page.locator('#zapyt');
     await expect(block.locator('h2')).toHaveText('Нестандартне завдання');
     await expect(block.locator('.zapyt__lead')).toHaveText(
@@ -48,7 +47,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
   });
 
   test('кнопка «Надіслати запит» графитовая, не жёлтая', async ({ page }) => {
-    await page.goto('/#zapyt');
+    await page.goto('/kontakty#zapyt');
     const button = page.locator('#zapyt').getByRole('button', { name: 'Надіслати запит' });
     await button.scrollIntoViewIfNeeded();
     await expect(button).toHaveCSS('background-color', 'rgb(30, 33, 36)');
@@ -57,7 +56,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
   });
 
   test('пустая отправка — ошибки у описания, имени, телефона, согласия; короткое описание не проходит', async ({ page }) => {
-    await page.goto('/#zapyt');
+    await page.goto('/kontakty#zapyt');
     const form = page.locator('#zapyt form');
     await form.getByRole('button', { name: 'Надіслати запит' }).click();
     await expect(page.locator('#zapyt-request')).toBeFocused();
@@ -68,7 +67,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
   });
 
   test('файлы: больше 3, не тот тип или больше 10 МБ — понятная ошибка', async ({ page }) => {
-    await page.goto('/#zapyt');
+    await page.goto('/kontakty#zapyt');
     const input = page.locator('#zapyt-files');
     const file = (name: string, size = 10) => ({ name, mimeType: 'application/octet-stream', buffer: Buffer.alloc(size) });
     await input.setInputFiles([file('1.jpg'), file('2.png'), file('3.heic'), file('4.pdf')]);
@@ -87,7 +86,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     page.on('request', (r) => {
       if (r.method() !== 'GET') posts.push(r.url());
     });
-    await page.goto('/#zapyt');
+    await page.goto('/kontakty#zapyt');
     await page.locator('#zapyt-request').fill('Стелаж у нішу 2,4 м і стіл для салону краси');
     await page.locator('#zapyt-files').setInputFiles([{ name: 'ескіз.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(100) }]);
     await expect(page.locator('#zapyt').getByRole('radio', { name: 'Viber' })).toBeChecked();
@@ -105,15 +104,16 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
 
 test.describe('реферальная программа', () => {
   test('поле «Хто вас порекомендував?» есть во всех формах и необязательное', async ({ page }) => {
+    // короткая форма финала главной — только ім’я и телефон (решение владельца 2026-10-21), поле есть в остальных
     await page.goto('/');
-    for (const id of ['zamir-referrer', 'quiz-referrer', 'quiz-short-referrer', 'zapyt-referrer']) {
+    for (const id of ['modal-referrer', 'quiz-referrer', 'quiz-short-referrer']) {
       const field = page.locator(`#${id}`);
       await expect(field).toHaveCount(1);
       await expect(field).not.toHaveAttribute('required', /.*/);
       await expect(page.locator(`label[for="${id}"]`)).toContainText('Хто вас порекомендував?');
     }
-    // попап замера
-    await expect(page.locator('[data-zamir-form] input[name="referrer"]')).toHaveCount(2);
+    await page.goto('/kontakty');
+    for (const id of ['kontakty-referrer', 'zapyt-referrer']) await expect(page.locator(`#${id}`)).toHaveCount(1);
   });
 
   test('блок «Рекомендуйте нас» скрыт, пока флаг referralEnabled выключен', async ({ page }) => {

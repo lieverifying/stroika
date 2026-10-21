@@ -1,23 +1,15 @@
 ---
-// Главная — лендинг кухонь: блоки 1–13 строго в порядке ТЗ, блок 0 (шапка) и 14 (футер) — в BaseLayout.
-// Вне нумерации ТЗ (решение владельца, 2026-10-20): «Нестандартне завдання» после «Ціни від»,
-// «Рекомендуйте нас» после «Відгуки» (только при facts.flags.referralEnabled).
+// Главная (решение владельца, 2026-10-21): короче и визуальнее, без пустых блоков.
+// 1 первый экран → сюжет кухни (как на «Як ми створюємо») → 3 «Наші роботи» → 5 квиз → 12 «Питання і відповіді» → 13 финал.
+// Шапка (0) и подвал (14) — в BaseLayout. «Нестандартне завдання» — на /kontakty.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
-import TrustNumbers from '../components/sections/TrustNumbers.astro';
 import Portfolio from '../components/sections/Portfolio.astro';
-import BeforeAfterSection from '../components/sections/BeforeAfterSection.astro';
 import QuizSection from '../components/sections/QuizSection.astro';
-import Team from '../components/sections/Team.astro';
-import Process from '../components/sections/Process.astro';
-import Prices from '../components/sections/Prices.astro';
-import CustomRequest from '../components/sections/CustomRequest.astro';
-import Referral from '../components/sections/Referral.astro';
-import Materials from '../components/sections/Materials.astro';
-import Reviews from '../components/sections/Reviews.astro';
-import WarrantyPayment from '../components/sections/WarrantyPayment.astro';
 import Faq from '../components/sections/Faq.astro';
 import FinalCta from '../components/sections/FinalCta.astro';
+import Story, { type StoryData } from '../components/story/Story.astro';
+import kitchen from '../content/stories/kitchen.json';
 ---
 
 <BaseLayout
@@ -25,18 +17,11 @@ import FinalCta from '../components/sections/FinalCta.astro';
   description="Кухні та корпусні меблі на замовлення: Черкаси та область. Безкоштовний замір і розрахунок вартості."
 >
   <Hero />
-  <TrustNumbers />
+  <div class="container-site section-pad">
+    <Story story={kitchen as StoryData} heading="Як ми створюємо кухню" moreHref="/yak-my-stvoriuiemo" />
+  </div>
   <Portfolio />
-  <BeforeAfterSection />
   <QuizSection />
-  <Team />
-  <Process />
-  <Prices />
-  <CustomRequest />
-  <Materials />
-  <Reviews />
-  <Referral />
-  <WarrantyPayment />
   <Faq />
   <FinalCta />
 </BaseLayout>

@@ -17,8 +17,10 @@ interface Props {
   source?: string;
   /** Приоритет жёлтой кнопки: в попапе 4 — она важнее всего, что видно под окном */
   ctaPriority?: number;
+  /** Короткая форма (финальный блок главной): только ім'я, телефон и согласие */
+  compact?: boolean;
 }
-const { idPrefix = 'zamir', source = 'zamir-form', ctaPriority = 3 } = Astro.props;
+const { idPrefix = 'zamir', source = 'zamir-form', ctaPriority = 3, compact = false } = Astro.props;
 const id = (name: string) => `${idPrefix}-${name}`;
 
 const TIMES = [
@@ -33,8 +35,8 @@ const TIMES = [
   <input type="hidden" name="source" value={source} />
   <Input name="name" id={id('name')} label="Ім’я" autocomplete="given-name" required error="Вкажіть, як до вас звертатися" />
   <PhoneInput id={id('phone')} />
-  <Select name="time" id={id('time')} label="Зручний час для дзвінка" options={TIMES} />
-  <ReferrerInput id={id('referrer')} />
+  {!compact && <Select name="time" id={id('time')} label="Зручний час для дзвінка" options={TIMES} />}
+  {!compact && <ReferrerInput id={id('referrer')} />}
   <ConsentCheckbox id={id('consent')} />
   <Honeypot id={id('website')} />
   <Button type="submit" size="lg" fullWidth ctaPriority={ctaPriority}>Надіслати заявку</Button>

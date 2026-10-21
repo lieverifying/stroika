@@ -17,6 +17,13 @@ async function choose(page: Page, label: string | RegExp) {
 }
 
 test.describe('квиз: переходы, «Назад», восстановление', () => {
+  test('без сохранённых ответов кнопки «Продовжити» нет; виден только шаг 1', async ({ page }) => {
+    await openQuiz(page);
+    await expect(quiz(page).getByRole('button', { name: 'Продовжити, де зупинились' })).toBeHidden();
+    await expect(quiz(page).locator('[data-step]:visible')).toHaveCount(1);
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+  });
+
   test('ветка кухни доходит до шага контакта, прогресс 1/7 … 7/7', async ({ page }) => {
     await openQuiz(page);
     await expect(progressText(page)).toHaveText('Крок 1 з 7');
@@ -57,13 +64,19 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(backBtn).toBeHidden();
   });
 
-  test('перезагрузка страницы: квиз на том же шаге с тем же прогрессом', async ({ page }) => {
+  test('перезагрузка: квиз на шаге 1 с кнопкой «Продовжити, де зупинились» — она возвращает на тот же шаг', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Кухня');
     await choose(page, 'П-подібна');
     await choose(page, 'Більше 5 м');
     await page.reload();
     await expect(quiz(page)).toHaveAttribute('data-ready', '');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    await expect(quiz(page).locator('#quiz-name')).toBeHidden(); // поля контакта — только на последнем шаге
+    const resume = quiz(page).getByRole('button', { name: 'Продовжити, де зупинились' });
+    await expect(resume).toBeVisible();
+    await resume.click();
+    await expect(resume).toBeHidden();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'facade');
     await expect(progressText(page)).toHaveText('Крок 4 з 7');
     // имя и телефон в хранилище не попадают — их там и нет: только ответы
@@ -175,13 +188,11 @@ test.describe('квиз: шаг контакта и коротка форма', 
     await expect(visibleStep(page).getByRole('radio')).toHaveText(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
   });
 
-  test('«Інше, нестандартне» ведёт в блок #zapyt, поле описания в фокусе, квиз остаётся на шаге 1', async ({ page }) => {
+  test('«Інше, нестандартне» ведёт на /kontakty#zapyt, ответы квиза не сохраняются', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Інше, нестандартне');
-    await expect(page).toHaveURL(/#zapyt$/);
-    await expect(page.locator('#zapyt-request')).toBeFocused();
+    await expect(page).toHaveURL(/\/kontakty#zapyt$/);
     await expect(page.locator('#zapyt-title')).toBeInViewport();
-    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
     expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
   });
 
@@ -275,7 +286,9 @@ test('события: ветка шафы — ровно quiz_start, quiz_step_1
   await page.locator('#quiz-consent').check();
   await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
   await expect(page).toHaveURL(/\/dyakuyemo$/);
-  const events = await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.dl') ?? '[]') as { event: string }[]);
+  const events = (await page.evaluate(() => JSON.parse(sessionStorage.getItem('test.dl') ?? '[]') as { event: string }[])).filter((e) =>
+    e.event.startsWith('quiz_'),
+  );
   expect(events.map((e) => e.event)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_6', 'quiz_step_7']);
   const dump = JSON.stringify(events);
   expect(dump).not.toContain('Олена');

@@ -11,6 +11,7 @@ import { STEPS } from '../../lib/quiz/config';
 
 <div class="quiz" data-quiz>
   <QuizProgress />
+  <button type="button" class="quiz__resume" data-quiz-resume hidden>Продовжити, де зупинились</button>
   {
     Object.values(STEPS).map((step) => (
       <QuizStep step={step} hidden={step.id !== 'goal'}>
@@ -68,6 +69,23 @@ import { STEPS } from '../../lib/quiz/config';
     gap: 0.75rem;
   }
   .quiz__nav:has(.quiz__back[hidden]):has(.quiz__restart[hidden]) {
+    display: none;
+  }
+  .quiz__resume {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    padding-inline: 1.25rem;
+    border: 1px solid var(--color-graphite);
+    border-radius: var(--radius-md);
+    background: var(--color-plaster);
+    color: var(--color-graphite);
+    font-size: var(--text-button);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .quiz__resume[hidden] {
     display: none;
   }
   .quiz__restart {

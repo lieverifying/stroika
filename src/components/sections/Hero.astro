@@ -1,6 +1,6 @@
 ---
 // Блок 1 — первый экран главной (ТЗ). Все обещания — заглушки facts.ts до подтверждения владельцем.
-// < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → выгоды → кнопки (кнопки могут уйти ниже
+// < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → строка «Замір, дизайн-проєкт і монтаж — наша команда» → кнопки (кнопки могут уйти ниже
 //   первого экрана: «Розрахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
 // ≥ 1024 px: фото справа (рамка по facts.media.heroOrientation: 4:5 или 4:3), текст слева по центру фото.
 // Фото — работа из портфолио (facts.media.hero = id в src/content/portfolio.json), обрезка по facts.media.heroFocus.
@@ -11,19 +11,10 @@ import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { HERO, url } from '../../lib/portfolio';
-import { has } from '../../lib/facts';
 
-const { promises, warranty, flags } = facts;
+const { flags } = facts;
 const portrait = facts.media.heroOrientation === 'portrait';
-// Выгоды: нет факта — нет пункта. Неподтверждённые обещания (ціна в договорі, гарантія) появятся, когда владелец пришлёт;
-// пока — подтверждённые факты. Всегда 3 пункта.
-const benefits = [
-  'Безкоштовний замір',
-  ...(has(promises.priceFixedText) ? [promises.priceFixedText] : []),
-  ...(flags.warrantyPayment && has(warranty.years) ? [`Гарантія ${warranty.years} р.`] : []),
-  'Замір, дизайн-проєкт і монтаж — наша команда',
-  facts.serviceArea.text,
-].slice(0, 3);
+
 ---
 
 <section
@@ -46,21 +37,9 @@ const benefits = [
 
       <h1 id="hero-title" class="text-h1">
         Кухні на замовлення в Черкасах
-        {has(promises.oneTeam) && <span class="hero__tail">— {promises.oneTeam}</span>}
       </h1>
 
-      <ul class="hero__benefits" aria-label="Переваги">
-        {
-          benefits.map((b, i) => (
-            <li>
-              <span class="hero__num" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span>{b}</span>
-            </li>
-          ))
-        }
-      </ul>
+      <p class="hero__lead">Замір, дизайн-проєкт і монтаж — наша команда</p>
 
       <div class="hero__actions">
         <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
@@ -110,34 +89,11 @@ const benefits = [
   .hero__badge {
     margin-bottom: 1rem;
   }
-  .hero__tail {
-    display: block;
-    margin-top: 0.25em;
-    color: var(--color-ink-muted);
-  }
-  /* Временная плашка-заглушка в H1 не должна спорить с заголовком, но и не меньше 16 px */
-  .hero__tail :global(.fact-ph) {
-    font-size: 1rem;
-    vertical-align: middle;
-  }
-  .hero__benefits {
-    display: grid;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
+  .hero__lead {
+    margin-top: 1.25rem;
     font-size: var(--text-lead);
-    line-height: 1.4;
-  }
-  .hero__benefits li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-  /* Номера выгод — моноширинный дуб: деталь «размерной» темы, без жёлтого */
-  .hero__num {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: var(--text-small);
-    color: var(--color-oak);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-ink-muted);
   }
   .hero__actions {
     display: grid;
@@ -182,9 +138,6 @@ const benefits = [
     .hero__media :global(.ph),
     .hero__media :global(img) {
       aspect-ratio: var(--ph-ratio, 4 / 5);
-    }
-    .hero__benefits {
-      margin-top: 2rem;
     }
     .hero__actions {
       margin-top: 2.5rem;

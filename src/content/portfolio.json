@@ -19,24 +19,14 @@
     }
   ],
   "featured": [
-    "kuhni-01",
-    "shafy-01",
-    "kuhni-14",
+    "kuhni-18",
     "kuhni-21",
     "interier-01",
-    "komertsiia-08"
+    "komertsiia-02",
+    "shafy-08",
+    "kuhni-15"
   ],
   "items": [
-    {
-      "id": "kuhni-01",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-01.webp",
-      "thumb": "img/kuhni/kuhni-01-thumb.webp",
-      "width": 1600,
-      "height": 1200,
-      "alt": "Кухня з фасадами під дуб і білими верхніми шафами"
-    },
     {
       "id": "kuhni-02",
       "type": "photo",
@@ -56,16 +46,6 @@
       "width": 960,
       "height": 1280,
       "alt": "Кухня з бежевими фасадами, підсвіткою та мармуровим фартухом"
-    },
-    {
-      "id": "kuhni-04",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-04.webp",
-      "thumb": "img/kuhni/kuhni-04-thumb.webp",
-      "width": 1600,
-      "height": 1200,
-      "alt": "Сіра кухня з вбудованою технікою"
     },
     {
       "id": "kuhni-05",
@@ -96,16 +76,6 @@
       "width": 1280,
       "height": 960,
       "alt": "Темна кухня з фартухом під камінь"
-    },
-    {
-      "id": "kuhni-10",
-      "type": "photo",
-      "category": "kuhni",
-      "src": "img/kuhni/kuhni-10.webp",
-      "thumb": "img/kuhni/kuhni-10-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Кутова кухня в оливкових тонах"
     },
     {
       "id": "kuhni-11",
@@ -208,16 +178,6 @@
       "alt": "Сіра кутова кухня з фасадами під дуб"
     },
     {
-      "id": "shafy-01",
-      "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-01.webp",
-      "thumb": "img/shafy/shafy-01-thumb.webp",
-      "width": 1200,
-      "height": 1600,
-      "alt": "Сіра шафа з відкритими бордовими полицями"
-    },
-    {
       "id": "shafy-02",
       "type": "photo",
       "category": "shafy",
@@ -246,26 +206,6 @@
       "width": 960,
       "height": 1280,
       "alt": "Біла шафа з робочим місцем"
-    },
-    {
-      "id": "shafy-05",
-      "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-05.webp",
-      "thumb": "img/shafy/shafy-05-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Шафа в коридорі до стелі"
-    },
-    {
-      "id": "shafy-06",
-      "type": "photo",
-      "category": "shafy",
-      "src": "img/shafy/shafy-06.webp",
-      "thumb": "img/shafy/shafy-06-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Гардеробна з відкритими полицями та шухлядами"
     },
     {
       "id": "shafy-07",
@@ -318,16 +258,6 @@
       "alt": "ТВ-панель і підвісна тумба під дерево"
     },
     {
-      "id": "interier-03",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-03.webp",
-      "thumb": "img/interier/interier-03-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Підвісна тумба у ванній і дзеркало з підсвіткою"
-    },
-    {
       "id": "interier-04",
       "type": "photo",
       "category": "interier",
@@ -336,16 +266,6 @@
       "width": 960,
       "height": 1280,
       "alt": "Вітрина-буфет з дерев'яною стільницею"
-    },
-    {
-      "id": "interier-05",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-05.webp",
-      "thumb": "img/interier/interier-05-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Стінові панелі під дерево з прихованими дверима"
     },
     {
       "id": "interier-06",
@@ -358,16 +278,6 @@
       "alt": "Рейкові стінові панелі в коридорі"
     },
     {
-      "id": "interier-07",
-      "type": "photo",
-      "category": "interier",
-      "src": "img/interier/interier-07.webp",
-      "thumb": "img/interier/interier-07-thumb.webp",
-      "width": 1200,
-      "height": 1600,
-      "alt": "Дерев'яний обідній стіл для тераси"
-    },
-    {
       "id": "interier-09",
       "type": "photo",
       "category": "interier",
@@ -378,16 +288,6 @@
       "alt": "Довгий дерев'яний стіл на терасі"
     },
     {
-      "id": "komertsiia-01",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-01.webp",
-      "thumb": "img/komertsiia/komertsiia-01-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Перегородка з дерева та скла"
-    },
-    {
       "id": "komertsiia-02",
       "type": "photo",
       "category": "komertsiia",
@@ -396,46 +296,6 @@
       "width": 1280,
       "height": 921,
       "alt": "Рецепція з зеленим фасадом"
-    },
-    {
-      "id": "komertsiia-03",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-03.webp",
-      "thumb": "img/komertsiia/komertsiia-03-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Рецепція з дерев'яними стіновими панелями"
-    },
-    {
-      "id": "komertsiia-04",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-04.webp",
-      "thumb": "img/komertsiia/komertsiia-04-thumb.webp",
-      "width": 1280,
-      "height": 720,
-      "alt": "Стійка та декоративна стіна з підсвіткою"
-    },
-    {
-      "id": "komertsiia-05",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-05.webp",
-      "thumb": "img/komertsiia/komertsiia-05-thumb.webp",
-      "width": 960,
-      "height": 1280,
-      "alt": "Стійка з металевими стільцями"
-    },
-    {
-      "id": "komertsiia-08",
-      "type": "photo",
-      "category": "komertsiia",
-      "src": "img/komertsiia/komertsiia-08.webp",
-      "thumb": "img/komertsiia/komertsiia-08-thumb.webp",
-      "width": 1280,
-      "height": 960,
-      "alt": "Стійка з рейками та неоновою підсвіткою"
     },
     {
       "id": "komertsiia-11",

@@ -28,8 +28,12 @@ export interface StoryData {
 }
 interface Props {
   story: StoryData;
+  /** Заголовок вместо story.title (на главной — «Як ми створюємо кухню») */
+  heading?: string;
+  /** Ссылка «Детальніше» рядом с заголовком (на главной — на /yak-my-stvoriuiemo) */
+  moreHref?: string;
 }
-const { story } = Astro.props;
+const { story, heading = story.title, moreHref } = Astro.props;
 const n = story.stages.length;
 const pad = (i: number) => String(i).padStart(2, '0');
 
@@ -48,7 +52,10 @@ const stages = await Promise.all(
 ---
 
 <section class="story" data-story={story.id} aria-labelledby={`story-${story.id}-title`} style={`--n: ${n}`}>
-  <h2 id={`story-${story.id}-title`} class="text-h2 story__heading">{story.title}</h2>
+  <div class="story__head">
+    <h2 id={`story-${story.id}-title`} class="text-h2 story__heading">{heading}</h2>
+    {moreHref && <a href={moreHref} class="story__more">Детальніше</a>}
+  </div>
   <div class="story__track">
     <div class="story__sticky">
       <ol class="story__list">
@@ -132,8 +139,23 @@ const stages = await Promise.all(
     display: grid;
     gap: 1.5rem;
   }
+  .story__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+  }
   .story__heading {
     margin: 0;
+  }
+  .story__more {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   /* ——— Статичный режим: этапы друг под другом ——— */
@@ -330,7 +352,14 @@ const stages = await Promise.all(
     const stepPx = () => innerHeight * 0.7;
     const stickyTop = () => parseFloat(getComputedStyle(sticky).top) || 0;
 
+    // Сцена закреплена на экране — посетитель действительно видит этапы (а не проскочил сюжет по якорю)
+    const pinned = () => {
+      const r = trackEl.getBoundingClientRect();
+      return r.top <= stickyTop() + 1 && r.bottom >= stickyTop() + sticky.offsetHeight - 1;
+    };
+
     const set = (i: number) => {
+      if (i === n - 1 && pinned()) complete();
       if (i === active) return;
       active = i;
       steps.forEach((s, k) => {
@@ -344,7 +373,6 @@ const stages = await Promise.all(
       root.dataset.active = String(i);
       load(i);
       load(i + 1);
-      if (i === n - 1) complete();
     };
 
     const update = () => {

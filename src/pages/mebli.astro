@@ -15,9 +15,9 @@ import { ITEMS, url, type PortfolioPhoto } from '../lib/portfolio';
 
 const QUIZ = '/?kvyz=shafa#kvyz';
 const pick = (id: string) => ITEMS.find((i) => i.id === id)!;
-const hero = pick('shafy-05') as PortfolioPhoto;
+const hero = pick('shafy-02') as PortfolioPhoto;
 // 6 работ, все около 3:4 — ряды по 3 (по 2 на телефоне) выходят ровными
-const works = ['shafy-03', 'shafy-06', 'shafy-08', 'interier-02', 'shafy-10', 'interier-04'].map(pick);
+const works = ['shafy-03', 'shafy-07', 'shafy-08', 'interier-02', 'shafy-10', 'interier-04'].map(pick);
 const furniture = facts.services.furniture.filter((f) => f !== 'кухні');
 ---
 
@@ -52,7 +52,7 @@ const furniture = facts.services.furniture.filter((f) => f !== 'кухні');
   <section class="section-pad" aria-labelledby="mebli-works" data-gallery>
     <div class="container-site">
       <SectionTitle id="mebli-works" title="Наші роботи" />
-      <PortfolioGrid items={works} eager={0} fill />
+      <PortfolioGrid items={works} eager={0} perRow={[2, 3]} />
       <div class="mebli__more">
         <Button href="/roboty#shafy" variant="secondary" icon="arrow-right">Усі шафи та меблі</Button>
         <a href="/yak-my-stvoriuiemo" class="mebli__link">Подивитися, як ми створюємо шафу-купе</a>

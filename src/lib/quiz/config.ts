@@ -3,7 +3,7 @@
  * В конфиге нет ни цифр ширины, ни цен, ни сроков: всё, что зависит от владельца, — из facts.ts.
  * Пути: кухня goal → kitchenShape → kitchenLength → facade → countertop → timing → contact (7);
  *       шафа goal → wardrobeType → [wardrobeWidth, если есть диапазоны] → timing → contact (5 или 4); інші меблі goal → shortForm (2).
- * «Інше, нестандартне» — не ветка: вариант со ссылкой на блок «Нестандартне завдання» (#zapyt).
+ * «Інше, нестандартне» — не ветка: вариант со ссылкой на блок «Нестандартне завдання» (/kontakty#zapyt).
  */
 import { facts, type Fact, type WidthBand as WidthBandFact } from '../../content/facts';
 import { isPlaceholder } from '../facts';
@@ -74,7 +74,7 @@ export const STEPS: Record<StepId, StepDef> = {
       { value: 'kitchen', label: 'Кухня' },
       { value: 'wardrobe', label: 'Шафа або гардеробна' },
       { value: 'other', label: 'Інші меблі' },
-      { value: 'custom', label: 'Інше, нестандартне', href: '#zapyt' },
+      { value: 'custom', label: 'Інше, нестандартне', href: '/kontakty#zapyt' },
     ],
     next: (a) => {
       const branch = branchOf(a.goal);

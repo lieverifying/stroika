@@ -121,7 +121,12 @@ test.describe('/roboty', () => {
   test('отбор: убранных фото нет; в подписях нет «кафе» и «бар»', async ({ page }) => {
     await page.goto('/roboty');
     const ids = data.items.map((i) => i.id);
-    for (const gone of ['kuhni-06', 'kuhni-07', 'kuhni-16', 'kuhni-19', 'shafy-09', 'interier-08', 'komertsiia-06', 'komertsiia-07', 'komertsiia-09', 'komertsiia-10'])
+    for (const gone of [
+      'kuhni-06', 'kuhni-07', 'kuhni-16', 'kuhni-19', 'shafy-09', 'interier-08', 'komertsiia-06', 'komertsiia-07', 'komertsiia-09', 'komertsiia-10',
+      // второй отбор (2026-10-21): инструменты, мусор, незаконченный потолок, люди, бары, кафе, неон
+      'kuhni-01', 'kuhni-04', 'kuhni-10', 'shafy-01', 'shafy-05', 'shafy-06', 'interier-03', 'interier-05', 'interier-07',
+      'komertsiia-01', 'komertsiia-03', 'komertsiia-04', 'komertsiia-05', 'komertsiia-08',
+    ])
       expect(ids).not.toContain(gone);
     const alts = await page.locator('.pf__item img, .pf__item video').evaluateAll((els) => els.map((e) => e.getAttribute('alt') ?? e.getAttribute('aria-label') ?? ''));
     for (const a of alts) expect(a).not.toMatch(/кафе|ресторан|\bбар\b|барі|бару|лаунж-бар/i);
@@ -140,7 +145,7 @@ test.describe('главная: блок «Наші роботи»', () => {
     await expect(count(page)).toHaveText('1 / 6');
   });
 
-  test('ряды заполнены целиком: по 2 фото на телефоне, по 3 на десктопе, высота в ряду одинаковая', async ({ page, isMobile }) => {
+  test('ряды заполнены целиком: крупно, по 2 фото в ряду на всех ширинах, высота в ряду одинаковая', async ({ page }) => {
     await page.goto('/');
     const rows = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => {
       const map = new Map<number, { h: number; right: number }[]>();
@@ -152,7 +157,7 @@ test.describe('главная: блок «Наші роботи»', () => {
       const gridRight = els[0].parentElement!.getBoundingClientRect().right;
       return [...map.values()].map((row) => ({ n: row.length, dh: Math.max(...row.map((x) => x.h)) - Math.min(...row.map((x) => x.h)), gap: gridRight - Math.max(...row.map((x) => x.right)) }));
     });
-    expect(rows.map((r) => r.n)).toEqual(isMobile ? [2, 2, 2] : [3, 3]);
+    expect(rows.map((r) => r.n)).toEqual([2, 2, 2]);
     for (const r of rows) {
       expect(r.dh).toBeLessThan(2);
       expect(r.gap).toBeLessThan(3);

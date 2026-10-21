@@ -8,21 +8,23 @@ import { url, type PortfolioItem } from '../../lib/portfolio';
 interface Props {
   items: PortfolioItem[];
   eager?: number;
-  /** Ряды заполнены целиком: 2 фото в ряд на телефоне, 3 — с 768 px (блок на главной) */
-  fill?: boolean;
+  /** Ряды заполнены целиком: [фото в ряд на телефоне, с 768 px], например [2, 3]. Без него — свободные ряды. */
+  perRow?: [number, number];
   class?: string;
 }
-const { items, eager = 4, fill = false, class: className } = Astro.props;
+const { items, eager = 4, perRow, class: className } = Astro.props;
+const fill = Boolean(perRow);
 const ratio = (i: PortfolioItem) => i.width / i.height;
 // Доля ширины ряда: пропорция фото / сумма пропорций в его ряду — высота у всех фото ряда одинаковая
 const share = (i: number, per: number) => {
   const row = items.slice(Math.floor(i / per) * per, Math.floor(i / per) * per + per);
   return ratio(items[i]) / row.reduce((a, it) => a + ratio(it), 0);
 };
-const fillVars = (i: number) => (fill ? `; --w2: ${share(i, 2).toFixed(4)}; --w3: ${share(i, 3).toFixed(4)}` : '');
+const fillVars = (i: number) => (perRow ? `; --wm: ${share(i, perRow[0]).toFixed(4)}; --wd: ${share(i, perRow[1]).toFixed(4)}` : '');
+const gridVars = perRow ? `--gaps-m: ${perRow[0] - 1}; --gaps-d: ${perRow[1] - 1}` : undefined;
 ---
 
-<ul class:list={['pf', { 'pf--fill': fill }, className]} data-pf-grid>
+<ul class:list={['pf', { 'pf--fill': fill }, className]} style={gridVars} data-pf-grid>
   {
     items.map((item, i) => (
       <li class="pf__item" data-category={item.category} data-id={item.id} style={`--r: ${ratio(item).toFixed(4)}${fillVars(i)}`}>
@@ -118,14 +120,14 @@ const fillVars = (i: number) => (fill ? `; --w2: ${share(i, 2).toFixed(4)}; --w3
       transform: scale(1.03);
     }
   }
-  /* Блок на главной: ряды заполнены целиком — по 2 фото на телефоне, по 3 с 768 px.
-     Ширина плитки = доля её пропорции в сумме ряда (--w2 / --w3 считаются при сборке) за вычетом зазоров. */
+  /* Ряды заполнены целиком (perRow): число фото в ряду на телефоне и с 768 px.
+     Ширина плитки = доля её пропорции в сумме ряда (--wm / --wd считаются при сборке) за вычетом зазоров. */
   .pf--fill::after {
     display: none;
   }
   .pf--fill .pf__item {
     flex: none;
-    width: calc(var(--w2) * (100% - 0.5rem) - 0.5px);
+    width: calc(var(--wm) * (100% - var(--gaps-m) * 0.5rem) - 0.5px);
   }
   @media (min-width: 48rem) {
     .pf {
@@ -140,7 +142,7 @@ const fillVars = (i: number) => (fill ? `; --w2: ${share(i, 2).toFixed(4)}; --w3
   }
   @media (min-width: 48rem) {
     .pf--fill .pf__item {
-      width: calc(var(--w3) * (100% - 1.5rem) - 0.5px);
+      width: calc(var(--wd) * (100% - var(--gaps-d) * 0.75rem) - 0.5px);
     }
   }
 </style>

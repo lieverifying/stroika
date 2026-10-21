@@ -1,5 +1,6 @@
 ---
-// /kontakty (ТЗ): телефон, месенджери, графік, зона виїзду (Черкаси та область) з картою, коротка форма.
+// /kontakty (ТЗ): телефон, месенджери, графік, зона виїзду (Черкаси та область) з картою, коротка форма,
+// «Нестандартне завдання» (#zapyt) — перенесено с главной 2026-10-21, сюда ведёт вариант квиза «Інше, нестандартне».
 // Ссылки — src/lib/contacts.ts (единый источник). Режим запуска: строки без фактов скрыты.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ZamirForm from '../components/forms/ZamirForm.astro';
@@ -11,6 +12,7 @@ import SectionTitle from '../components/ui/SectionTitle.astro';
 import { facts } from '../content/facts';
 import { contactLinks } from '../lib/contacts';
 import { has } from '../lib/facts';
+import CustomRequest from '../components/sections/CustomRequest.astro';
 
 const { contacts: c, serviceArea, flags } = facts;
 // Нет факта — нет строки: график, почта, адрес, Instagram, условия выезда и карта — только когда есть данные
@@ -76,6 +78,7 @@ const rows = [
       <ZamirForm idPrefix="kontakty" source="kontakty" />
     </section>
   </div>
+  <CustomRequest />
 </BaseLayout>
 
 <style>

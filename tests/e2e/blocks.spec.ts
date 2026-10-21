@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test';
 
 // Блоки 8–11: никаких выдуманных цен, брендов, отзывов и условий
 test.describe('блоки 8–11', () => {
-  test('блок 8 «Скільки коштує»: без цен и сроков — от чего зависит цена, одна кнопка заявки', async ({ page }) => {
-    await page.goto('/');
+  test('«Скільки коштує» (на /mebli; с главной убран): без цен и сроков, одна кнопка заявки', async ({ page }) => {
+    await page.goto('/mebli');
     const block = page.locator('[data-block="8"]');
     await expect(block.locator('h2')).toHaveText('Скільки коштує');
     await expect(block).toContainText('Ціну й терміни розрахуємо під ваше завдання');
@@ -14,9 +14,9 @@ test.describe('блоки 8–11', () => {
   });
 });
 
-test('режим запуска: блоки 2, 4, 9, 10, 11 без фактов скрыты, пустых плашек нет', async ({ page }) => {
+test('главная: блоков 2, 4, 6–11 нет, пустых плашек нет', async ({ page }) => {
   await page.goto('/');
-  for (const n of [2, 4, 9, 10, 11]) await expect(page.locator(`[data-block="${n}"]`)).toHaveCount(0);
+  for (const n of [2, 4, 6, 7, 8, 9, 10, 11]) await expect(page.locator(`[data-block="${n}"]`)).toHaveCount(0);
   await expect(page.locator('.fact-ph')).toHaveCount(0);
 });
 

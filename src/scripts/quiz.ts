@@ -3,7 +3,8 @@
  * и хранилищем (storage.ts). Грузится, только когда квиз появился на экране (см. Quiz.astro).
  * — переход по нажатию варианта, без кнопки «Далі»;
  * — «Назад» и системная «назад» (history.pushState / popstate) листают шаги;
- * — ответы сохраняются (без имени и телефона) и восстанавливаются после перезагрузки;
+ * — ответы сохраняются (без имени и телефона); при новом показе квиз всегда начинается с шага 1,
+ *   а сохранённое прохождение возвращает кнопка «Продовжити, де зупинились»;
  * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы;
  * — «Інше, нестандартне» не меняет состояние, а ведёт в блок «Нестандартне завдання» (#zapyt).
  */
@@ -37,9 +38,13 @@ export function initQuiz(root: HTMLElement): void {
   const backBtn = root.querySelector<HTMLButtonElement>('[data-quiz-back]');
   const restartBtn = root.querySelector<HTMLButtonElement>('[data-quiz-restart]');
 
+  const resumeBtn = root.querySelector<HTMLButtonElement>('[data-quiz-resume]');
   const preset = presetFromUrl();
-  let state: QuizState = loadState(Date.now()) ?? start(Date.now(), preset);
-  if (preset && !state.started && state.stepId === 'goal') state = start(Date.now(), preset);
+  // Всегда начинаем с шага 1: главная не должна открываться сразу на шаге контакта.
+  // Сохранённое прохождение (дальше шага 1) предлагаем продолжить кнопкой.
+  const saved = loadState(Date.now());
+  let resumable: QuizState | null = saved && saved.history.length > 0 ? saved : null;
+  let state: QuizState = start(Date.now(), preset);
 
   const persist = () => saveState(state);
 
@@ -74,6 +79,7 @@ export function initQuiz(root: HTMLElement): void {
     root.dataset.last = String(isLastStep(state));
 
     const first = state.stepId === 'goal';
+    if (resumeBtn) resumeBtn.hidden = !(resumable && first);
     if (backBtn) backBtn.hidden = first;
     if (restartBtn) restartBtn.hidden = first && !state.answers.goal;
 
@@ -85,6 +91,7 @@ export function initQuiz(root: HTMLElement): void {
   }
 
   function go(next: QuizState) {
+    resumable = null; // начали заново — старое прохождение больше не предлагаем
     state = next;
     persist();
     history.pushState({ ...history.state, quizStep: state.stepId }, '');
@@ -107,7 +114,8 @@ export function initQuiz(root: HTMLElement): void {
 
   // Переход к блоку на странице (шапку учитывает scroll-padding-top у html) и фокус на первое поле
   function goToAnchor(href: string) {
-    const target = document.querySelector<HTMLElement>(href);
+    // Блок на другой странице (например, /kontakty#zapyt) — обычный переход
+    const target = href.startsWith('#') ? document.querySelector<HTMLElement>(href) : null;
     if (!target) return void location.assign(href);
     history.pushState(history.state, '', href);
     target.scrollIntoView({ block: 'start' });
@@ -155,8 +163,15 @@ export function initQuiz(root: HTMLElement): void {
     render(true);
   });
 
+  resumeBtn?.addEventListener('click', () => {
+    if (!resumable) return;
+    const next = resumable;
+    go(next);
+  });
+
   restartBtn?.addEventListener('click', () => {
     clearState();
+    resumable = null;
     state = start(Date.now());
     history.replaceState({ ...history.state, quizStep: 'goal' }, '');
     render(true);

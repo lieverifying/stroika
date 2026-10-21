@@ -51,12 +51,17 @@ test.describe('поля формы', () => {
 
   test('поля 48 px и шрифт 16 px (iOS не зумит), согласие не отмечено', async ({ page }) => {
     await page.goto('/');
-    for (const sel of ['#zamir-name', '#zamir-phone', '#zamir-time']) {
+    for (const sel of ['#zamir-name', '#zamir-phone']) {
       const f = page.locator(sel);
       await expect(f).toHaveCSS('font-size', '16px');
       expect((await f.boundingBox())!.height).toBeGreaterThanOrEqual(48);
     }
     await expect(page.locator('#zamir-consent')).not.toBeChecked();
+    // полная форма с выбором времени — на /kontakty (на главной короткая)
+    await page.goto('/kontakty');
+    const time = page.locator('#kontakty-time');
+    await expect(time).toHaveCSS('font-size', '16px');
+    expect((await time.boundingBox())!.height).toBeGreaterThanOrEqual(48);
   });
 
   test('поле-ловушка не попадает в порядок Tab и скрыто от скринридера', async ({ page }) => {
