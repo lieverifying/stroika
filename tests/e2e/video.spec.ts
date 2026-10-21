@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-// Блок 6 — видео бригады загружается только по клику
+// Видео-фасад. На главной видео скрыто, пока его нет (режим запуска) — компонент проверяем на /styleguide.
 test.describe('видео бригады', () => {
   test('до клика нет ни <video>, ни запросов к видео; по клику появляется <video preload="none">', async ({ page }) => {
     const videoRequests: string[] = [];
     page.on('request', (r) => {
       if (r.resourceType() === 'media' || /\.(mp4|webm)(\?|$)/.test(r.url())) videoRequests.push(r.url());
     });
-    await page.goto('/');
+    await page.goto('/styleguide');
     const facade = page.locator('[data-video-facade]');
     await facade.scrollIntoViewIfNeeded();
     await page.waitForLoadState('networkidle'); // все запросы после прокрутки завершены
@@ -27,7 +27,7 @@ test.describe('видео бригады', () => {
   });
 
   test('кнопка доступна с клавиатуры и не меньше 48 px', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/styleguide');
     const button = page.locator('[data-video-facade] button');
     const box = (await button.boundingBox())!;
     expect(box.height).toBeGreaterThanOrEqual(48);

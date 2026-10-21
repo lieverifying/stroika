@@ -28,7 +28,7 @@ test('галочка согласия во всех формах ведёт на
 });
 
 test.describe('/polityka', () => {
-  test('разделы политики; без реквизитов ФОП; контакт для запросов — заглушка', async ({ page }) => {
+  test('разделы политики; владелец — ФОП {{FOP_NAME}}, контакт {{PRIVACY_EMAIL}} и телефон', async ({ page }) => {
     await page.goto('/polityka');
     await expect(page.locator('h1')).toHaveText('Політика конфіденційності');
     await expect(page.locator('article h2')).toHaveText([
@@ -43,20 +43,24 @@ test.describe('/polityka', () => {
       'Зміни політики',
     ]);
     await expect(page.locator('main')).toContainText('Про захист персональних даних');
-    await expect(page.locator('main')).not.toContainText(/ФОП|РНОКПП|ІПН/);
-    for (const name of ['PRIVACY_CONTACT_EMAIL', 'PRIVACY_UPDATED_AT', 'PRIVACY_RETENTION']) {
-      await expect(page.locator(`[data-placeholder="${name}"]`).first()).toBeVisible();
-    }
+    await expect(page.locator('main')).toContainText('Володілець персональних даних — ФОП');
+    await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
+    // единственные заглушки режима запуска — их пришлёт владелец
+    const names = await page.locator('.fact-ph').evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('data-placeholder')))].sort());
+    expect(names).toEqual(['FOP_NAME', 'PRIVACY_EMAIL']);
   });
 });
 
 test.describe('/kontakty', () => {
-  test('телефон, месенджери, графік, зона виїзду, коротка форма', async ({ page }) => {
+  test('телефон, Viber и Telegram на один номер, зона виїзду, коротка форма; без фактов — без графіка, адреси, карти, Instagram', async ({ page }) => {
     await page.goto('/kontakty');
     await expect(page.locator('h1')).toHaveText('Контакти');
-    await expect(page.locator('main a[href^="tel:"]')).toHaveCount(1);
-    for (const name of ['Viber', 'Telegram', 'Instagram']) await expect(page.locator('main').getByRole('link', { name })).toBeVisible();
-    await expect(page.locator('main')).toContainText('Графік');
+    await expect(page.locator('main a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
+    await expect(page.locator('main').getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
+    await expect(page.locator('main').getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
+    await expect(page.locator('main').getByRole('link', { name: 'Instagram' })).toHaveCount(0);
+    await expect(page.locator('main')).not.toContainText(/Графік|Адреса|Пошта/);
+    await expect(page.locator('main .ph, main .fact-ph')).toHaveCount(0);
     await expect(page.locator('main')).toContainText('Черкаси та область');
     await expect(page.locator('main form[data-zamir-form]')).toHaveCount(1);
     await expect(page.locator('#kontakty-referrer')).toHaveCount(1);
@@ -74,12 +78,12 @@ test.describe('/mebli', () => {
     await expect(page.locator('main form[data-zamir-form]')).toHaveCount(1);
   });
 
-  test('кнопка «Розрахувати» открывает квиз с заранее выбранной «Шафа або гардеробна» (путь 5 шагов)', async ({ page }) => {
+  test('кнопка «Розрахувати» открывает квиз с заранее выбранной «Шафа або гардеробна»', async ({ page }) => {
     await page.goto('/mebli');
     await page.locator('.mebli-hero').getByRole('link', { name: 'Розрахувати вартість' }).click();
     await expect(page).toHaveURL(/\?kvyz=shafa#kvyz$/);
     await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
-    await expect(page.locator('[data-quiz] [data-quiz-progress-text]')).toHaveText('Крок 1 з 5');
+    await expect(page.locator('[data-quiz] [data-quiz-progress-text]')).toHaveText(/^Крок 1 з [45]$/);
     await expect(page.locator('[data-step="goal"] [data-value="wardrobe"]')).toHaveAttribute('aria-checked', 'true');
   });
 });
@@ -102,4 +106,27 @@ test('на новых страницах не больше одного жёлт
     const yellow = await yellowOnScreen(page);
     expect(yellow.length, `${path}: ${yellow.join(' | ')}`).toBeLessThanOrEqual(1);
   }
+});
+
+test('режим запуска: ни одной плашки-заглушки и пустого места под фото на страницах (кроме ФОП и почты в политике)', async ({ page }) => {
+  for (const path of ['/', '/roboty', '/mebli', '/kontakty', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404']) {
+    await page.goto(path);
+    await expect(page.locator('.fact-ph'), path).toHaveCount(0);
+    await expect(page.locator('main .ph:visible'), path).toHaveCount(0);
+    expect(await page.locator('body').innerText(), path).not.toMatch(/\{\{|undefined|\[object Object\]/);
+  }
+});
+
+test('телефон +380 75 991 48 43 и ссылки tel / Viber / Telegram: шапка, нижняя панель, подвал, /dyakuyemo', async ({ page, isMobile }) => {
+  await page.goto('/');
+  if (isMobile) {
+    await expect(page.locator('[data-bottom-bar] a[href="tel:+380759914843"]')).toHaveCount(1);
+    await expect(page.locator('[data-bottom-bar] a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
+  } else {
+    await expect(page.locator('[data-header] a[href="tel:+380759914843"]').first()).toContainText('+380 75 991 48 43');
+  }
+  await expect(page.locator('footer a[href="tel:+380759914843"]')).toHaveCount(1);
+  await page.goto('/dyakuyemo');
+  await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
+  await expect(page.locator('main a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
 });

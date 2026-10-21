@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-// Блок 4 — слайдер «було / стало»
+// Слайдер «було / стало». Блок 4 на главной скрыт, пока нет пар фото (режим запуска) — компонент проверяем на /styleguide.
 test.describe('було / стало', () => {
   test('клавиатура: стрелки двигают сравнение', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/styleguide');
     const range = page.locator('.ba__range').first();
     await range.focus();
     for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowRight');
@@ -13,7 +13,7 @@ test.describe('було / стало', () => {
   });
 
   test('ручку можно тянуть, страница вбок не едет', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/styleguide');
     const fig = page.locator('[data-before-after]').first();
     await fig.scrollIntoViewIfNeeded();
     const knob = (await fig.locator('.ba__knob').boundingBox())!;
@@ -31,7 +31,7 @@ test.describe('було / стало', () => {
 });
 
 test('ручка стоит над бегунком: на краях шкалы не уезжает из зоны захвата', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/styleguide');
   const fig = page.locator('[data-before-after]').first();
   await fig.scrollIntoViewIfNeeded();
   const range = fig.locator('.ba__range');
@@ -47,7 +47,7 @@ test('ручка стоит над бегунком: на краях шкалы 
 
 test('телефон: ручка тянется пальцем (touch-события)', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'только телефон');
-  await page.goto('/');
+  await page.goto('/styleguide');
   const fig = page.locator('[data-before-after]').first();
   await fig.scrollIntoViewIfNeeded();
   const knob = (await fig.locator('.ba__knob').boundingBox())!;

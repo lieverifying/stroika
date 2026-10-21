@@ -35,18 +35,16 @@ test('над квизом — подзаголовок про месенджер
 });
 
 test.describe('блок «Нестандартне завдання» (#zapyt)', () => {
-  test('стоит сразу после «Ціни від», подзаголовок от владельца, место под круглое фото', async ({ page }) => {
+  test('стоит сразу после «Скільки коштує», подзаголовок без имени и минут, без фото владельца', async ({ page }) => {
     await page.goto('/');
     const next = await page.locator('[data-block="8"]').evaluate((el) => el.nextElementSibling?.id);
     expect(next).toBe('zapyt');
     const block = page.locator('#zapyt');
     await expect(block.locator('h2')).toHaveText('Нестандартне завдання');
-    await expect(block).toContainText('Опишіть, що потрібно зробити. Я,');
-    await expect(block).toContainText('власник «Вимір», зателефоную вам особисто');
-    await expect(block).toContainText('терміни, орієнтовну вартість і наступні кроки.');
-    const photo = (await block.locator('.zapyt__photo .ph').boundingBox())!;
-    expect(Math.abs(photo.width - photo.height)).toBeLessThanOrEqual(1);
-    await expect(block.locator('.zapyt__photo .ph')).toHaveCSS('border-radius', /px|%/);
+    await expect(block.locator('.zapyt__lead')).toHaveText(
+      'Опишіть, що потрібно зробити — ми зв’яжемося з вами особисто у робочий час і дамо детальну відповідь: терміни, орієнтовну вартість і наступні кроки.',
+    );
+    await expect(block.locator('.ph, .zapyt__photo, .fact-ph')).toHaveCount(0);
   });
 
   test('кнопка «Надіслати запит» графитовая, не жёлтая', async ({ page }) => {
@@ -100,7 +98,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     await page.locator('#zapyt-consent').check();
     await page.locator('#zapyt form').getByRole('button', { name: 'Надіслати запит' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
-    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Ігор\. Надішлемо розрахунок у Viber протягом .+ хвилин у робочий час\.$/);
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Ігор\. Надішлемо розрахунок у Viber у робочий час\.$/);
     expect(posts).toEqual([]);
   });
 });

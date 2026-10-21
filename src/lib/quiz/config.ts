@@ -2,7 +2,7 @@
  * Шаги, варианты и граф переходов квиза (ARCHITECTURE.md 4.1–4.2, ТЗ «Квиз-калькулятор»).
  * В конфиге нет ни цифр ширины, ни цен, ни сроков: всё, что зависит от владельца, — из facts.ts.
  * Пути: кухня goal → kitchenShape → kitchenLength → facade → countertop → timing → contact (7);
- *       шафа goal → wardrobeType → wardrobeWidth → timing → contact (5); інші меблі goal → shortForm (2).
+ *       шафа goal → wardrobeType → [wardrobeWidth, если есть диапазоны] → timing → contact (5 или 4); інші меблі goal → shortForm (2).
  * «Інше, нестандартне» — не ветка: вариант со ссылкой на блок «Нестандартне завдання» (#zapyt).
  */
 import { facts, type Fact, type WidthBand as WidthBandFact } from '../../content/facts';
@@ -17,9 +17,14 @@ export function branchOf(goal: Goal | undefined): Branch | null {
   return null;
 }
 
+/** Диапазоны ширины шкафа от владельца есть — шаг «Приблизна ширина» показываем; нет — пропускаем (нет факта — нет шага) */
+export const HAS_WARDROBE_WIDTH = !isPlaceholder(facts.quiz.wardrobeWidthBands);
+
 export const PATHS: Record<Branch, StepId[]> = {
   kitchen: ['goal', 'kitchenShape', 'kitchenLength', 'facade', 'countertop', 'timing', 'contact'],
-  wardrobe: ['goal', 'wardrobeType', 'wardrobeWidth', 'timing', 'contact'],
+  wardrobe: HAS_WARDROBE_WIDTH
+    ? ['goal', 'wardrobeType', 'wardrobeWidth', 'timing', 'contact']
+    : ['goal', 'wardrobeType', 'timing', 'contact'],
   short: ['goal', 'shortForm'],
 };
 
@@ -132,7 +137,7 @@ export const STEPS: Record<StepId, StepDef> = {
       { value: 'rozpashna', label: 'Розпашна шафа' },
       { value: 'harderobna', label: 'Гардеробна' },
     ],
-    next: () => 'wardrobeWidth',
+    next: () => (HAS_WARDROBE_WIDTH ? 'wardrobeWidth' : 'timing'),
   },
   wardrobeWidth: {
     id: 'wardrobeWidth',

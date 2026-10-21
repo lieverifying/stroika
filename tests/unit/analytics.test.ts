@@ -1,7 +1,7 @@
 // Юнит-тесты аналитики: track() и события шагов квиза (ARCHITECTURE 4.7)
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { quizStepEvents, track } from '../../src/lib/analytics';
-import { PATHS } from '../../src/lib/quiz/config';
+import { PATHS, HAS_WARDROBE_WIDTH } from '../../src/lib/quiz/config';
 import { answer, back, start } from '../../src/lib/quiz/machine';
 import type { Branch, QuizState } from '../../src/lib/quiz/types';
 
@@ -59,11 +59,12 @@ function walk(branch: Branch, values: string[], variant?: 'A' | 'B') {
 }
 
 describe('quizStepEvents', () => {
-  const wardrobe = ['wardrobe', 'kupe', 'unknown', 'later'];
+  const wardrobe = HAS_WARDROBE_WIDTH ? ['wardrobe', 'kupe', 'unknown', 'later'] : ['wardrobe', 'kupe', 'later'];
 
-  test('ветка шафи: quiz_start, 1, 2, 3, 6 (и 7 на контакте)', () => {
+  test('ветка шафи: quiz_start, 1, 2, [3, если есть шаг ширины], 6 (и 7 на контакте)', () => {
     const { events, state } = walk('wardrobe', wardrobe);
-    expect(events.map((e) => e.name)).toEqual(['quiz_start', 'quiz_step_1', 'quiz_step_2', 'quiz_step_3', 'quiz_step_6']);
+    const steps = HAS_WARDROBE_WIDTH ? [1, 2, 3, 6] : [1, 2, 6];
+    expect(events.map((e) => e.name)).toEqual(['quiz_start', ...steps.map((n) => `quiz_step_${n}`)]);
     const contact = quizStepEvents(state, 'contact', 'wardrobe');
     expect(contact.events.map((e) => e.name)).toEqual(['quiz_step_7']);
   });

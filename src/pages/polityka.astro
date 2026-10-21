@@ -1,6 +1,7 @@
 ---
 // /polityka — политика конфиденциальности (ТЗ; ARCHITECTURE.md, риск Т6). Обязательна для форм и рекламы.
-// Реквизитов ФОП нет (решение владельца, 2026-10-21): владелец данных — «Вимір» с контактами из facts.ts.
+// Владелец данных — ФОП {{FOP_NAME}}, контакт {{PRIVACY_EMAIL}} и телефон (решение владельца, 2026-10-21).
+// Это единственные заглушки режима запуска: боевая сборка падает, пока владелец их не пришлёт. В подвале ФОП не показываем.
 // Описано только то, что сайт делает на самом деле: поля форм, каналы заявки (фаза 6), хранение в браузере.
 // Когда подключим аналитику (фаза 7), добавить раздел о cookies и сервисах аналитики.
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -14,12 +15,13 @@ const { legal, contacts: c, brand } = facts;
 <BaseLayout title="Політика конфіденційності — Вимір" description="Як «Вимір» збирає, використовує і зберігає персональні дані з форм на сайті.">
   <article class="container-site section-pad policy">
     <h1 class="text-h1">Політика конфіденційності</h1>
-    <p class="policy__meta">Редакція від <Fact value={legal.privacyUpdatedAt} /></p>
+    <p class="policy__meta">Редакція від {legal.privacyUpdatedAt}</p>
 
     <h2>Хто обробляє дані</h2>
     <p>
-      «{brand.name}» — кухні та корпусні меблі на замовлення, {facts.serviceArea.text.toLowerCase()}. З питань персональних даних
-      пишіть на <a href={`mailto:${legal.privacyContactEmail}`}><Fact value={legal.privacyContactEmail} /></a> або телефонуйте
+      Володілець персональних даних — ФОП <Fact value={legal.fopName} />, що працює під назвою «{brand.name}» (кухні та корпусні
+      меблі на замовлення, {facts.serviceArea.text.toLowerCase()}). З питань персональних даних пишіть на
+      <a href={`mailto:${legal.privacyEmail}`}><Fact value={legal.privacyEmail} /></a> або телефонуйте
       <a href={contactLinks.tel}><Fact value={c.phoneDisplay} /></a>.
     </p>
 
@@ -53,7 +55,7 @@ const { legal, contacts: c, brand } = facts;
     </p>
 
     <h2>Скільки зберігаємо</h2>
-    <p><Fact value={legal.privacyRetention} />. Після цього дані видаляємо.</p>
+    <p>Не довше, ніж потрібно для мети, заради якої ви залишили заявку. Після цього дані видаляємо.</p>
 
     <h2>Дані у вашому браузері</h2>
     <p>
@@ -70,7 +72,7 @@ const { legal, contacts: c, brand } = facts;
       <li>поскаржитися Уповноваженому Верховної Ради України з прав людини або звернутися до суду.</li>
     </ul>
     <p>
-      Для цього напишіть на <a href={`mailto:${legal.privacyContactEmail}`}><Fact value={legal.privacyContactEmail} /></a>.
+      Для цього напишіть на <a href={`mailto:${legal.privacyEmail}`}><Fact value={legal.privacyEmail} /></a>.
     </p>
 
     <h2>Зміни політики</h2>

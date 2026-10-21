@@ -1,6 +1,6 @@
 ---
 // /kontakty (ТЗ): телефон, месенджери, графік, зона виїзду (Черкаси та область) з картою, коротка форма.
-// Контакты — заглушки facts.ts, ссылки — src/lib/contacts.ts (единый источник).
+// Ссылки — src/lib/contacts.ts (единый источник). Режим запуска: строки без фактов скрыты.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ZamirForm from '../components/forms/ZamirForm.astro';
 import Button from '../components/ui/Button.astro';
@@ -10,8 +10,15 @@ import PlaceholderImage from '../components/ui/PlaceholderImage.astro';
 import SectionTitle from '../components/ui/SectionTitle.astro';
 import { facts } from '../content/facts';
 import { contactLinks } from '../lib/contacts';
+import { has } from '../lib/facts';
 
-const { contacts: c, serviceArea } = facts;
+const { contacts: c, serviceArea, flags } = facts;
+// Нет факта — нет строки: график, почта, адрес, Instagram, условия выезда и карта — только когда есть данные
+const rows = [
+  ...(flags.schedule && has(c.scheduleText) ? [{ label: 'Графік', text: c.scheduleText }] : []),
+  ...(has(c.emailPublic) ? [{ label: 'Пошта', text: c.emailPublic, href: contactLinks.email }] : []),
+  ...(flags.address && has(c.address) ? [{ label: 'Адреса', text: c.address }] : []),
+];
 ---
 
 <BaseLayout title="Контакти — Вимір, кухні та меблі на замовлення в Черкасах" description="Телефон, Viber, Telegram і графік роботи «Вимір». Замір і монтаж — Черкаси та область.">
@@ -28,31 +35,39 @@ const { contacts: c, serviceArea } = facts;
         <div class="contacts__messengers">
           <Button href={contactLinks.viber} variant="secondary" icon="viber">Viber</Button>
           <Button href={contactLinks.telegram} variant="secondary" icon="telegram">Telegram</Button>
-          <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">Instagram</Button>
+          {
+            flags.instagram && contactLinks.instagram && (
+              <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">
+                Instagram
+              </Button>
+            )
+          }
         </div>
-        <dl class="contacts__list">
-          <div>
-            <dt>Графік</dt>
-            <dd><Fact value={c.scheduleText} /></dd>
-          </div>
-          <div>
-            <dt>Пошта</dt>
-            <dd><a href={contactLinks.email}><Fact value={c.emailPublic} /></a></dd>
-          </div>
-          <div>
-            <dt>Адреса</dt>
-            <dd><Fact value={c.address} /></dd>
-          </div>
-        </dl>
+        {
+          rows.length > 0 && (
+            <dl class="contacts__list">
+              {rows.map((r) => (
+                <div>
+                  <dt>{r.label}</dt>
+                  <dd>{r.href ? <a href={r.href}>{r.text}</a> : r.text}</dd>
+                </div>
+              ))}
+            </dl>
+          )
+        }
       </section>
 
       <section class="contacts__card" aria-labelledby="contacts-area">
         <h2 id="contacts-area" class="contacts__title">Зона виїзду</h2>
         <p class="contacts__area">{serviceArea.text}</p>
-        <p class="contacts__muted"><Fact value={serviceArea.terms} /></p>
-        <div class="contacts__map">
-          <PlaceholderImage width={1200} height={900} label="карта зони виїзду" />
-        </div>
+        {has(serviceArea.terms) && <p class="contacts__muted">{serviceArea.terms}</p>}
+        {
+          flags.serviceAreaMap && (
+            <div class="contacts__map">
+              <PlaceholderImage width={1200} height={900} label="карта зони виїзду" />
+            </div>
+          )
+        }
       </section>
     </div>
 

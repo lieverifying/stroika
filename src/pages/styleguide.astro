@@ -6,6 +6,7 @@ import CaseCard from '../components/cases/CaseCard.astro';
 import Accordion from '../components/ui/Accordion.astro';
 import Badge from '../components/ui/Badge.astro';
 import BeforeAfter from '../components/ui/BeforeAfter.astro';
+import VideoFacade from '../components/ui/VideoFacade.astro';
 import Button from '../components/ui/Button.astro';
 import Chip from '../components/ui/Chip.astro';
 import Dimension from '../components/ui/Dimension.astro';
@@ -103,11 +104,12 @@ const [demoCase] = await getFeaturedCases(1);
     </section>
 
     <section class="sg__section" aria-labelledby="sg-media">
-      <h2 id="sg-media" class="text-h2">Плейсхолдер, картка кейсу, було / стало</h2>
+      <h2 id="sg-media" class="text-h2">Плейсхолдер, картка кейсу, було / стало, відео</h2>
       <div class="sg__grid">
         <PlaceholderImage width={1200} height={900} label="плейсхолдер 4:3" />
         {demoCase && <CaseCard item={demoCase} />}
         <BeforeAfter index={1} />
+        <VideoFacade src="{{TEAM_VIDEO}}" title="Команда «Вимір» на монтажі" />
       </div>
     </section>
 

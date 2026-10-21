@@ -9,9 +9,12 @@ import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import VideoFacade from '../ui/VideoFacade.astro';
 import { facts } from '../../content/facts';
-import { pluralUk, withDefault } from '../../lib/facts';
+import { has, pluralUk, withDefault } from '../../lib/facts';
 
 const team = facts.flags.teamCards ? facts.team : [];
+// Нет факта — нет блока: фото и видео выводим, только когда владелец их прислал
+const photo = has(facts.teamPhoto);
+const video = has(facts.teamVideo) ? facts.teamVideo : null;
 const heading = withDefault(facts.teamTitle);
 const subtitle = withDefault(facts.teamSubtitle);
 // 4 мастера — в ряд, 2 — по два, остальное — по три в ряд
@@ -21,10 +24,14 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
 <section data-block="6" class="team on-dark" aria-labelledby="team-title">
   <div class="container-site">
     <SectionTitle id="team-title" title={heading.text} pendingFact={heading.pending} subtitle={subtitle.text} dark />
-    <div class="team__main">
-      <div class="team__photo">
-        <PlaceholderImage width={1600} height={1200} label="команда або монтаж, горизонтальне 4:3" />
-      </div>
+    <div class:list={['team__main', { 'team__main--text': !photo }]}>
+      {
+        photo && (
+          <div class="team__photo">
+            <PlaceholderImage width={1600} height={1200} label="команда або монтаж, горизонтальне 4:3" />
+          </div>
+        )
+      }
       <div class="team__text">
         <p class="team__lead">Приїжджаємо на замір, готуємо дизайн-проєкт і встановлюємо меблі самі. Деталі за нашим проєктом виготовляють фабрики-партнери.</p>
         <div>
@@ -57,9 +64,13 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
         </ul>
       )
     }
-    <div class="team__video">
-      <VideoFacade src={facts.teamVideo} title="Команда «Вимір» на монтажі" />
-    </div>
+    {
+      video && (
+        <div class="team__video">
+          <VideoFacade src={String(video)} title="Команда «Вимір» на монтажі" />
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -181,6 +192,13 @@ const cols = team.length === 4 ? 4 : team.length <= 2 ? 2 : 3;
     .team__main {
       grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       gap: 3rem;
+    }
+    /* Без фото: текст и список монтажа в две колонки */
+    .team__main--text .team__text {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 3rem;
+      align-items: start;
     }
     .team__list {
       display: grid;

@@ -1,4 +1,5 @@
 ---
+// Режим запуска: блок скрыт флагом facts.flags.trustNumbers, пока нет цифр (trust.*, warranty.years).
 // Блок 2 — «Цифри довіри» (ТЗ): 4 числа, только реальные — до подтверждения владельцем заглушки facts.ts.
 // Сроков на сайте нет (решение владельца, 2026-10-21): 3 числа.
 // Телефон — 2 × 2, десктоп — 4 в ряд. Размерная линия под числом — мотив замера, только здесь как деталь.
@@ -12,8 +13,11 @@ const items = [
   { value: facts.trust.years, label: `${pluralUk(facts.trust.years, ['рік', 'роки', 'років'])} досвіду` },
   { value: facts.warranty.years, label: `${pluralUk(facts.warranty.years, ['рік', 'роки', 'років'])} гарантії` },
 ];
+const show = facts.flags.trustNumbers;
 ---
 
+{
+  show && (
 <section data-block="2" class="trust" aria-labelledby="trust-title">
   <div class="container-site">
     <h2 id="trust-title" class="sr-only">Вимір у цифрах</h2>
@@ -32,6 +36,8 @@ const items = [
     </ul>
   </div>
 </section>
+  )
+}
 
 <style>
   .trust__grid {

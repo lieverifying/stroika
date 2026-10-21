@@ -17,7 +17,7 @@ import { facts } from '../../content/facts';
     <div class="final__map">
       <h3 class="final__map-title">Зона виїзду</h3>
       <p class="final__area"><Fact value={facts.serviceArea.text} /></p>
-      <PlaceholderImage width={1200} height={1200} label="карта зони виїзду" />
+      {facts.flags.serviceAreaMap && <PlaceholderImage width={1200} height={1200} label="карта зони виїзду" />}
     </div>
   </div>
 </section>

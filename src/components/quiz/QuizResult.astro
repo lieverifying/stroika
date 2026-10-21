@@ -1,11 +1,11 @@
 ---
 // Экран результата на /dyakuyemo (ARCHITECTURE.md 4.4). Скрипт подставляет имя и способ связи из sessionStorage:
-// «Дякуємо, {ім’я}. Надішлемо розрахунок у {Viber / Telegram} протягом N хвилин у робочий час»,
-// для звонка — «Зателефонуємо протягом N хвилин у робочий час». Без данных — общий текст со звонком.
+// «Дякуємо, {ім’я}. Надішлемо розрахунок у {Viber / Telegram} у робочий час»,
+// для звонка — «Зателефонуємо у робочий час» (без минут — режим запуска 2026-10-21). Без данных — общий текст со звонком.
 // Цена (экран А) — только при reason 'ok' и флаге facts.flags.quizResultVariant = 'A'; по умолчанию Б (без цены).
-// Минуты перезвона и подарок — заглушки до подтверждения владельцем.
-import Fact from '../ui/Fact.astro';
+// Подарок (3D) — только когда владелец подтвердит.
 import { facts } from '../../content/facts';
+import { has } from '../../lib/facts';
 
 const { promises } = facts;
 ---
@@ -18,13 +18,12 @@ const { promises } = facts;
   </div>
 
   <p class="quiz-result__lead" data-thanks>
-    Дякуємо<span data-thanks-name></span>.{' '}<span data-thanks-action>Зателефонуємо</span>{' '}протягом{' '}
-    <Fact value={promises.callbackMinutes} />{' '}хвилин у робочий час.
+    Дякуємо<span data-thanks-name></span>.{' '}<span data-thanks-action>Зателефонуємо</span>{' '}у робочий час.
   </p>
 
   <div data-result="B" hidden>
     <p class="quiz-result__no-length" data-no-length hidden>Порахуємо точно після заміру — це безкоштовно.</p>
-    <p class="quiz-result__gift"><Fact value={promises.gift3dText} /></p>
+    {has(promises.gift3dText) && <p class="quiz-result__gift">{promises.gift3dText}</p>}
   </div>
 </div>
 

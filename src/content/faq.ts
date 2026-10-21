@@ -5,7 +5,7 @@
  * Текст между фактами — шаблон без цифр и обещаний.
  */
 import { facts, type Brand, type Fact } from './facts';
-import { isPlaceholder, pluralUk } from '../lib/facts';
+import { has, isPlaceholder, pluralUk } from '../lib/facts';
 
 /** Часть ответа: обычный текст или факт (с форматом для настоящего значения) */
 export type AnswerPart = string | { fact: Fact<string | number>; format?: (v: never) => string };
@@ -36,26 +36,42 @@ export const FAQ: FaqItem[] = [
     q: 'Скільки коштує кухня?',
     a: ['Ціна залежить від розмірів, матеріалів і наповнення. Розрахуємо її під ваше завдання після безкоштовного заміру.'],
   },
-  {
-    q: 'З яких матеріалів і з якою фурнітурою робите?',
-    a: ['Матеріали: ', { fact: brandNames(materials.materialBrands) }, '. Фурнітура: ', { fact: brandNames(materials.hardwareBrands) }, '.'],
-  },
-  {
-    q: 'Яка гарантія?',
-    a: ['Гарантія — ', { fact: warranty.years }, ` ${pluralUk(warranty.years, ['рік', 'роки', 'років'])}. `, { fact: warranty.terms }],
-  },
+  // Нет факта — нет вопроса (режим запуска, 2026-10-21)
+  ...(has(materials.materialBrands) && has(materials.hardwareBrands)
+    ? [
+        {
+          q: 'З яких матеріалів і з якою фурнітурою робите?',
+          a: ['Матеріали: ', { fact: brandNames(materials.materialBrands) }, '. Фурнітура: ', { fact: brandNames(materials.hardwareBrands) }, '.'],
+        },
+      ]
+    : []),
+  ...(facts.flags.warrantyPayment
+    ? [
+        {
+          q: 'Яка гарантія?',
+          a: ['Гарантія — ', { fact: warranty.years }, ` ${pluralUk(warranty.years, ['рік', 'роки', 'років'])}. `, { fact: warranty.terms }],
+        },
+      ]
+    : []),
   {
     q: 'Чи допомагаєте з побутовою технікою?',
-    a: [{ fact: facts.faq.appliances }],
+    // Пока владелец не дал свой ответ — из подтверждённого списка того, что входит в монтаж
+    a: has(facts.faq.appliances)
+      ? [{ fact: facts.faq.appliances }]
+      : ['Так. Під час монтажу вбудовуємо техніку, врізаємо мийку та варильну поверхню, підключаємо воду та розетки.'],
   },
   {
     q: 'Чи працюєте в області?',
-    a: [`Так, працюємо: ${serviceArea.text.toLowerCase()}. `, { fact: serviceArea.terms }],
+    a: [`Так, працюємо: ${serviceArea.text.toLowerCase()}.`, ...(has(serviceArea.terms) ? [' ', { fact: serviceArea.terms }] : [])],
   },
-  {
-    q: 'Як відбувається оплата?',
-    a: ['Передоплата — ', { fact: payment.prepayPercent }, ' %. ', { fact: payment.schedule }],
-  },
+  ...(facts.flags.warrantyPayment
+    ? [
+        {
+          q: 'Як відбувається оплата?',
+          a: ['Передоплата — ', { fact: payment.prepayPercent }, ' %. ', { fact: payment.schedule }],
+        },
+      ]
+    : []),
   {
     q: 'Замір справді безкоштовний?',
     a: ['Так, замір безкоштовний.'],

@@ -1,12 +1,20 @@
 /**
  * Все факты о бизнесе — в одном месте (ARCHITECTURE.md, раздел 5).
- * Пока владелец не прислал данные, значение — заглушка вида '{{NAME}}':
+ * Пока владелец не прислал данные, значение — заглушка вида missing('NAME'):
  * на сайте она видна как серая плашка, а боевая сборка с ней не пройдёт.
  * Ничего не выдумываем: цифры, имена, контакты и обещания — только от владельца.
  */
 
 export type Placeholder = `{{${string}}}`;
-export type Fact<T> = T | Placeholder;
+/**
+ * Факта нет — блок не выводим (режим запуска, решение владельца 2026-10-21: «нет факта — нет блока»).
+ * В отличие от заглушки {{NAME}} не роняет боевую сборку: место на сайте скрыто. Имя — для FACTS-TODO.
+ */
+export interface Missing {
+  readonly missing: string;
+}
+export const missing = (name: string): Missing => ({ missing: name });
+export type Fact<T> = T | Placeholder | Missing;
 
 export interface TeamMember {
   name: Fact<string>;
@@ -55,140 +63,143 @@ export const facts = {
 
   // Владелец — подпись и фото в блоке «Нестандартне завдання»
   owner: {
-    name: '{{OWNER_NAME}}',
-    photo: '{{OWNER_PHOTO}}',
+    name: missing('OWNER_NAME'),
+    photo: missing('OWNER_PHOTO'),
   },
 
   // Цен и сроков на сайте нет (решение владельца, 2026-10-21): считаем под задачу клиента.
   // Цены за метр ниже нужны только выключенному экрану квиза с ценой (вариант А), на сайте не показываются.
   prices: {
     perMeter: {
-      mdfFilm: '{{PRICE_PER_M_MDF_FILM}}',
-      mdfPainted: '{{PRICE_PER_M_MDF_PAINTED}}',
-      dsp: '{{PRICE_PER_M_DSP}}',
+      mdfFilm: missing('PRICE_PER_M_MDF_FILM'),
+      mdfPainted: missing('PRICE_PER_M_MDF_PAINTED'),
+      dsp: missing('PRICE_PER_M_DSP'),
     },
     countertopPerMeter: {
-      dsp: '{{COUNTERTOP_PER_M_DSP}}',
-      quartz: '{{COUNTERTOP_PER_M_QUARTZ}}',
+      dsp: missing('COUNTERTOP_PER_M_DSP'),
+      quartz: missing('COUNTERTOP_PER_M_QUARTZ'),
     },
-    islandSurcharge: '{{ISLAND_SURCHARGE}}',
+    islandSurcharge: missing('ISLAND_SURCHARGE'),
     wardrobePerMeter: {
-      kupe: '{{WARDROBE_PRICE_PER_M_KUPE}}',
-      rozpashna: '{{WARDROBE_PRICE_PER_M_ROZPASHNA}}',
-      harderobna: '{{WARDROBE_PRICE_PER_M_HARDEROBNA}}',
+      kupe: missing('WARDROBE_PRICE_PER_M_KUPE'),
+      rozpashna: missing('WARDROBE_PRICE_PER_M_ROZPASHNA'),
+      harderobna: missing('WARDROBE_PRICE_PER_M_HARDEROBNA'),
     },
   },
 
   quiz: {
-    kitchenLenMinM: '{{QUIZ_KITCHEN_LEN_MIN_M}}',
-    kitchenLenMaxM: '{{QUIZ_KITCHEN_LEN_MAX_M}}',
-    wardrobeWidthBands: '{{QUIZ_WARDROBE_WIDTH_BANDS}}',
-    priceRound: '{{QUIZ_PRICE_ROUND}}',
-    maxRangeRatio: '{{QUIZ_MAX_RANGE_RATIO}}',
-    facadeTypesConfirmed: '{{FACADE_TYPES_CONFIRMED}}',
-    countertopTypesConfirmed: '{{COUNTERTOP_TYPES_CONFIRMED}}',
+    kitchenLenMinM: missing('QUIZ_KITCHEN_LEN_MIN_M'),
+    kitchenLenMaxM: missing('QUIZ_KITCHEN_LEN_MAX_M'),
+    wardrobeWidthBands: missing('QUIZ_WARDROBE_WIDTH_BANDS'),
+    priceRound: missing('QUIZ_PRICE_ROUND'),
+    maxRangeRatio: missing('QUIZ_MAX_RANGE_RATIO'),
+    facadeTypesConfirmed: missing('FACADE_TYPES_CONFIRMED'),
+    countertopTypesConfirmed: missing('COUNTERTOP_TYPES_CONFIRMED'),
   },
 
   // Обещания из ТЗ: на сайт попадут только после подтверждения владельцем
   promises: {
-    callbackMinutes: '{{PROMISE_CALLBACK_MINUTES}}',
-    priceFixedText: '{{PROMISE_PRICE_FIXED_TEXT}}',
-    gift3dText: '{{PROMISE_3D_GIFT_TEXT}}',
-    oneTeam: '{{PROMISE_ONE_TEAM}}',
+    callbackMinutes: missing('PROMISE_CALLBACK_MINUTES'),
+    priceFixedText: missing('PROMISE_PRICE_FIXED_TEXT'),
+    gift3dText: missing('PROMISE_3D_GIFT_TEXT'),
+    oneTeam: missing('PROMISE_ONE_TEAM'),
   },
 
 
   trust: {
-    kitchensDone: '{{TRUST_KITCHENS_DONE}}',
-    years: '{{TRUST_YEARS}}',
+    kitchensDone: missing('TRUST_KITCHENS_DONE'),
+    years: missing('TRUST_YEARS'),
   },
 
   warranty: {
-    years: '{{WARRANTY_YEARS}}',
-    terms: '{{WARRANTY_TERMS}}',
+    years: missing('WARRANTY_YEARS'),
+    terms: missing('WARRANTY_TERMS'),
   },
 
   payment: {
-    prepayPercent: '{{PAYMENT_PREPAY_PERCENT}}',
-    schedule: '{{PAYMENT_SCHEDULE}}',
-    methods: '{{PAYMENT_METHODS}}',
+    prepayPercent: missing('PAYMENT_PREPAY_PERCENT'),
+    schedule: missing('PAYMENT_SCHEDULE'),
+    methods: missing('PAYMENT_METHODS'),
   },
 
   contacts: {
-    phoneDisplay: '{{PHONE_DISPLAY}}',
-    phoneE164: '{{PHONE_E164}}',
-    viberPhoneE164: '{{VIBER_PHONE_E164}}',
-    telegramUsername: '{{TELEGRAM_USERNAME}}',
-    instagramHandle: '{{INSTAGRAM_HANDLE}}',
-    emailPublic: '{{EMAIL_PUBLIC}}',
-    scheduleText: '{{SCHEDULE_TEXT}}',
-    scheduleSchema: '{{SCHEDULE_SCHEMA}}',
-    address: '{{ADDRESS}}',
+    // Подтверждено владельцем 2026-10-21. Viber и Telegram — на тот же номер.
+    phoneDisplay: '+380 75 991 48 43',
+    phoneE164: '+380759914843',
+    viberPhoneE164: '+380759914843',
+    // Telegram по номеру телефона: https://t.me/+380759914843
+    telegramUsername: '+380759914843',
+    instagramHandle: missing('INSTAGRAM_HANDLE'),
+    emailPublic: missing('EMAIL_PUBLIC'),
+    scheduleText: missing('SCHEDULE_TEXT'),
+    scheduleSchema: missing('SCHEDULE_SCHEMA'),
+    address: missing('ADDRESS'),
   },
 
   serviceArea: {
     text: 'Черкаси та область',
-    terms: '{{SERVICE_AREA_TERMS}}',
-    cityDistricts: '{{SERVICE_AREA_CITY_DISTRICTS}}',
-    map: '{{SERVICE_AREA_MAP}}',
+    terms: missing('SERVICE_AREA_TERMS'),
+    cityDistricts: missing('SERVICE_AREA_CITY_DISTRICTS'),
+    map: missing('SERVICE_AREA_MAP'),
   },
 
   google: {
-    rating: '{{GOOGLE_RATING}}',
-    reviewsCount: '{{GOOGLE_REVIEWS_COUNT}}',
-    reviewsUrl: '{{GOOGLE_REVIEWS_URL}}',
-    reviewWriteUrl: '{{GOOGLE_REVIEW_WRITE_URL}}',
-    mapsUrl: '{{GOOGLE_MAPS_URL}}',
+    rating: missing('GOOGLE_RATING'),
+    reviewsCount: missing('GOOGLE_REVIEWS_COUNT'),
+    reviewsUrl: missing('GOOGLE_REVIEWS_URL'),
+    reviewWriteUrl: missing('GOOGLE_REVIEW_WRITE_URL'),
+    mapsUrl: missing('GOOGLE_MAPS_URL'),
   },
 
-  // Политика конфиденциальности. Реквизитов ФОП на сайте нет (решение владельца, 2026-10-21).
+    // Политика: владелец данных — ФОП (в подвале не показываем). Эти две заглушки владелец пришлёт до запуска —
+  // боевая сборка падает, пока они не заменены.
   legal: {
-    privacyContactEmail: '{{PRIVACY_CONTACT_EMAIL}}',
-    privacyUpdatedAt: '{{PRIVACY_UPDATED_AT}}',
-    // Сколько храним заявки, например «12 місяців після останнього звернення»
-    privacyRetention: '{{PRIVACY_RETENTION}}',
+    fopName: '{{FOP_NAME}}',
+    privacyEmail: '{{PRIVACY_EMAIL}}',
+    // Дата этой редакции текста политики
+    privacyUpdatedAt: '21.10.2026',
   },
 
   // Карточки мастеров — за флагом flags.teamCards (выключен): без имён и личных фото до согласия мастеров.
   // Вёрстка рассчитана на 2–6 карточек; сейчас 3 заглушки
   team: [1, 2, 3].map(
     (n): TeamMember => ({
-      name: `{{MASTER_${n}_NAME}}`,
-      role: `{{MASTER_${n}_ROLE}}`,
-      years: `{{MASTER_${n}_YEARS}}`,
-      quote: `{{MASTER_${n}_QUOTE}}`,
-      photo: `{{MASTER_${n}_PHOTO}}`,
+      name: missing(`MASTER_${n}_NAME`),
+      role: missing(`MASTER_${n}_ROLE`),
+      years: missing(`MASTER_${n}_YEARS`),
+      quote: missing(`MASTER_${n}_QUOTE`),
+      photo: missing(`MASTER_${n}_PHOTO`),
     }),
   ),
   // Блок 6 (решение владельца, 2026-10-20): замір, дизайн-проєкт і монтаж — своя команда, детали делают фабрики-партнёры
   teamTitle: 'Своя команда',
   teamSubtitle: 'Замір, дизайн-проєкт і монтаж — наша команда.',
   // Одно фото команды или монтажа
-  teamPhoto: '{{TEAM_PHOTO}}',
-  teamVideo: '{{TEAM_VIDEO}}',
+  teamPhoto: missing('TEAM_PHOTO'),
+  teamVideo: missing('TEAM_VIDEO'),
 
   // Реферальная программа — блок «Рекомендуйте нас» и вопрос в FAQ показываются при flags.referralEnabled
   referral: {
-    reward: '{{REFERRAL_REWARD}}',
-    friendBonus: '{{REFERRAL_FRIEND_BONUS}}',
+    reward: missing('REFERRAL_REWARD'),
+    friendBonus: missing('REFERRAL_FRIEND_BONUS'),
   },
 
   materials: {
-    hardwareBrands: '{{HARDWARE_BRANDS}}',
-    materialBrands: '{{MATERIAL_BRANDS}}',
+    hardwareBrands: missing('HARDWARE_BRANDS'),
+    materialBrands: missing('MATERIAL_BRANDS'),
   },
 
   faq: {
-    appliances: '{{FAQ_APPLIANCES}}',
+    appliances: missing('FAQ_APPLIANCES'),
   },
 
   // Только реальные отзывы с согласия авторов
   reviews: [1, 2, 3].map(
     (n): Review => ({
-      author: `{{REVIEW_${n}_AUTHOR}}`,
-      district: `{{REVIEW_${n}_DISTRICT}}`,
-      text: `{{REVIEW_${n}_TEXT}}`,
-      source: `{{REVIEW_${n}_SOURCE}}`,
+      author: missing(`REVIEW_${n}_AUTHOR`),
+      district: missing(`REVIEW_${n}_DISTRICT`),
+      text: missing(`REVIEW_${n}_TEXT`),
+      source: missing(`REVIEW_${n}_SOURCE`),
     }),
   ),
 
@@ -201,11 +212,11 @@ export const facts = {
     // Не заглушка, а настройка: точка кадра, которая остаётся видна при обрезке фото (CSS object-position).
     // На телефоне фото обрезается до 16:10 — сюда ставим, где на фото главное, например '50% 60%'.
     heroFocus: '50% 50%',
-    beforeAfterPairs: '{{BEFORE_AFTER_PAIRS}}',
-    ogImage: '{{OG_IMAGE}}',
+    beforeAfterPairs: missing('BEFORE_AFTER_PAIRS'),
+    ogImage: missing('OG_IMAGE'),
   },
 
-  seasonalBadgeText: '{{SEASONAL_BADGE_TEXT}}',
+  seasonalBadgeText: missing('SEASONAL_BADGE_TEXT'),
 
   // Не заглушки, а безопасные умолчания (решение владельца: экран Б по умолчанию)
   flags: {
@@ -220,6 +231,14 @@ export const facts = {
     referralEnabled: false as boolean,
     // Сюжет «Шафа-купе» на странице «Як ми створюємо» (кадры получены 2026-10-21)
     storyWardrobe: true as boolean,
+    // Режим запуска (2026-10-21): блоки без фактов скрыты. Включать вместе с фактами — иначе check-release не пропустит.
+    trustNumbers: false as boolean, // «Цифри довіри» — trust.*, warranty.years
+    reviews: false as boolean, // «Відгуки» — reviews, google.*
+    warrantyPayment: false as boolean, // гарантия и порядок оплаты — warranty.*, payment.*
+    instagram: false as boolean, // Instagram — contacts.instagramHandle
+    schedule: false as boolean, // график работы — contacts.scheduleText
+    address: false as boolean, // адрес — contacts.address
+    serviceAreaMap: false as boolean, // карта зоны выезда — serviceArea.map
   },
 } satisfies FactsSchema;
 
@@ -287,5 +306,12 @@ interface FactsSchema {
     teamCards: boolean;
     referralEnabled: boolean;
     storyWardrobe: boolean;
+    trustNumbers: boolean;
+    reviews: boolean;
+    warrantyPayment: boolean;
+    instagram: boolean;
+    schedule: boolean;
+    address: boolean;
+    serviceAreaMap: boolean;
   };
 }

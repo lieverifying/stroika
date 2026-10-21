@@ -1,18 +1,16 @@
 ---
 // Блок 7 — «Як працюємо» (ТЗ): 5 шагов. Сроков нет (решение владельца, 2026-10-21: терміни — під завдання),
-// только обещание перезвона на шаге «Заявка» (заглушка facts.ts).
+// на шаге «Заявка» — «Передзвонимо у робочий час» (без минут, режим запуска 2026-10-21).
 // Телефон — вертикальная шкала с номерами, десктоп — 5 колонок, шаги соединяет размерная линия (мотив замера).
 import Dimension from '../ui/Dimension.astro';
-import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import { facts } from '../../content/facts';
 
-const { promises } = facts;
 
 // Изготовление — фабрики-партнёры по нашему проекту; срок подтверждён владельцем (от авансу). Монтаж — что входит.
 const install = facts.services.install;
-const steps: { title: string; text: string; term?: typeof promises.callbackMinutes; unit?: string; prefix?: string }[] = [
-  { title: 'Заявка', text: 'Квіз, форма на сайті, дзвінок або Viber.', term: promises.callbackMinutes, unit: 'хв', prefix: 'Передзвонимо за' },
+const steps: { title: string; text: string; term?: string }[] = [
+  { title: 'Заявка', text: 'Квіз, форма на сайті, дзвінок або Viber.', term: 'Передзвонимо у робочий час' },
   { title: 'Замір', text: 'Безкоштовно приїжджаємо і знімаємо розміри приміщення.' },
   { title: 'Дизайн-проєкт і кошторис', text: 'Готуємо дизайн-проєкт і рахуємо вартість та терміни під ваше завдання.' },
   { title: 'Договір і виготовлення', text: 'Підписуємо договір. Деталі за нашим проєктом виготовляють фабрики-партнери.' },
@@ -36,11 +34,7 @@ const steps: { title: string; text: string; term?: typeof promises.callbackMinut
             <div class="process__body">
               <h3 class="process__title">{s.title}</h3>
               <p class="process__text">{s.text}</p>
-              {s.term && (
-                <p class="process__term">
-                  {s.prefix} <Fact value={s.term} class="process__value" /> {s.unit}
-                </p>
-              )}
+              {s.term && <p class="process__term">{s.term}</p>}
             </div>
           </li>
         ))

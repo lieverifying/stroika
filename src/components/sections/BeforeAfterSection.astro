@@ -1,13 +1,19 @@
 ---
+// Нет факта — нет блока: скрыт, пока владелец не прислал пары фото (facts.media.beforeAfterPairs).
 // Блок 4 — «Було / стало» (ТЗ): 2–3 пары фото со слайдером сравнения.
 // Телефон — лента со scroll-snap (страница вбок не едет), десктоп — сетка.
 // Пары фото — facts.media.beforeAfterPairs; пока их нет — 3 пары плейсхолдеров.
 import BeforeAfter from '../ui/BeforeAfter.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
+import { facts } from '../../content/facts';
+import { has } from '../../lib/facts';
 
 const pairs = [1, 2, 3];
+const show = has(facts.media.beforeAfterPairs);
 ---
 
+{
+  show && (
 <section data-block="4" class="section-pad" aria-labelledby="before-after-title">
   <div class="container-site">
     <SectionTitle id="before-after-title" title="Було / стало" subtitle="Потягніть ручку, щоб порівняти." />
@@ -22,6 +28,8 @@ const pairs = [1, 2, 3];
     </ul>
   </div>
 </section>
+  )
+}
 
 <style>
   .ba-list {

@@ -1,17 +1,14 @@
 ---
 // Блок «Нестандартне завдання» (решение владельца, 2026-10-20) — сразу после «Ціни від», якорь #zapyt.
-// Сюда же ведёт вариант квиза «Інше, нестандартне». Владелец перезванивает лично: имя и фото — заглушки facts.owner.
+// Сюда же ведёт вариант квиза «Інше, нестандартне». Режим запуска (2026-10-21): без имени и фото владельца, без минут.
 // Форма: описание 10–1000 символов, до 3 файлов (JPG, PNG, HEIC, PDF, до 10 МБ), поля контакта, согласие.
 // Кнопка графитовая: жёлтый на экране остаётся за кнопками квиза и замера.
 // Отправка — заглушка до фазы 6 (файлы уйдут multipart-запросом в api/lead.php), затем /dyakuyemo.
 import ContactFields from '../quiz/ContactFields.astro';
 import Button from '../ui/Button.astro';
-import Fact from '../ui/Fact.astro';
-import PlaceholderImage from '../ui/PlaceholderImage.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import Textarea from '../ui/form/Textarea.astro';
 import '../ui/form/field.css';
-import { facts } from '../../content/facts';
 import { FILES_MAX } from '../../lib/lead/validate';
 
 const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic,image/heif,application/pdf';
@@ -21,16 +18,10 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
   <div class="container-site zapyt">
     <div class="zapyt__intro">
       <SectionTitle id="zapyt-title" title="Нестандартне завдання" />
-      <div class="zapyt__owner">
-        <div class="zapyt__photo">
-          <PlaceholderImage width={600} height={600} label="власник, кругле фото" />
-        </div>
-        <p class="zapyt__lead">
-          Опишіть, що потрібно зробити. Я, <Fact value={facts.owner.name} />, власник «{facts.brand.name}», зателефоную вам особисто
-          протягом <Fact value={facts.promises.callbackMinutes} /> хвилин у робочий час і дам детальну відповідь: терміни, орієнтовну
-          вартість і наступні кроки.
-        </p>
-      </div>
+      <p class="zapyt__lead">
+        Опишіть, що потрібно зробити — ми зв’яжемося з вами особисто у робочий час і дамо детальну відповідь: терміни, орієнтовну
+        вартість і наступні кроки.
+      </p>
     </div>
 
     <form class="zapyt__form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-zapyt-form>
@@ -72,21 +63,6 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
     display: grid;
     gap: 1.5rem;
     align-content: start;
-  }
-  .zapyt__owner {
-    display: grid;
-    grid-template-columns: 5rem minmax(0, 1fr);
-    gap: 1rem;
-    align-items: start;
-  }
-  /* Круглое фото владельца; пока — серый круг без подписи (подпись не помещается в 80 px) */
-  .zapyt__photo :global(.ph) {
-    aspect-ratio: 1;
-    border-radius: var(--radius-full);
-  }
-  .zapyt__photo :global(.ph__label),
-  .zapyt__photo :global(.ph__dim) {
-    display: none;
   }
   .zapyt__lead {
     font-size: var(--text-lead);
@@ -149,24 +125,14 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
     .zapyt__form {
       padding: 2rem;
     }
-    .zapyt__owner {
-      grid-template-columns: 7rem minmax(0, 1fr);
-      gap: 1.5rem;
     }
-  }
   @media (min-width: 64rem) {
     .zapyt {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       gap: 4rem;
       align-items: start;
     }
-    .zapyt__owner {
-      grid-template-columns: 1fr;
     }
-    .zapyt__photo {
-      width: 8rem;
-    }
-  }
 </style>
 
 <script>

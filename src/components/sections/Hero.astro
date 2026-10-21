@@ -11,9 +11,19 @@ import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { HERO, url } from '../../lib/portfolio';
+import { has } from '../../lib/facts';
 
 const { promises, warranty, flags } = facts;
 const portrait = facts.media.heroOrientation === 'portrait';
+// Выгоды: нет факта — нет пункта. Неподтверждённые обещания (ціна в договорі, гарантія) появятся, когда владелец пришлёт;
+// пока — подтверждённые факты. Всегда 3 пункта.
+const benefits = [
+  'Безкоштовний замір',
+  ...(has(promises.priceFixedText) ? [promises.priceFixedText] : []),
+  ...(flags.warrantyPayment && has(warranty.years) ? [`Гарантія ${warranty.years} р.`] : []),
+  'Замір, дизайн-проєкт і монтаж — наша команда',
+  facts.serviceArea.text,
+].slice(0, 3);
 ---
 
 <section
@@ -36,13 +46,20 @@ const portrait = facts.media.heroOrientation === 'portrait';
 
       <h1 id="hero-title" class="text-h1">
         Кухні на замовлення в Черкасах
-        <span class="hero__tail">— <Fact value={promises.oneTeam} /></span>
+        {has(promises.oneTeam) && <span class="hero__tail">— {promises.oneTeam}</span>}
       </h1>
 
       <ul class="hero__benefits" aria-label="Переваги">
-        <li><span class="hero__num" aria-hidden="true">01</span><span>Безкоштовний замір</span></li>
-        <li><span class="hero__num" aria-hidden="true">02</span><span><Fact value={promises.priceFixedText} /></span></li>
-        <li><span class="hero__num" aria-hidden="true">03</span><span>Гарантія <Fact value={warranty.years} /> р.</span></li>
+        {
+          benefits.map((b, i) => (
+            <li>
+              <span class="hero__num" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span>{b}</span>
+            </li>
+          ))
+        }
       </ul>
 
       <div class="hero__actions">

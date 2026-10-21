@@ -1,13 +1,21 @@
-import { factDefaults, type Fact, type Placeholder } from '../content/facts';
+import { factDefaults, type Fact, type Missing, type Placeholder } from '../content/facts';
 
-/** Значение — незаменённая заглушка вида '{{NAME}}'. */
-export function isPlaceholder(value: unknown): value is Placeholder {
-  return typeof value === 'string' && /^\{\{[A-Z0-9_]+\}\}$/.test(value);
+/** Факта нет: missing('NAME') — блок не выводим. */
+export function isMissing(value: unknown): value is Missing {
+  return typeof value === 'object' && value !== null && typeof (value as Missing).missing === 'string';
 }
 
+/** Значения ещё нет: заглушка '{{NAME}}' или missing('NAME'). Логика «есть ли факт» во всём коде — через неё. */
+export function isPlaceholder(value: unknown): value is Placeholder | Missing {
+  return isMissing(value) || (typeof value === 'string' && /^\{\{[A-Z0-9_]+\}\}$/.test(value));
+}
+
+/** Факт есть — можно показывать */
+export const has = <T>(value: Fact<T>): value is T => !isPlaceholder(value);
+
 /** Имя заглушки без скобок: '{{WARRANTY_YEARS}}' → 'WARRANTY_YEARS'. */
-export function placeholderName(value: Placeholder): string {
-  return value.slice(2, -2);
+export function placeholderName(value: Placeholder | Missing): string {
+  return isMissing(value) ? value.missing : value.slice(2, -2);
 }
 
 /**
@@ -17,7 +25,7 @@ export function placeholderName(value: Placeholder): string {
 export function withDefault(value: Fact<string>): { text: string; pending: string | null } {
   if (!isPlaceholder(value)) return { text: value, pending: null };
   const name = placeholderName(value);
-  return { text: factDefaults[name] ?? value, pending: name };
+  return { text: factDefaults[name] ?? (isMissing(value) ? '' : value), pending: name };
 }
 
 /** Число или null, если вместо числа заглушка (тогда расчёт откатывается). */
@@ -36,14 +44,15 @@ export function formatUAH(n: number): string {
 }
 
 /** Ссылки связи. С заглушкой ссылка нерабочая, но видно, что место ждёт данных (ARCHITECTURE.md 5.3). */
-export const telHref = (e164: Fact<string>) => `tel:${e164}`;
+const str = (v: Fact<string>) => (isMissing(v) ? '' : v);
+export const telHref = (e164: Fact<string>) => `tel:${str(e164)}`;
 export const viberHref = (e164: Fact<string>) =>
-  isPlaceholder(e164) ? `viber://chat?number=${e164}` : `viber://chat?number=${encodeURIComponent(e164)}`;
-export const telegramHref = (username: Fact<string>) => `https://t.me/${username}`;
+  isPlaceholder(e164) ? `viber://chat?number=${str(e164)}` : `viber://chat?number=${encodeURIComponent(e164)}`;
+export const telegramHref = (username: Fact<string>) => `https://t.me/${str(username)}`;
 
 /** '+380671234567' → '+380 67 123 45 67'. Заглушку возвращает как есть. */
 export function formatPhone(e164: Fact<string>): string {
-  if (isPlaceholder(e164)) return e164;
+  if (isPlaceholder(e164)) return isMissing(e164) ? '' : e164;
   const m = /^\+380(\d{2})(\d{3})(\d{2})(\d{2})$/.exec(e164);
   return m ? `+380 ${m[1]} ${m[2]} ${m[3]} ${m[4]}` : e164;
 }

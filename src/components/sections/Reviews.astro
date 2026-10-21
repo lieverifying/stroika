@@ -1,4 +1,5 @@
 ---
+// Режим запуска: блок скрыт флагом facts.flags.reviews, пока нет отзывов и данных Google.
 // Блок 10 — «Відгуки» (ТЗ): только реальные отзывы с согласия авторов + рейтинг Google.
 // Всё — заглушки facts.reviews и facts.google; ни одного придуманного отзыва или рейтинга.
 // Телефон — лента со scroll-snap, десктоп — 3 колонки. Ссылка «Всі відгуки в Google» — во внешней вкладке.
@@ -6,11 +7,14 @@ import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import { facts } from '../../content/facts';
-import { pluralUk } from '../../lib/facts';
+import { has, pluralUk } from '../../lib/facts';
 
 const { reviews, google } = facts;
+const show = facts.flags.reviews;
 ---
 
+{
+  show && (
 <section data-block="10" class="section-pad" aria-labelledby="reviews-title">
   <div class="container-site">
     <SectionTitle id="reviews-title" title="Відгуки" />
@@ -37,12 +41,14 @@ const { reviews, google } = facts;
       }
     </ul>
     <div class="reviews__more">
-      <Button href={google.reviewsUrl} variant="outline" icon="arrow-right" target="_blank" rel="noopener">
+      <Button href={has(google.reviewsUrl) ? String(google.reviewsUrl) : undefined} variant="outline" icon="arrow-right" target="_blank" rel="noopener">
         Всі відгуки в Google
       </Button>
     </div>
   </div>
 </section>
+  )
+}
 
 <style>
   .reviews__rating {

@@ -5,11 +5,15 @@ test.describe('футер', () => {
   test('ссылки с правильной схемой, зоны нажатия ≥ 48 px', async ({ page }) => {
     await page.goto('/');
     const f = page.locator('footer[data-block="14"]');
-    await expect(f.locator('a[href^="tel:"]')).toHaveCount(1);
-    await expect(f.locator('a[href^="mailto:"]')).toHaveCount(1);
-    await expect(f.locator('a[href^="viber://"]')).toHaveCount(1);
-    await expect(f.locator('a[href^="https://t.me/"]')).toHaveCount(1);
-    await expect(f.locator('a[href^="https://instagram.com/"]')).toHaveCount(1);
+    await expect(f.locator('a[href="tel:+380759914843"]')).toHaveCount(1);
+    await expect(f.locator('a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
+    await expect(f.locator('a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
+    await expect(f.locator('a[href="https://t.me/+380759914843"]')).toHaveCount(1);
+    // режим запуска: почты, Instagram, графика, адреса и ФОП нет, пока нет фактов
+    await expect(f.locator('a[href^="mailto:"]')).toHaveCount(0);
+    await expect(f.locator('a[href*="instagram.com"]')).toHaveCount(0);
+    await expect(f).not.toContainText(/ФОП|ІПН/);
+    await expect(f.locator('.fact-ph')).toHaveCount(0);
     await expect(f.locator('a[href="/polityka"]')).toHaveCount(1);
     for (const a of await f.locator('a').all()) {
       expect((await a.boundingBox())!.height).toBeGreaterThanOrEqual(48);

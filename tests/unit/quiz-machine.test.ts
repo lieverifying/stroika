@@ -1,6 +1,6 @@
 // Юнит-тесты конечного автомата квиза (ARCHITECTURE 4.2): чистые функции, без DOM
 import { describe, expect, test } from 'vitest';
-import { BRANCH_FIELDS, PATHS, STEPS, branchOf } from '../../src/lib/quiz/config';
+import { BRANCH_FIELDS, HAS_WARDROBE_WIDTH, PATHS, STEPS, branchOf } from '../../src/lib/quiz/config';
 import { answer, back, currentPath, isLastStep, progress, setTask, start } from '../../src/lib/quiz/machine';
 import type { Branch, QuizState, StepId } from '../../src/lib/quiz/types';
 
@@ -9,7 +9,8 @@ const T0 = 1_000;
 /** Ответы для прохода каждой ветки: [goal, ...значения single-шагов] */
 const WALKS: Record<string, { branch: Branch; values: string[] }> = {
   kitchen: { branch: 'kitchen', values: ['kitchen', 'kutova', '3to4', 'mdf-film', 'quartz', '1to3m'] },
-  wardrobe: { branch: 'wardrobe', values: ['wardrobe', 'kupe', 'unknown', 'later'] },
+  // шаг ширины есть, только если владелец прислал диапазоны (нет факта — нет шага)
+  wardrobe: { branch: 'wardrobe', values: HAS_WARDROBE_WIDTH ? ['wardrobe', 'kupe', 'unknown', 'later'] : ['wardrobe', 'kupe', 'later'] },
   other: { branch: 'short', values: ['other'] },
 };
 
@@ -65,9 +66,9 @@ describe('прохождение веток совпадает с PATHS', () => 
     });
   }
 
-  test('длины: кухня 7, шафа 5, коротка 2', () => {
+  test('длины: кухня 7, шафа 5 (4 без диапазонов ширины), коротка 2', () => {
     expect(walk(WALKS.kitchen.values).visited).toHaveLength(7);
-    expect(walk(WALKS.wardrobe.values).visited).toHaveLength(5);
+    expect(walk(WALKS.wardrobe.values).visited).toHaveLength(HAS_WARDROBE_WIDTH ? 5 : 4);
     expect(walk(WALKS.other.values).visited).toHaveLength(2);
   });
 
@@ -138,7 +139,7 @@ describe('смена ветки на шаге 1', () => {
   test('шафа -> коротка: удаляются ответы шафы, task не трогается', () => {
     const { states } = walk(WALKS.wardrobe.values);
     let s = states[states.length - 1];
-    for (let i = 0; i < 4; i++) s = back(s, 1);
+    for (let i = 0; i < PATHS.wardrobe.length - 1; i++) s = back(s, 1);
     s = answer(s, 'other', 2);
     expect(s.stepId).toBe('shortForm');
     expect(s.answers).toEqual({ goal: 'other' });
@@ -206,14 +207,14 @@ describe('progress', () => {
     expect(progress(start(T0))).toEqual({ current: 1, total: 7 });
   });
 
-  test('preset с известной веткой: 1/5', () => {
-    expect(progress(start(T0, { goal: 'wardrobe' }))).toEqual({ current: 1, total: 5 });
+  test('preset с известной веткой: 1 / длина пути шафы', () => {
+    expect(progress(start(T0, { goal: 'wardrobe' }))).toEqual({ current: 1, total: PATHS.wardrobe.length });
   });
 
   test('шафа: 1/7 -> 2/5', () => {
     const s0 = start(T0);
     expect(progress(s0)).toEqual({ current: 1, total: 7 });
-    expect(progress(answer(s0, 'wardrobe', 1))).toEqual({ current: 2, total: 5 });
+    expect(progress(answer(s0, 'wardrobe', 1))).toEqual({ current: 2, total: PATHS.wardrobe.length });
   });
 
   test('кухня: 1/7 -> 2/7', () => {
@@ -286,5 +287,12 @@ describe('шаг 1 и сроки (решение владельца, 2026-10-20)
     const labels = STEPS.timing.options?.map((o) => o.label);
     expect(labels?.[0]).toBe('Протягом 3 місяців');
     expect(labels?.some((l) => /Нового року/.test(String(l)))).toBe(false);
+  });
+});
+
+describe('шаг ширины шафы — только с фактами владельца', () => {
+  test('без диапазонов ширины шаг «Приблизна ширина» пропускается: тип → сроки', () => {
+    expect(PATHS.wardrobe.includes('wardrobeWidth')).toBe(HAS_WARDROBE_WIDTH);
+    expect(STEPS.wardrobeType.next({})).toBe(HAS_WARDROBE_WIDTH ? 'wardrobeWidth' : 'timing');
   });
 });

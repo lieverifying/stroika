@@ -1,12 +1,13 @@
 ---
 // Блок 14 — футер (ТЗ): контакты, график, соцсети, ссылка на политику. Реквизитов ФОП нет (решение владельца, 2026-10-21).
-// Контакты — заглушки facts.ts.
+// Режим запуска: почта, график, адрес и Instagram — только когда есть факт и включён флаг.
 // Тёмный фон; все ссылки — зоны нажатия ≥ 48 px. Нижнюю панель телефона футер не прячет: body уже с отступом под неё.
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
+import { has } from '../../lib/facts';
 
 const { contacts: c, brand } = facts;
 const year = new Date().getFullYear();
@@ -29,20 +30,30 @@ const year = new Date().getFullYear();
             <Fact value={c.phoneDisplay} />
           </a>
         </li>
-        <li>
-          <a href={contactLinks.email} class="site-footer__link"><Fact value={c.emailPublic} /></a>
-        </li>
-        <li class="site-footer__muted"><Fact value={c.scheduleText} /></li>
-        <li class="site-footer__muted"><Fact value={c.address} /></li>
+        {
+          has(c.emailPublic) && (
+            <li>
+              <a href={contactLinks.email} class="site-footer__link">{c.emailPublic}</a>
+            </li>
+          )
+        }
+        {facts.flags.schedule && has(c.scheduleText) && <li class="site-footer__muted">{c.scheduleText}</li>}
+        {facts.flags.address && has(c.address) && <li class="site-footer__muted">{c.address}</li>}
       </ul>
     </div>
 
     <div class="site-footer__col">
-      <h2 class="site-footer__title">Месенджери і соцмережі</h2>
+      <h2 class="site-footer__title">Месенджери</h2>
       <div class="site-footer__social">
         <Button href={contactLinks.viber} variant="outline" icon="viber">Viber</Button>
         <Button href={contactLinks.telegram} variant="outline" icon="telegram">Telegram</Button>
-        <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">Instagram</Button>
+        {
+          facts.flags.instagram && contactLinks.instagram && (
+            <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">
+              Instagram
+            </Button>
+          )
+        }
       </div>
     </div>
 
