@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 // Поля формы замера (блок 13)
 test.describe('поля формы', () => {
   test('маска телефона: 0671234567 → +380 67 123 45 67', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const phone = page.locator('#zamir-phone');
     await phone.click();
     await expect(phone).toHaveValue('+380 ');
@@ -13,7 +13,7 @@ test.describe('поля формы', () => {
   });
 
   test('Backspace стирает номер вместе с +380, поле не застревает', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const phone = page.locator('#zamir-phone');
     await phone.click();
     await phone.pressSequentially('0671');
@@ -22,7 +22,7 @@ test.describe('поля формы', () => {
   });
 
   test('скрытая ошибка не подключена к aria-describedby, показанная — подключена', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const name = page.locator('#zamir-name');
     expect(await name.getAttribute('aria-describedby') ?? '').not.toContain('zamir-name-error');
     await page.locator('#zamir form button[type=submit]').click();
@@ -35,7 +35,7 @@ test.describe('поля формы', () => {
     test(`вставка из буфера «${pasted}» → +380 67 123 45 67`, async ({ page, context, browserName }) => {
       test.skip(browserName !== 'chromium', 'права на буфер обмена — только Chromium');
       await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-      await page.goto('/');
+      await page.goto('/kukhni');
       const phone = page.locator('#zamir-phone');
       await phone.click(); // в поле уже «+380 »
       await page.evaluate((t) => navigator.clipboard.writeText(t), pasted);
@@ -45,12 +45,12 @@ test.describe('поля формы', () => {
   }
 
   test('маска привязана к своему полю: у каждого поля телефона своя', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('phone-field input[data-masked]')).toHaveCount(await page.locator('phone-field').count());
   });
 
   test('поля 48 px и шрифт 16 px (iOS не зумит), согласие не отмечено', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     for (const sel of ['#zamir-name', '#zamir-phone']) {
       const f = page.locator(sel);
       await expect(f).toHaveCSS('font-size', '16px');
@@ -65,7 +65,7 @@ test.describe('поля формы', () => {
   });
 
   test('поле-ловушка не попадает в порядок Tab и скрыто от скринридера', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('#zamir-website')).toHaveAttribute('tabindex', '-1');
     await expect(page.locator('.hp').first()).toHaveAttribute('aria-hidden', 'true');
   });
@@ -77,7 +77,7 @@ test.describe('блок 13: форма замера', () => {
     page.on('request', (r) => {
       if (r.method() !== 'GET') posts.push(r.url());
     });
-    await page.goto('/');
+    await page.goto('/kukhni');
     const form = page.locator('#zamir form');
     await form.getByRole('button', { name: 'Надіслати заявку' }).click();
     await expect(page.locator('#zamir-name')).toBeFocused();
@@ -85,7 +85,7 @@ test.describe('блок 13: форма замера', () => {
     await expect(page.locator('#zamir-name-error')).toBeVisible();
     await expect(page.locator('#zamir-phone-error')).toBeVisible();
     await expect(page.locator('#zamir-consent-error')).toBeVisible();
-    await expect(page).toHaveURL(/\/(#.*)?$/);
+    await expect(page).toHaveURL(/\/kukhni(#.*)?$/);
     expect(posts).toEqual([]);
   });
 
@@ -94,7 +94,7 @@ test.describe('блок 13: форма замера', () => {
     page.on('request', (r) => {
       if (r.method() !== 'GET') posts.push(r.url());
     });
-    await page.goto('/');
+    await page.goto('/kukhni');
     await page.locator('#zamir-name').fill('Тест');
     await page.locator('#zamir-phone').click();
     await page.locator('#zamir-phone').pressSequentially('0671234567');
@@ -108,7 +108,7 @@ test.describe('блок 13: форма замера', () => {
 
   test('телефон: при фокусе в поле нижняя панель скрыта, кнопка отправки видна', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     await page.locator('#zamir-phone').focus();
     await expect(page.locator('[data-bottom-bar]')).toHaveAttribute('data-hidden', '');
     const submit = page.locator('#zamir form').getByRole('button', { name: 'Надіслати заявку' });

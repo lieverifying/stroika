@@ -1,5 +1,7 @@
 ---
 // Общий шаблон страницы: lang="uk", шрифты, SEO, шапка, футер и нижняя панель.
+// bare — без шапки, подвала, нижней панели и попапа (экран выбора «/»). На посадочных (/kukhni, /mebli)
+// body получает data-landing — по нему заявка помечается страницей-источником (src/lib/landing.ts).
 import '../styles/global.css';
 import Fonts from '../components/layout/Fonts.astro';
 import SeoHead from '../components/layout/SeoHead.astro';
@@ -8,14 +10,17 @@ import Header from '../components/layout/Header.astro';
 import MobileBottomBar from '../components/layout/MobileBottomBar.astro';
 import Footer from '../components/layout/Footer.astro';
 import ZamirModal from '../components/forms/ZamirModal.astro';
+import { landingOfPath, pagePath } from '../lib/landing';
 
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  bare?: boolean;
 }
 
-const { title, description, noindex } = Astro.props;
+const { title, description, noindex, bare = false } = Astro.props;
+const landing = landingOfPath(pagePath(Astro.url));
 ---
 
 <!doctype html>
@@ -29,15 +34,15 @@ const { title, description, noindex } = Astro.props;
     <meta name="theme-color" content="#F1F1EE" />
     <Fonts />
   </head>
-  <body>
+  <body data-landing={landing ?? undefined} class:list={{ 'is-bare': bare }}>
     <SkipLink />
-    <Header />
+    {!bare && <Header />}
     <main id="main">
       <slot />
     </main>
-    <Footer />
-    <MobileBottomBar />
-    <ZamirModal />
+    {!bare && <Footer />}
+    {!bare && <MobileBottomBar />}
+    {!bare && <ZamirModal />}
     <script>
       import { initCtaArbiter } from '../lib/cta-arbiter';
       initCtaArbiter();

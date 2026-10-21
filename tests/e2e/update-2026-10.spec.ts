@@ -5,7 +5,7 @@ import { yellowOnScreen } from './helpers';
 
 test.describe('факты бригады на главной', () => {
   test('нет ремонта, «під ключ», демонтажа, электрики, сантехники, плитки и запрещённых слов', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const text = await page.locator('body').innerText();
     const meta = await page.locator('meta[name="description"]').getAttribute('content');
     for (const bad of [/ремонт/i, /під ключ/i, /демонтаж/i, /електрик/i, /сантехнік/i, /плитк/i, /шпон/i, /менеджер/i, /свій дизайнер/i, /Нового року/i]) {
@@ -16,19 +16,19 @@ test.describe('факты бригады на главной', () => {
   });
 
   test('цен и сроков нет (решение владельца, 2026-10-21); зона — подтверждённый факт', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const main = page.locator('main');
     await expect(main).not.toContainText(/місяц[іья] від авансу|\d+\s*днів|від \d[\d\s]* грн/);
     await expect(main.locator('[data-placeholder^="PRICE_"], [data-placeholder^="TERM_"], [data-placeholder="PROMISE_MEASURE_3D_HOURS"]')).toHaveCount(0);
     await expect(page.locator('[data-block="12"]')).toContainText('Назвемо їх після заміру разом із ціною');
-    await expect(page.locator('[data-block="12"]')).toContainText('черкаси та область');
+    await expect(page.locator('[data-block="12"]')).toContainText('Черкаси та область');
     await expect(page.locator('[data-block="1"] .hero__badge')).toHaveCount(0); // сезонный бейдж выключен
     await expect(page.locator('footer')).not.toContainText(/ФОП|ІПН|РНОКПП/);
   });
 });
 
 test('над квизом — подзаголовок про месенджер', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/kukhni');
   await expect(page.locator('#kvyz .section-title__subtitle')).toHaveText(
     'Оберіть, яку кухню хочете, — ми порахуємо і надішлемо ціну у зручний для вас месенджер.',
   );
@@ -105,7 +105,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
 test.describe('реферальная программа', () => {
   test('поле «Хто вас порекомендував?» есть во всех формах и необязательное', async ({ page }) => {
     // короткая форма финала главной — только ім’я и телефон (решение владельца 2026-10-21), поле есть в остальных
-    await page.goto('/');
+    await page.goto('/kukhni');
     for (const id of ['modal-referrer', 'quiz-referrer', 'quiz-short-referrer']) {
       const field = page.locator(`#${id}`);
       await expect(field).toHaveCount(1);
@@ -117,7 +117,7 @@ test.describe('реферальная программа', () => {
   });
 
   test('блок «Рекомендуйте нас» скрыт, пока флаг referralEnabled выключен', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('#rekomenduyte')).toHaveCount(0);
     await expect(page.locator('body')).not.toContainText('Рекомендуйте нас');
   });

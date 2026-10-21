@@ -6,12 +6,19 @@ import Button from '../ui/Button.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
+
+interface Props {
+  subtitle: string;
+  /** Откуда заявка — уходит в заявке (source) */
+  source: string;
+}
+const { subtitle, source } = Astro.props;
 ---
 
 <section id="zamir" data-block="13" class="section-pad" aria-labelledby="final-title">
   <div class="container-site final">
     <div class="final__contact">
-      <SectionTitle id="final-title" title="Безкоштовний замір" subtitle="Зателефонуйте, напишіть у Viber або залиште номер — передзвонимо й домовимося про час." />
+      <SectionTitle id="final-title" title="Безкоштовний замір" subtitle={subtitle} />
       <div class="final__buttons">
         <Button href={contactLinks.tel} variant="secondary" size="lg" icon="phone" fullWidth>Подзвонити</Button>
         <Button href={contactLinks.viber} variant="secondary" size="lg" icon="viber" fullWidth>Viber</Button>
@@ -19,7 +26,7 @@ import { contactLinks } from '../../lib/contacts';
       <p class="final__phone"><a href={contactLinks.tel}>{facts.contacts.phoneDisplay}</a></p>
     </div>
     <div class="final__form">
-      <ZamirForm compact />
+      <ZamirForm compact source={source} />
     </div>
   </div>
 </section>

@@ -1,19 +1,27 @@
 ---
-// Блок 3 — «Наші роботи» (решение владельца, 2026-10-21): 6 лучших работ из src/content/portfolio.json (featured),
-// крупно, по 2 в ряд (ряды целиком, без обрезки), без подписей, фото открывается на весь экран; «Усі роботи» → /roboty.
+// Блок 3 — «Наші роботи» на посадочной: 6 работ из src/content/portfolio.json (featured.kukhni / featured.mebli),
+// крупно, по 2 в ряд (ряды целиком, без обрезки), без подписей, фото открывается на весь экран; внизу — в галерею.
 import Lightbox from '../portfolio/Lightbox.astro';
 import PortfolioGrid from '../portfolio/PortfolioGrid.astro';
 import Button from '../ui/Button.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import { FEATURED } from '../../lib/portfolio';
+import type { PortfolioItem } from '../../lib/portfolio';
+
+interface Props {
+  title: string;
+  items: PortfolioItem[];
+  moreHref: string;
+  moreLabel: string;
+}
+const { title, items, moreHref, moreLabel } = Astro.props;
 ---
 
 <section data-block="3" class="section-pad" aria-labelledby="portfolio-title" data-gallery>
   <div class="container-site">
-    <SectionTitle id="portfolio-title" title="Наші роботи" />
-    <PortfolioGrid items={FEATURED} eager={0} perRow={[2, 2]} />
+    <SectionTitle id="portfolio-title" title={title} />
+    <PortfolioGrid items={items} eager={0} perRow={[2, 2]} />
     <div class="portfolio__more">
-      <Button href="/roboty" variant="secondary" icon="arrow-right">Усі роботи</Button>
+      <Button href={moreHref} variant="secondary" icon="arrow-right">{moreLabel}</Button>
     </div>
   </div>
   <Lightbox />

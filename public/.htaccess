@@ -1,7 +1,14 @@
 # Хостинг adm.tools (Apache). Страница 404 и постоянные перенаправления (CLAUDE.md, «Страницы»).
 ErrorDocument 404 /404.html
 
-# /kukhni отдельной страницей не делаем — главная и есть лендинг кухонь
-Redirect 301 /kukhni /
+# Сборка кладёт страницы файлами (build.format = 'file': kukhni.html), а ссылки на сайте — без расширения (/kukhni).
+# Отдаём /kukhni из kukhni.html; адрес с .html перенаправляем на адрес без расширения.
+RewriteEngine On
+RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.html[\s?]
+RewriteRule ^ /%1 [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]
+
 # Ремонт убран с сайта (2026-10-20)
 Redirect 301 /remont /

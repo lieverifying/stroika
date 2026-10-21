@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test.describe('первый экран', () => {
   test('телефон: фото первым над H1, 16:10, во всю ширину; заявка доступна из нижней панели', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     const media = (await page.locator('.hero__media').boundingBox())!;
     const h1 = (await page.locator('h1').boundingBox())!;
     expect(media.y + media.height).toBeLessThanOrEqual(h1.y);
@@ -16,7 +16,7 @@ test.describe('первый экран', () => {
 
   test('десктоп: текст по центру фото по вертикали, фото под шапкой и целиком в первом экране', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
-    await page.goto('/');
+    await page.goto('/kukhni');
     const text = (await page.locator('.hero__text').boundingBox())!;
     const media = (await page.locator('.hero__media').boundingBox())!;
     const header = (await page.locator('[data-header]').boundingBox())!;
@@ -26,12 +26,12 @@ test.describe('первый экран', () => {
   });
 
   test('H1 — Unbounded 500', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('h1')).toHaveCSS('font-weight', '500');
   });
 
   test('фото — настоящая работа из портфолио (facts.media.hero), с alt, грузится сразу', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const img = page.locator('.hero__media img');
     await expect(img).toHaveAttribute('src', /\/portfolio\/img\/kuhni\/kuhni-20\.webp$/);
     await expect(img).toHaveAttribute('alt', /.+/);

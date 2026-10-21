@@ -18,14 +18,24 @@
       "title": "Комерційні об’єкти"
     }
   ],
-  "featured": [
-    "kuhni-18",
-    "kuhni-21",
-    "interier-01",
-    "komertsiia-02",
-    "shafy-08",
-    "kuhni-15"
-  ],
+  "featured": {
+    "kukhni": [
+      "kuhni-18",
+      "kuhni-21",
+      "kuhni-15",
+      "kuhni-03",
+      "kuhni-14",
+      "kuhni-17"
+    ],
+    "mebli": [
+      "interier-01",
+      "komertsiia-02",
+      "shafy-08",
+      "komertsiia-11",
+      "shafy-10",
+      "shafy-03"
+    ]
+  },
   "items": [
     {
       "id": "kuhni-02",

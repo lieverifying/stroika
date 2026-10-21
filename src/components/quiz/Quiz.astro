@@ -7,9 +7,16 @@ import QuizStep from './QuizStep.astro';
 import QuizContact from './QuizContact.astro';
 import QuizShortForm from './QuizShortForm.astro';
 import { STEPS } from '../../lib/quiz/config';
+import type { Goal } from '../../lib/quiz/types';
+
+interface Props {
+  /** Заранее выбранная ветка на шаге 1 (посадочная /kukhni или /mebli) */
+  preset?: Goal;
+}
+const { preset } = Astro.props;
 ---
 
-<div class="quiz" data-quiz>
+<div class="quiz" data-quiz data-preset={preset}>
   <QuizProgress />
   <button type="button" class="quiz__resume" data-quiz-resume hidden>Продовжити, де зупинились</button>
   {

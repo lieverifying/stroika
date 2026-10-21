@@ -7,7 +7,7 @@ const quiz = (page: Page) => page.locator('[data-quiz]');
 const visibleStep = (page: Page) => quiz(page).locator('[data-step]:not([hidden])');
 const progressText = (page: Page) => quiz(page).locator('[data-quiz-progress-text]');
 
-async function openQuiz(page: Page, path = '/#kvyz') {
+async function openQuiz(page: Page, path = '/kukhni#kvyz') {
   await page.goto(path);
   await expect(quiz(page)).toHaveAttribute('data-ready', '');
 }
@@ -92,21 +92,25 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
     await page.goBack();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
-    await expect(page).toHaveURL(/\/#kvyz$/);
+    await expect(page).toHaveURL(/\/kukhni#kvyz$/);
   });
 
   test('/?kvyz=shafa#kvyz заранее выбирает шафу', async ({ page }) => {
-    await openQuiz(page, '/?kvyz=shafa#kvyz');
+    await openQuiz(page, '/kukhni?kvyz=shafa#kvyz');
     await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'true');
     await expect(progressText(page)).toHaveText('Крок 1 з 4');
   });
 
-  test('«Почати заново» сбрасывает ответы', async ({ page }) => {
+  test('«Почати заново» сбрасывает ответы — к ветке, выбранной на посадочной', async ({ page }) => {
     await openQuiz(page);
-    await choose(page, 'Кухня');
+    await choose(page, 'Шафа або гардеробна');
+    await choose(page, 'Шафа-купе');
     await quiz(page).locator('[data-quiz-restart]').click();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
-    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'false');
+    // на /kukhni заранее выбрана «Кухня», ответы шафы стёрты
+    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'true');
+    await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'false');
+    await expect(quiz(page).locator('[data-quiz-restart]')).toBeHidden();
   });
 
   test('клавиатура: стрелки двигают фокус по вариантам, Enter выбирает', async ({ page }) => {

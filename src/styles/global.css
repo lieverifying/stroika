@@ -20,6 +20,10 @@
     line-height: var(--text-body--line-height);
     overflow-wrap: break-word;
   }
+  /* Экран выбора «/» без нижней панели — отступ под неё не нужен */
+  body.is-bare {
+    padding-bottom: 0;
+  }
 
   h1,
   h2,

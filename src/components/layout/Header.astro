@@ -1,6 +1,8 @@
 ---
 // Блок 0 — шапка (ТЗ). Закреплена при прокрутке.
 // < 1024 px: логотип, звонок, бургер. ≥ 1024 px: меню, телефон, «Безкоштовний замір».
+// На посадочных (/kukhni, /mebli) — переключатель «Кухні · Меблі» с выделенным активным пунктом;
+// на телефоне тогда вместо полного логотипа знак (угольник + В), чтобы всё поместилось в одну строку.
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
@@ -8,15 +10,43 @@ import MobileMenu from './MobileMenu.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { NAV } from './nav';
+import { landingOfPath, pagePath, zamirHref } from '../../lib/landing';
 
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const path = pagePath(Astro.url);
+const landing = landingOfPath(path);
+const SWITCH = [
+  { id: 'kukhni', label: 'Кухні', href: '/kukhni' },
+  { id: 'mebli', label: 'Меблі', href: '/mebli' },
+] as const;
 ---
 
 <header data-header class="site-header sticky top-0 z-(--z-header) bg-plaster">
   <div class="container-site flex h-(--header-h) items-center justify-between gap-4">
-    <a href="/" class="-ml-1 flex min-h-12 items-center px-1" aria-label="Вимір — на головну">
-      <img src="/brand/logo.svg" alt="" width="148" height="32" class="h-8 w-auto lg:h-9" />
-    </a>
+    <div class="flex min-w-0 items-center gap-3">
+      <a href="/" class="-ml-1 flex min-h-12 shrink-0 items-center px-1" aria-label="Вимір — на головну">
+        {
+          landing ? (
+            <>
+              <img src="/brand/mark.svg" alt="" width="32" height="32" class="h-8 w-auto sm:hidden" />
+              <img src="/brand/logo.svg" alt="" width="148" height="32" class="hidden h-8 w-auto sm:block lg:h-9" />
+            </>
+          ) : (
+            <img src="/brand/logo.svg" alt="" width="148" height="32" class="h-8 w-auto lg:h-9" />
+          )
+        }
+      </a>
+      {
+        landing && (
+          <nav aria-label="Кухні або меблі" class="switch" data-landing-switch>
+            {SWITCH.map((s) => (
+              <a href={s.href} class="switch__item" aria-current={s.id === landing ? 'page' : undefined}>
+                {s.label}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+    </div>
 
     <nav aria-label="Головне меню" class="hidden lg:block">
       <ul class="flex items-center gap-1">
@@ -41,7 +71,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
         <Icon name="phone" size={20} />
         <Fact value={facts.contacts.phoneDisplay} />
       </a>
-      <Button href="/#zamir" deferPrimary ctaPriority={1} data-zamir-open>Безкоштовний замір</Button>
+      <Button href={zamirHref(landing)} deferPrimary ctaPriority={1} data-zamir-open>Безкоштовний замір</Button>
     </div>
 
     <div class="flex items-center lg:hidden">
@@ -74,6 +104,32 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
   }
   .site-header[data-scrolled] {
     box-shadow: var(--shadow-raised);
+  }
+  /* Переключатель посадочных: два сегмента, активный — графит (не жёлтый: жёлтый только для заявки) */
+  .switch {
+    display: flex;
+    padding: 0.125rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-full);
+    background: var(--color-white);
+  }
+  .switch__item {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.875rem;
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .switch__item[aria-current='page'] {
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .switch__item:focus-visible {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
   }
   .nav-link:hover {
     background: var(--color-white);

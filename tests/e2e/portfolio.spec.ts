@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; thumb?: string; poster?: string; width: number; height: number; alt: string }
 const data = JSON.parse(readFileSync(new URL('../../src/content/portfolio.json', import.meta.url), 'utf8')) as {
   categories: { id: string; title: string }[];
-  featured: string[];
+  featured: { kukhni: string[]; mebli: string[] };
   items: Item[];
 };
 const photos = (cat?: string) => data.items.filter((i) => i.type === 'photo' && (!cat || i.category === cat));
@@ -133,20 +133,27 @@ test.describe('/roboty', () => {
   });
 });
 
-test.describe('главная: блок «Наші роботи»', () => {
-  test('6 работ из featured по порядку, «Усі роботи» → /roboty, фото открывается на весь экран', async ({ page }) => {
-    await page.goto('/');
+test.describe('посадочные: блок работ', () => {
+  test('/kukhni: 6 кухонь из featured.kukhni по порядку, «Усі кухні» → галерея, фото открывается на весь экран', async ({ page }) => {
+    await page.goto('/kukhni');
     const block = page.locator('[data-block="3"]');
-    await expect(block.locator('h2')).toHaveText('Наші роботи');
-    expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured);
-    await expect(block.getByRole('link', { name: 'Усі роботи' })).toHaveAttribute('href', '/roboty');
+    await expect(block.locator('h2')).toHaveText('Наші кухні');
+    expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured.kukhni);
+    await expect(block.getByRole('link', { name: 'Усі кухні' })).toHaveAttribute('href', '/roboty#kuhni');
     await block.locator('.pf__open').first().click();
     await expect(lb(page)).toHaveAttribute('open', '');
     await expect(count(page)).toHaveText('1 / 6');
   });
 
+  test('/mebli: 6 работ из featured.mebli, «Усі шафи та меблі» → галерея', async ({ page }) => {
+    await page.goto('/mebli');
+    const block = page.locator('[data-block="3"]');
+    expect(await block.locator('.pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.id))).toEqual(data.featured.mebli);
+    await expect(block.getByRole('link', { name: 'Усі шафи та меблі' })).toHaveAttribute('href', '/roboty#shafy');
+  });
+
   test('ряды заполнены целиком: крупно, по 2 фото в ряду на всех ширинах, высота в ряду одинаковая', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     const rows = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => {
       const map = new Map<number, { h: number; right: number }[]>();
       for (const e of els) {

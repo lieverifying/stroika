@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('нижняя панель', () => {
   test('телефон: видна, кнопки ≥ 48 px, конец страницы не перекрыт', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     const bar = page.locator('[data-bottom-bar]');
     await expect(bar).toBeVisible();
 
@@ -20,7 +20,7 @@ test.describe('нижняя панель', () => {
 
   test('телефон: прячется при фокусе в поле ввода', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     await page.evaluate(() => {
       const input = document.createElement('input');
       input.id = 'test-field';
@@ -35,7 +35,7 @@ test.describe('нижняя панель', () => {
 
   test('десктоп: панели нет', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('[data-bottom-bar]')).toBeHidden();
   });
 });

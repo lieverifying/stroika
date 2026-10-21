@@ -4,7 +4,12 @@
 import Accordion from '../ui/Accordion.astro';
 import Fact from '../ui/Fact.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import { FAQ } from '../../content/faq';
+import type { FaqItem } from '../../content/faq';
+
+interface Props {
+  items: FaqItem[];
+}
+const { items } = Astro.props;
 ---
 
 <section data-block="12" class="section-pad" aria-labelledby="faq-title">
@@ -12,7 +17,7 @@ import { FAQ } from '../../content/faq';
     <SectionTitle id="faq-title" title="Питання і відповіді" />
     <div class="faq__list">
       {
-        FAQ.map((item) => (
+        items.map((item) => (
           <Accordion summary={item.q} name="faq">
             <p>{item.a.map((part) => (typeof part === 'string' ? part : <Fact value={part.fact} format={part.format} />))}</p>
           </Accordion>

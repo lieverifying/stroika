@@ -39,8 +39,13 @@ const byId = (id: string) => {
   return item;
 };
 
-/** Работы для блока на главной — в порядке featured */
-export const FEATURED = data.featured.map(byId);
+/** 6 работ для блока «Наші роботи» на посадочной — в порядке featured (подобран по пропорциям, по 2 в ряд) */
+export const FEATURED = {
+  kukhni: data.featured.kukhni.map(byId),
+  mebli: data.featured.mebli.map(byId),
+};
+
+export const photoById = (id: string) => byId(id) as PortfolioPhoto;
 
 /** Фото первого экрана — id из facts.media.hero */
 export const HERO = byId(facts.media.hero) as PortfolioPhoto;

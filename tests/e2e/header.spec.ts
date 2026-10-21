@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('шапка', () => {
   test('телефон: бургер открывает и закрывает меню мышью и клавиатурой', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     const toggle = page.locator('[data-menu-toggle]');
     const menu = page.locator('#mobile-menu');
 
@@ -24,7 +24,7 @@ test.describe('шапка', () => {
 
   test('телефон: при открытом меню Tab не уходит на страницу под ним', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'только телефон');
-    await page.goto('/');
+    await page.goto('/kukhni');
     await page.locator('[data-menu-toggle]').click();
     for (let i = 0; i < 20; i++) {
       await page.keyboard.press('Tab');
@@ -38,7 +38,7 @@ test.describe('шапка', () => {
 
   test('десктоп: меню в одну строку, бургера нет', async ({ page, isMobile }) => {
     test.skip(isMobile, 'только десктоп');
-    await page.goto('/');
+    await page.goto('/kukhni');
     await expect(page.locator('[data-menu-toggle]')).toBeHidden();
     const items = page.getByRole('navigation', { name: 'Головне меню' }).getByRole('link');
     await expect(items).toHaveText(['Кухні', 'Меблі', 'Роботи', 'Як ми створюємо', 'Контакти']); // «Ремонт» убран (2026-10-20)
@@ -47,7 +47,7 @@ test.describe('шапка', () => {
   });
 
   test('шапка остаётся вверху при прокрутке', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     await page.mouse.wheel(0, 600);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0); // прокрутка произошла
     const top = await page.locator('[data-header]').evaluate((el) => el.getBoundingClientRect().top);

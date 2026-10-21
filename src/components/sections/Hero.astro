@@ -1,5 +1,6 @@
 ---
-// Блок 1 — первый экран главной (ТЗ). Все обещания — заглушки facts.ts до подтверждения владельцем.
+// Блок 1 — первый экран посадочной (/kukhni, /mebli): фото, H1, одна строка, «Розрахувати вартість» и «Написати у Viber».
+// Тексты и фото — из пропсов страницы (тексты /kukhni и /mebli не повторяют друг друга).
 // < 1024 px: фото первым во всю ширину, 16:10 → бейдж → H1 → строка «Замір, дизайн-проєкт і монтаж — наша команда» → кнопки (кнопки могут уйти ниже
 //   первого экрана: «Розрахувати» всегда есть в нижней панели). В DOM текст идёт первым — H1 первый для скринридера.
 // ≥ 1024 px: фото справа (рамка по facts.media.heroOrientation: 4:5 или 4:3), текст слева по центру фото.
@@ -10,8 +11,18 @@ import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
-import { HERO, url } from '../../lib/portfolio';
+import { HERO, url, type PortfolioPhoto } from '../../lib/portfolio';
 
+interface Props {
+  title: string;
+  lead: string;
+  /** Фото первого экрана; по умолчанию — facts.media.hero (кухня) */
+  photo?: PortfolioPhoto;
+  /** Точка кадра при обрезке до 16:10 на телефоне */
+  focus?: string;
+  quizHref: string;
+}
+const { title, lead, photo = HERO, focus = facts.media.heroFocus, quizHref } = Astro.props;
 const { flags } = facts;
 const portrait = facts.media.heroOrientation === 'portrait';
 
@@ -21,7 +32,7 @@ const portrait = facts.media.heroOrientation === 'portrait';
   data-block="1"
   class="hero"
   aria-labelledby="hero-title"
-  style={`--hero-focus: ${facts.media.heroFocus}`}
+  style={`--hero-focus: ${focus}`}
 >
   <div class:list={['hero__inner container-site', { 'hero__inner--portrait': portrait }]}>
     <div class="hero__text">
@@ -35,14 +46,12 @@ const portrait = facts.media.heroOrientation === 'portrait';
         )
       }
 
-      <h1 id="hero-title" class="text-h1">
-        Кухні на замовлення в Черкасах
-      </h1>
+      <h1 id="hero-title" class="text-h1">{title}</h1>
 
-      <p class="hero__lead">Замір, дизайн-проєкт і монтаж — наша команда</p>
+      <p class="hero__lead">{lead}</p>
 
       <div class="hero__actions">
-        <Button href="/#kvyz" size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
+        <Button href={quizHref} size="lg" icon="calculator" ctaPriority={3}>Розрахувати вартість</Button>
         <Button href={contactLinks.viber} variant="secondary" icon="viber">
           Написати у Viber
         </Button>
@@ -51,12 +60,12 @@ const portrait = facts.media.heroOrientation === 'portrait';
 
     <div class="hero__media">
       <img
-        src={url(HERO.src)}
-        srcset={`${url(HERO.thumb)} ${Math.round((HERO.width * 640) / Math.max(HERO.width, HERO.height))}w, ${url(HERO.src)} ${HERO.width}w`}
+        src={url(photo.src)}
+        srcset={`${url(photo.thumb)} ${Math.round((photo.width * 640) / Math.max(photo.width, photo.height))}w, ${url(photo.src)} ${photo.width}w`}
         sizes="(min-width: 64rem) 40vw, 100vw"
-        width={HERO.width}
-        height={HERO.height}
-        alt={HERO.alt}
+        width={photo.width}
+        height={photo.height}
+        alt={photo.alt}
         fetchpriority="high"
         decoding="async"
       />

@@ -572,6 +572,7 @@ Y = L_max × (p_max + s_max) [+ остров]   → округлить ввер�
 | `quiz_start` | Первый выбор на шаге 1, один раз за жизнь `QuizState` | `quiz_branch`, `quiz_variant` |
 | `quiz_step_N` | Шаг с `tzNumber = N` пройден (выбран вариант или отправлен контакт). Повторно для того же N не шлётся | `quiz_branch`, `step_id` |
 | `quiz_submit` | Ответ `api/lead.php`: `ok` | `quiz_branch`, `result_variant`, `result_reason` |
+| `lead_submit` | Заявка отправлена (квиз, форма замера, нестандартный запрос) | `form`, `landing`: kukhni / mebli / none |
 | `story_complete` | «Як ми створюємо»: достигнут последний этап сюжета кухни (один раз за просмотр) | `story: 'kitchen'` |
 | `quiz_submit_error` | Ошибка отправки | `error_kind` (`network` / `validation` / `server`) |
 
@@ -586,6 +587,7 @@ interface LeadPayload {
   // Первым полем; в сообщении Telegram — ПЕРВАЯ СТРОКА (решение владельца 2026-10-20). Форма замера — всегда 'call'.
   contactMethod: 'viber' | 'telegram' | 'call';
   form: 'quiz' | 'zamir' | 'zapyt' | 'case' | 'kontakty';
+  landing: 'kukhni' | 'mebli' | 'none';  // страница-источник (2026-10-21): текущая посадочная или последняя посещённая
   name: string;                         // 2–50
   phone: string;                        // +380XXXXXXXXX
   preferredTime?: string;               // форма замера: «Зручний час»

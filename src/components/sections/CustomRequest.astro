@@ -138,6 +138,8 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
 <script>
   import { clearErrorsOnFix, setFieldError, validateForm } from '../../lib/lead/field-errors';
   import { saveThanks, toMethod } from '../../lib/lead/result-store';
+  import { leadLanding } from '../../lib/landing';
+  import { track } from '../../lib/track';
   import { submitLead } from '../../lib/lead/submit';
   import { validateConsent, validateFiles, validateName, validatePhone, validateRequest } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
@@ -178,9 +180,11 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
       const method = toMethod(data.get('method'));
       const name = String(data.get('name') ?? '').trim();
       // Способ связи — первым полем: в Telegram-сообщении он первой строкой (ARCHITECTURE.md 7)
+      const landing = leadLanding();
       const res = await submitLead({
         contactMethod: method,
         form: 'zapyt',
+        landing, // последняя посадочная (kukhni / mebli) или 'none'
         request: String(data.get('request') ?? '').trim(),
         files: Array.from(filesInput.files ?? []).map((f) => ({ name: f.name, size: f.size })),
         name,
@@ -190,6 +194,7 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
         website: data.get('website') ?? '',
       });
       if (res.ok) {
+        track('lead_submit', { form: 'zapyt', landing });
         saveThanks({ name, method, result: null });
         location.assign('/dyakuyemo');
       }

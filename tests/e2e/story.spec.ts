@@ -199,7 +199,7 @@ test.describe('содержимое', () => {
 
 test.describe('ссылки на страницу', () => {
   test('меню шапки: после «Роботи»; футер; на главной — сюжет кухни со ссылкой «Детальніше»', async ({ page, isMobile }) => {
-    await page.goto('/');
+    await page.goto('/kukhni');
     if (!isMobile) {
       const items = page.getByRole('navigation', { name: 'Головне меню' }).getByRole('link');
       await expect(items).toHaveText(['Кухні', 'Меблі', 'Роботи', 'Як ми створюємо', 'Контакти']);

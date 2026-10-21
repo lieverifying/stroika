@@ -6,6 +6,7 @@ import Icon from '../ui/Icon.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { NAV } from './nav';
+import { landingOfPath, zamirHref } from '../../lib/landing';
 
 interface Props {
   path: string;
@@ -50,6 +51,6 @@ const c = facts.contacts;
       </div>
     </div>
 
-    <Button href="/#zamir" size="lg" fullWidth ctaPriority={3} data-zamir-open>Безкоштовний замір</Button>
+    <Button href={zamirHref(landingOfPath(path))} size="lg" fullWidth ctaPriority={3} data-zamir-open>Безкоштовний замір</Button>
   </div>
 </div>

@@ -5,6 +5,10 @@
 // «Розрахувати» — кнопка заявки: без JS графитовая, жёлтой её делает cta-arbiter (src/lib/cta-arbiter.ts).
 import Icon from '../ui/Icon.astro';
 import { contactLinks } from '../../lib/contacts';
+import { landingOfPath, pagePath, quizHref } from '../../lib/landing';
+
+// «Розрахувати» — в квиз текущей посадочной (на остальных страницах — /kukhni)
+const landing = landingOfPath(pagePath(Astro.url));
 ---
 
 <nav data-bottom-bar aria-label="Швидкий зв'язок" class="bottom-bar">
@@ -17,7 +21,7 @@ import { contactLinks } from '../../lib/contacts';
     <span>Viber</span>
   </a>
   <a
-    href="/#kvyz"
+    href={quizHref(landing)}
     class="cell cell--cta"
     data-cta="primary"
     data-cta-priority="2"

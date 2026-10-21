@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { yellowOnScreen } from './helpers';
 
 // Внутренние страницы (ТЗ): «Меблі», «Контакти», «Політика конфіденційності», 404 — и ни одной битой ссылки
-const PAGES = ['/', '/roboty', '/mebli', '/kontakty', '/polityka', '/yak-my-stvoriuiemo', '/dyakuyemo'];
+const PAGES = ['/', '/kukhni', '/mebli', '/roboty', '/kontakty', '/polityka', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404'];
 
 test('все внутренние ссылки со всех страниц ведут на существующие страницы', async ({ page, request }) => {
   const links = new Set<string>();
@@ -20,7 +20,7 @@ test('все внутренние ссылки со всех страниц ве
 });
 
 test('галочка согласия во всех формах ведёт на существующую политику', async ({ page, request }) => {
-  await page.goto('/');
+  await page.goto('/kukhni');
   const hrefs = await page.locator('.consent__label a').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
   expect(hrefs.length).toBeGreaterThan(0);
   expect(new Set(hrefs)).toEqual(new Set(['/polityka']));
@@ -67,34 +67,13 @@ test.describe('/kontakty', () => {
   });
 });
 
-test.describe('/mebli', () => {
-  test('первый экран с фото, работы, «Скільки коштує» без цен, форма; квиз — сразу ветка шафы', async ({ page }) => {
-    await page.goto('/mebli');
-    await expect(page.locator('h1')).toHaveText('Шафи та меблі на замовлення в Черкасах');
-    await expect(page.locator('.mebli-hero__media img')).toHaveAttribute('src', /\/portfolio\/img\/shafy\//);
-    await expect(page.locator('main [data-pf-grid] .pf__item')).toHaveCount(6);
-    await expect(page.locator('main')).not.toContainText(/грн|кухні,/);
-    await expect(page.locator('main').getByRole('link', { name: 'Розрахувати вартість' }).first()).toHaveAttribute('href', '/?kvyz=shafa#kvyz');
-    await expect(page.locator('main form[data-zamir-form]')).toHaveCount(1);
-  });
-
-  test('кнопка «Розрахувати» открывает квиз с заранее выбранной «Шафа або гардеробна»', async ({ page }) => {
-    await page.goto('/mebli');
-    await page.locator('.mebli-hero').getByRole('link', { name: 'Розрахувати вартість' }).click();
-    await expect(page).toHaveURL(/\?kvyz=shafa#kvyz$/);
-    await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
-    await expect(page.locator('[data-quiz] [data-quiz-progress-text]')).toHaveText(/^Крок 1 з [45]$/);
-    await expect(page.locator('[data-step="goal"] [data-value="wardrobe"]')).toHaveAttribute('aria-checked', 'true');
-  });
-});
-
 test.describe('404', () => {
   test('несуществующий адрес: «Сторінку не знайдено», кнопки на главную и в квиз, noindex', async ({ page }) => {
     const res = await page.goto('/takoi-storinky-nemaie');
     expect(res!.status()).toBe(404);
     await expect(page.locator('h1')).toHaveText('Сторінку не знайдено');
     await expect(page.locator('main').getByRole('link', { name: 'На головну' })).toHaveAttribute('href', '/');
-    await expect(page.locator('main').getByRole('link', { name: 'Розрахувати вартість' })).toHaveAttribute('href', '/#kvyz');
+    await expect(page.locator('main').getByRole('link', { name: 'Розрахувати вартість' })).toHaveAttribute('href', '/kukhni#kvyz');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });
@@ -109,7 +88,7 @@ test('на новых страницах не больше одного жёлт
 });
 
 test('режим запуска: ни одной плашки-заглушки и пустого места под фото на страницах (кроме ФОП и почты в политике)', async ({ page }) => {
-  for (const path of ['/', '/roboty', '/mebli', '/kontakty', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404']) {
+  for (const path of ['/', '/kukhni', '/mebli', '/roboty', '/kontakty', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404']) {
     await page.goto(path);
     await expect(page.locator('.fact-ph'), path).toHaveCount(0);
     await expect(page.locator('main .ph:visible'), path).toHaveCount(0);
@@ -118,7 +97,7 @@ test('режим запуска: ни одной плашки-заглушки �
 });
 
 test('телефон +380 75 991 48 43 и ссылки tel / Viber / Telegram: шапка, нижняя панель, подвал, /dyakuyemo', async ({ page, isMobile }) => {
-  await page.goto('/');
+  await page.goto('/kukhni');
   if (isMobile) {
     await expect(page.locator('[data-bottom-bar] a[href="tel:+380759914843"]')).toHaveCount(1);
     await expect(page.locator('[data-bottom-bar] a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);

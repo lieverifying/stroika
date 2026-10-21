@@ -5,11 +5,12 @@
  * — «Назад» и системная «назад» (history.pushState / popstate) листают шаги;
  * — ответы сохраняются (без имени и телефона); при новом показе квиз всегда начинается с шага 1,
  *   а сохранённое прохождение возвращает кнопка «Продовжити, де зупинились»;
- * — /?kvyz=shafa#kvyz заранее выбирает ветку шафы;
+ * — ветка на шаге 1 выбрана заранее: data-preset у квиза (посадочная /kukhni или /mebli) или /?kvyz=shafa;
  * — «Інше, нестандартне» не меняет состояние, а ведёт в блок «Нестандартне завдання» (#zapyt).
  */
 import { facts } from '../content/facts';
 import { quizStepEvents, track } from '../lib/analytics';
+import { leadLanding } from '../lib/landing';
 import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
 import { saveThanks, toMethod } from '../lib/lead/result-store';
 import { submitLead } from '../lib/lead/submit';
@@ -21,10 +22,12 @@ import { answer, back, isLastStep, progress, setTask, start } from '../lib/quiz/
 import { clearState, loadState, saveState } from '../lib/quiz/storage';
 import type { QuizAnswers, QuizState, StepId } from '../lib/quiz/types';
 
-/** Предвыбор ветки из адреса: /?kvyz=shafa */
-function presetFromUrl(): Partial<QuizAnswers> | undefined {
+/** Предвыбор ветки: data-preset квиза (посадочная) или адрес /?kvyz=shafa */
+function presetFor(root: HTMLElement): Partial<QuizAnswers> | undefined {
   const v = new URLSearchParams(location.search).get('kvyz');
-  return v === 'shafa' ? { goal: 'wardrobe' } : undefined;
+  if (v === 'shafa') return { goal: 'wardrobe' };
+  const p = root.dataset.preset;
+  return p === 'kitchen' || p === 'wardrobe' ? { goal: p } : undefined;
 }
 
 export function initQuiz(root: HTMLElement): void {
@@ -39,7 +42,7 @@ export function initQuiz(root: HTMLElement): void {
   const restartBtn = root.querySelector<HTMLButtonElement>('[data-quiz-restart]');
 
   const resumeBtn = root.querySelector<HTMLButtonElement>('[data-quiz-resume]');
-  const preset = presetFromUrl();
+  const preset = presetFor(root);
   // Всегда начинаем с шага 1: главная не должна открываться сразу на шаге контакта.
   // Сохранённое прохождение (дальше шага 1) предлагаем продолжить кнопкой.
   const saved = loadState(Date.now());
@@ -81,7 +84,8 @@ export function initQuiz(root: HTMLElement): void {
     const first = state.stepId === 'goal';
     if (resumeBtn) resumeBtn.hidden = !(resumable && first);
     if (backBtn) backBtn.hidden = first;
-    if (restartBtn) restartBtn.hidden = first && !state.answers.goal;
+    // «Почати заново» — когда уже есть пройденные шаги (выбранная заранее ветка на шаге 1 не в счёт)
+    if (restartBtn) restartBtn.hidden = first && state.history.length === 0;
 
     if (focus && current) {
       current.querySelector<HTMLElement>('.quiz-step__title')?.focus({ preventScroll: true });
@@ -172,7 +176,7 @@ export function initQuiz(root: HTMLElement): void {
   restartBtn?.addEventListener('click', () => {
     clearState();
     resumable = null;
-    state = start(Date.now());
+    state = start(Date.now(), preset);
     history.replaceState({ ...history.state, quizStep: 'goal' }, '');
     render(true);
   });
@@ -208,9 +212,11 @@ export function initQuiz(root: HTMLElement): void {
     const method = toMethod(data.get('method'));
     const name = String(data.get('name') ?? '').trim();
     // Способ связи — первым полем: в Telegram-сообщении он первой строкой (ARCHITECTURE.md 7)
+    const landing = leadLanding();
     const res = await submitLead({
       contactMethod: method,
       form: 'quiz',
+      landing, // страница-источник: kukhni или mebli
       name,
       phone: normalizePhone(String(data.get('phone') ?? '')),
       referrer: String(data.get('referrer') ?? '').trim(),
@@ -219,6 +225,7 @@ export function initQuiz(root: HTMLElement): void {
       website: data.get('website') ?? '',
     });
     if (res.ok) {
+      track('lead_submit', { form: 'quiz', landing });
       saveThanks({ name, method, result });
       clearState();
       location.assign('/dyakuyemo');

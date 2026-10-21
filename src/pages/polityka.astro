@@ -20,7 +20,7 @@ const { legal, contacts: c, brand } = facts;
     <h2>Хто обробляє дані</h2>
     <p>
       Володілець персональних даних — ФОП <Fact value={legal.fopName} />, що працює під назвою «{brand.name}» (кухні та корпусні
-      меблі на замовлення, {facts.serviceArea.text.toLowerCase()}). З питань персональних даних пишіть на
+      меблі на замовлення, {facts.serviceArea.text}). З питань персональних даних пишіть на
       <a href={`mailto:${legal.privacyEmail}`}><Fact value={legal.privacyEmail} /></a> або телефонуйте
       <a href={contactLinks.tel}><Fact value={c.phoneDisplay} /></a>.
     </p>
