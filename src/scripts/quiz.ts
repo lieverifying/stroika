@@ -3,9 +3,10 @@
  * и хранилищем (storage.ts). Грузится, только когда квиз появился на экране (см. Quiz.astro).
  * — переход по нажатию варианта, без кнопки «Далі»;
  * — «Назад» и системная «назад» (history.pushState / popstate) листают шаги;
- * — ответы сохраняются (без имени и телефона); при новом показе квиз всегда начинается с шага 1,
+ * — ответы сохраняются (без имени и телефона); при новом показе квиз начинается с начала (шаг 1 или шаг 2 посадочной),
  *   а сохранённое прохождение возвращает кнопка «Продовжити, де зупинились»;
- * — ветка на шаге 1 выбрана заранее: data-preset у квиза (посадочная /kukhni или /mebli) или /?kvyz=shafa;
+ * — на посадочной шаг 1 пропущен (правка 2026-10-21): /kukhni начинает с «Яка форма кухні?», /mebli — с типа шафы
+ *   (data-preset у квиза или /?kvyz=shafa); «Назад» возвращает на шаг 1, на остальных страницах квиз — с шага 1;
  * — «Інше, нестандартне» не меняет состояние, а ведёт в блок «Нестандартне завдання» (#zapyt).
  */
 import { facts } from '../content/facts';
@@ -56,11 +57,14 @@ export function initQuiz(root: HTMLElement): void {
 
   const resumeBtn = root.querySelector<HTMLButtonElement>('[data-quiz-resume]');
   const preset = presetFor(root);
-  // Всегда начинаем с шага 1: главная не должна открываться сразу на шаге контакта.
-  // Сохранённое прохождение (дальше шага 1) предлагаем продолжить кнопкой.
+  // Начало: шаг 1, а на посадочной — сразу шаг 2 её ветки (ответ на шаг 1 подставлен).
+  // Главная не открывается на шаге контакта: сохранённое прохождение предлагаем продолжить кнопкой.
+  const fresh = (): QuizState => (preset?.goal ? answer(start(Date.now()), preset.goal, Date.now()) : start(Date.now()));
+  let state: QuizState = fresh();
+  const initial = { stepId: state.stepId, depth: state.history.length };
+  const atStart = () => state.stepId === initial.stepId && state.history.length === initial.depth;
   const saved = loadState(Date.now());
-  let resumable: QuizState | null = saved && saved.history.length > 0 ? saved : null;
-  let state: QuizState = start(Date.now(), preset);
+  let resumable: QuizState | null = saved && saved.history.length > initial.depth ? saved : null;
 
   const persist = () => saveState(state);
 
@@ -84,21 +88,22 @@ export function initQuiz(root: HTMLElement): void {
     const tabStop = options.find((o) => o.dataset.value === chosen) ?? options[0];
     options.forEach((o) => (o.tabIndex = o === tabStop ? 0 : -1));
 
+    // «Крок N з M» — шаги текущей ветки (кухня 6, шафа 5, інші меблі 4); пока ветка не выбрана — просто «Крок 1»
     const { current: n, total } = progress(state);
+    const label = branchOf(state.answers.goal) ? `Крок ${n} з ${total}` : `Крок ${n}`;
     if (bar) {
       bar.setAttribute('aria-valuenow', String(n));
       bar.setAttribute('aria-valuemax', String(total));
-      bar.setAttribute('aria-valuetext', `Крок ${n} з ${total}`);
+      bar.setAttribute('aria-valuetext', label);
       bar.querySelector<HTMLElement>('span')?.style.setProperty('--progress', `calc(${n} / ${total})`);
     }
-    if (barText) barText.textContent = `Крок ${n} з ${total}`;
+    if (barText) barText.textContent = label;
     root.dataset.last = String(isLastStep(state));
 
-    const first = state.stepId === 'goal';
-    if (resumeBtn) resumeBtn.hidden = !(resumable && first);
-    if (backBtn) backBtn.hidden = first;
-    // «Почати заново» — когда уже есть пройденные шаги (выбранная заранее ветка на шаге 1 не в счёт)
-    if (restartBtn) restartBtn.hidden = first && state.history.length === 0;
+    if (resumeBtn) resumeBtn.hidden = !(resumable && atStart());
+    if (backBtn) backBtn.hidden = state.history.length === 0;
+    // «Почати заново» — когда уже есть пройденные шаги (подставленный на посадочной шаг 1 не в счёт)
+    if (restartBtn) restartBtn.hidden = atStart();
 
     if (focus && current) {
       current.querySelector<HTMLElement>('.quiz-step__title')?.focus({ preventScroll: true });
@@ -111,7 +116,8 @@ export function initQuiz(root: HTMLElement): void {
     resumable = null; // начали заново — старое прохождение больше не предлагаем
     state = next;
     persist();
-    history.pushState({ ...history.state, quizStep: state.stepId }, '');
+    // quizDepth — сколько шагов квиз сам положил в историю: «Назад» листает историю, только пока она есть
+    history.pushState({ ...history.state, quizStep: state.stepId, quizDepth: (history.state?.quizDepth ?? 0) + 1 }, '');
     render(true);
   }
 
@@ -164,7 +170,7 @@ export function initQuiz(root: HTMLElement): void {
 
   // «Назад» в квизе = шаг истории браузера, чтобы и системная кнопка «назад» вела себя так же
   backBtn?.addEventListener('click', () => {
-    if (history.state?.quizStep === state.stepId && state.history.length) history.back();
+    if (history.state?.quizStep === state.stepId && (history.state?.quizDepth ?? 0) > 0 && state.history.length) history.back();
     else {
       state = back(state, Date.now());
       persist();
@@ -174,6 +180,13 @@ export function initQuiz(root: HTMLElement): void {
 
   window.addEventListener('popstate', (e) => {
     const target = (e.state as { quizStep?: StepId } | null)?.quizStep ?? 'goal';
+    // Первая запись истории на посадочной — уже шаг 2 (шаг 1 подставлен без записи): «назад» с неё — на шаг 1
+    if (target === state.stepId && state.stepId === initial.stepId && state.history.length) {
+      state = back(state, Date.now());
+      persist();
+      render(true);
+      return;
+    }
     if (target === state.stepId || !state.history.includes(target)) return;
     while (state.stepId !== target && state.history.length) state = back(state, Date.now());
     persist();
@@ -189,8 +202,8 @@ export function initQuiz(root: HTMLElement): void {
   restartBtn?.addEventListener('click', () => {
     clearState();
     resumable = null;
-    state = start(Date.now(), preset);
-    history.replaceState({ ...history.state, quizStep: 'goal' }, '');
+    state = fresh();
+    history.replaceState({ ...history.state, quizStep: state.stepId, quizDepth: 0 }, '');
     render(true);
   });
 
@@ -252,7 +265,7 @@ export function initQuiz(root: HTMLElement): void {
     }
   }
 
-  history.replaceState({ ...history.state, quizStep: state.stepId }, '');
+  history.replaceState({ ...history.state, quizStep: state.stepId, quizDepth: 0 }, '');
   root.classList.add('quiz--ready');
   render(false);
 }

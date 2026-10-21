@@ -12,17 +12,23 @@ for (const l of [
     photo: 'kukhnia-06',
     cats: ['kukhni'],
     works: 6,
+    firstStep: 'kitchenShape',
+    progress: 'Крок 2 з 6',
+    walk: ['Кутова', 'До 3 м', 'ДСП', 'Пізніше'],
     active: 'Кухні',
   },
   {
     path: '/mebli',
     other: '/kukhni',
-    h1: 'Шафи, гардеробні та корпусні меблі під ваш розмір',
+    h1: 'Шафи, гардеробні та меблі під ваш розмір',
     title: 'Шафи, гардеробні та корпусні меблі на замовлення в Черкасах — Вимір',
     story: 'wardrobe',
     photo: 'shafa-01',
     cats: ['shafy', 'garderobni', 'inshi'],
     works: 4,
+    firstStep: 'wardrobeType',
+    progress: 'Крок 2 з 5',
+    walk: ['Купе', 'Не знаю', 'Пізніше'],
     active: 'Меблі',
   },
 ] as const) {
@@ -48,29 +54,31 @@ for (const l of [
       for (const c of cats) expect(l.cats as readonly string[]).toContain(c);
     });
 
-    test('квиз свёрнут: сначала только шаг 1 из карточек; «Порахувати вартість» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
+    test('квиз без шага 1: сразу вопрос ветки страницы, «Крок 2 з N»; «Порахувати вартість» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
       await page.goto(`${l.path}#kvyz`);
       await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
       await expect(page.locator('[data-quiz] [data-step]:visible')).toHaveCount(1);
-      await expect(page.locator('[data-quiz] [data-step]:not([hidden])')).toHaveAttribute('data-step', 'goal');
-      await expect(page.locator('[data-step="goal"] [aria-checked="true"]')).toHaveCount(0);
+      await expect(page.locator('[data-quiz] [data-step]:not([hidden])')).toHaveAttribute('data-step', l.firstStep);
+      await expect(page.locator('[data-quiz-progress-text]')).toHaveText(l.progress);
       await expect(page.locator('[data-block="1"]').getByRole('link', { name: 'Порахувати вартість' })).toHaveAttribute('href', `${l.path}#kvyz`);
       if (isMobile) await expect(page.locator('[data-bottom-bar] [data-cta]')).toHaveAttribute('href', `${l.path}#kvyz`);
     });
 
-    test('6 вопросов FAQ; цена и срок — «Розрахуємо під ваше завдання і надішлемо у месенджер.»', async ({ page }) => {
+    test('5 вопросов FAQ (без вопроса о сроках); «Скільки коштує?» — от чего зависит цена и что она фиксируется в договоре', async ({ page }) => {
       await page.goto(l.path);
       const faq = page.locator('[data-block="12"]');
       await expect(faq.locator('summary')).toHaveText([
         'Скільки коштує?',
-        'Скільки часу займає?',
         'Чим ви відрізняєтесь від модульних меблів з мережевого магазину?',
         'Чи можна за моїм дизайн-проєктом?',
         'Чи встановлюєте техніку і мийку?',
         'Чи працюєте в області?',
       ]);
       await faq.locator('summary').first().click();
-      await expect(faq.locator('details').first()).toContainText('Розрахуємо під ваше завдання і надішлемо у месенджер.');
+      await expect(faq.locator('details').first()).toContainText(
+        'Залежить від розмірів, матеріалів і наповнення. Надішліть розміри або пройдіть розрахунок — ціну надішлемо у месенджер, і в договорі вона вже не зміниться.',
+      );
+      await expect(faq).not.toContainText(/місяц|тижн|днів/);
     });
 
     test('переключатель «Кухні · Меблі»: активный выделен; меню Кухні · Меблі · Роботи · Як ми створюємо · Контакти', async ({ page, isMobile }) => {
@@ -94,7 +102,7 @@ for (const l of [
       await page.goto(`${l.path}#kvyz`);
       await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
       const step = page.locator('[data-quiz] [data-step]:not([hidden])');
-      for (const label of ['Інші меблі', 'Передпокій', 'Пізніше']) await step.getByRole('radio', { name: label, exact: true }).click();
+      for (const label of l.walk) await step.getByRole('radio', { name: label, exact: true }).click();
       await page.locator('#quiz-name').fill('Тест');
       await page.locator('#quiz-phone').click();
       await page.locator('#quiz-phone').pressSequentially('0671234567');

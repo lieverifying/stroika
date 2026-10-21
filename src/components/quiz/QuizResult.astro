@@ -3,19 +3,27 @@
 // «Дякуємо, {ім’я}. Надішлемо розрахунок у {Viber / Telegram} у робочий час»,
 // для звонка — «Зателефонуємо у робочий час» (без минут — режим запуска 2026-10-21). Без данных — общий текст со звонком.
 // Цена (экран А) — только при reason 'ok' и флаге facts.flags.quizResultVariant = 'A'; по умолчанию Б (без цены).
+// При флаге Б разметки экрана А на странице нет вовсе — ни с JS, ни без него (правка 2026-10-21).
 // Подарок (3D) — только когда владелец подтвердит.
 import { facts } from '../../content/facts';
 import { has } from '../../lib/facts';
 
 const { promises } = facts;
+const variantA = facts.flags.quizResultVariant === 'A';
 ---
 
 <div class="quiz-result" data-quiz-result data-shown="generic">
-  <div data-result="A" hidden>
-    <p class="quiz-result__label">Орієнтовна вартість</p>
-    <p class="quiz-result__price">від <span data-price-from></span> до <span data-price-to></span></p>
-    <p>Точна ціна — після безкоштовного заміру.</p>
-  </div>
+  {
+    variantA && (
+      <div data-result="A" hidden>
+        <p class="quiz-result__label">Орієнтовна вартість</p>
+        <p class="quiz-result__price">
+          від <span data-price-from /> до <span data-price-to />
+        </p>
+        <p>Точна ціна — після безкоштовного заміру.</p>
+      </div>
+    )
+  }
 
   <p class="quiz-result__lead" data-thanks>
     Дякуємо<span data-thanks-name></span>.{' '}<span data-thanks-action>Зателефонуємо</span>{' '}у робочий час.
@@ -67,21 +75,13 @@ const { promises } = facts;
 </style>
 
 <script>
-  import { SITE_ENV } from 'astro:env/client';
   import { CHANNEL_LABEL, takeThanks, type ThanksData } from '../../lib/lead/result-store';
   import { formatUAH } from '../../lib/facts';
 
   const box = document.querySelector<HTMLElement>('[data-quiz-result]');
   if (box) {
-    let data: ThanksData | null = takeThanks();
-    // Демо экрана А на тестовых числах — только не в боевой сборке: /dyakuyemo?demoPrice=1
-    if (SITE_ENV !== 'production' && new URLSearchParams(location.search).has('demoPrice')) {
-      data = {
-        name: data?.name ?? '',
-        method: data?.method ?? 'viber',
-        result: { variant: 'A', configured: 'A', reason: 'ok', price: { from: 48000, to: 62000, currency: 'UAH' } },
-      };
-    }
+    const data: ThanksData | null = takeThanks();
+    const hasA = Boolean(box.querySelector('[data-result="A"]'));
     if (data) {
       if (data.name) box.querySelector('[data-thanks-name]')!.textContent = `, ${data.name}`;
       box.querySelector('[data-thanks-action]')!.textContent =
@@ -90,7 +90,7 @@ const { promises } = facts;
     }
     const result = data?.result;
     if (result) {
-      const show = result.variant === 'A' && result.reason === 'ok' && result.price ? 'A' : 'B';
+      const show = hasA && result.variant === 'A' && result.reason === 'ok' && result.price ? 'A' : 'B';
       box.querySelectorAll<HTMLElement>('[data-result]').forEach((el) => (el.hidden = el.dataset.result !== show));
       if (show === 'A' && result.price) {
         box.querySelector('[data-price-from]')!.textContent = formatUAH(result.price.from);

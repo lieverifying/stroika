@@ -20,7 +20,7 @@ test.describe('факты бригады на главной', () => {
     const main = page.locator('main');
     await expect(main).not.toContainText(/місяц[іья] від авансу|\d+\s*днів|від \d[\d\s]* грн/);
     await expect(main.locator('[data-placeholder^="PRICE_"], [data-placeholder^="TERM_"], [data-placeholder="PROMISE_MEASURE_3D_HOURS"]')).toHaveCount(0);
-    await expect(page.locator('[data-block="12"]')).toContainText('Розрахуємо під ваше завдання і надішлемо у месенджер.');
+    await expect(page.locator('[data-block="12"]')).toContainText('Залежить від розмірів, матеріалів і наповнення.');
     await expect(page.locator('[data-block="12"]')).toContainText('Так, працюємо в Черкасах та області.');
     await expect(page.locator('[data-block="1"] .hero__badge')).toHaveCount(0); // сезонный бейдж выключен
     await expect(page.locator('footer')).not.toContainText(/ФОП|ІПН|РНОКПП/);

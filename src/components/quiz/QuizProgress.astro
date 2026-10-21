@@ -1,21 +1,21 @@
 ---
-// Прогресс квиза: полоса и «Крок N з M» (ARCHITECTURE.md 4.6). Пока ветка не выбрана, M = 7.
+// Прогресс квиза: полоса и «Крок N з M» — шаги текущей ветки (кухня 6, шафа 5, інші меблі 4). Пока ветка не выбрана — «Крок 1».
 // Скрипт квиза обновляет aria-valuenow / aria-valuemax, ширину полосы и текст.
 ---
 
 <div class="quiz-progress">
-  <p class="quiz-progress__text" data-quiz-progress-text aria-hidden="true">Крок 1 з 7</p>
+  <p class="quiz-progress__text" data-quiz-progress-text aria-hidden="true">Крок 1</p>
   <div
     class="quiz-progress__bar"
     role="progressbar"
     aria-label="Прогрес"
     aria-valuemin="1"
-    aria-valuemax="7"
+    aria-valuemax="6"
     aria-valuenow="1"
-    aria-valuetext="Крок 1 з 7"
+    aria-valuetext="Крок 1"
     data-quiz-progress
   >
-    <span class="quiz-progress__fill" style="--progress: calc(1 / 7)"></span>
+    <span class="quiz-progress__fill" style="--progress: calc(1 / 6)"></span>
   </div>
 </div>
 

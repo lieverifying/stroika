@@ -7,9 +7,14 @@ const quiz = (page: Page) => page.locator('[data-quiz]');
 const visibleStep = (page: Page) => quiz(page).locator('[data-step]:not([hidden])');
 const progressText = (page: Page) => quiz(page).locator('[data-quiz-progress-text]');
 
-async function openQuiz(page: Page, path = '/kukhni#kvyz') {
+/** Квиз на /kukhni открывается сразу с формы кухни; для проверок шага 1 возвращаемся «Назад» (step1 = true) */
+async function openQuiz(page: Page, path = '/kukhni#kvyz', step1 = true) {
   await page.goto(path);
   await expect(quiz(page)).toHaveAttribute('data-ready', '');
+  if (step1 && (await quiz(page).locator('[data-quiz-back]').isVisible())) {
+    await quiz(page).locator('[data-quiz-back]').click();
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+  }
 }
 
 async function choose(page: Page, label: string | RegExp) {
@@ -82,14 +87,14 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(backBtn).toBeHidden();
   });
 
-  test('перезагрузка: квиз на шаге 1 с кнопкой «Продовжити, де зупинились» — она возвращает на тот же шаг', async ({ page }) => {
+  test('перезагрузка: квиз с начала (на /kukhni — форма кухни) с кнопкой «Продовжити, де зупинились» — она возвращает на тот же шаг', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Кухня');
     await choose(page, 'П-подібна');
     await choose(page, 'Більше 5 м');
     await page.reload();
     await expect(quiz(page)).toHaveAttribute('data-ready', '');
-    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
     await expect(quiz(page).locator('#quiz-name')).toBeHidden(); // поля контакта — только на последнем шаге
     const resume = quiz(page).getByRole('button', { name: 'Продовжити, де зупинились' });
     await expect(resume).toBeVisible();
@@ -119,15 +124,17 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await expect(progressText(page)).toHaveText('Крок 1 з 5');
   });
 
-  test('«Почати заново» сбрасывает ответы: шаг 1 без выбора', async ({ page }) => {
+  test('«Почати заново» сбрасывает ответы — к началу квиза этой посадочной (форма кухни, без выбора)', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Шафа або гардеробна');
     await choose(page, 'Купе');
     await quiz(page).locator('[data-quiz-restart]').click();
-    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
-    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'false');
-    await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'false');
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
+    await expect(visibleStep(page).locator('[aria-checked="true"]')).toHaveCount(0);
     await expect(quiz(page).locator('[data-quiz-restart]')).toBeHidden();
+    await quiz(page).locator('[data-quiz-back]').click();
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    await expect(visibleStep(page).getByRole('radio', { name: 'Шафа або гардеробна' })).toHaveAttribute('aria-checked', 'false');
   });
 
   test('клавиатура: стрелки двигают фокус по вариантам, Enter выбирает', async ({ page }) => {
@@ -200,12 +207,12 @@ test.describe('квиз: шаг контакта', () => {
     await expect(visibleStep(page).getByRole('radio')).toHaveText(['Кухня', 'Шафа або гардеробна', 'Інші меблі', 'Інше, нестандартне']);
   });
 
-  test('«Інше, нестандартне» ведёт на /kontakty#zapyt, ответы квиза не сохраняются', async ({ page }) => {
+  test('«Інше, нестандартне» ведёт на /kontakty#zapyt, этот выбор квиз не сохраняет', async ({ page }) => {
     await openQuiz(page);
     await choose(page, 'Інше, нестандартне');
     await expect(page).toHaveURL(/\/kontakty#zapyt$/);
     await expect(page.locator('#zapyt-title')).toBeInViewport();
-    expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('vymir.quiz.v1') ?? '')).not.toContain('custom');
   });
 
   test('шаг сроков: «Протягом 3 місяців» вместо «до Нового року»', async ({ page }) => {
@@ -297,14 +304,35 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     }
   });
 
-  test('/dyakuyemo без данных квиза — общий текст; демо экрана А (?demoPrice=1, не в боевой сборке)', async ({ page }) => {
+  test('/dyakuyemo без данных квиза — общий текст; разметки цены нет ни с JS, ни без него (флаг B)', async ({ page, browser }) => {
     await page.goto('/dyakuyemo');
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'generic');
     await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо\. Зателефонуємо у робочий час\.$/);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+    await expect(page.locator('[data-result="A"]')).toHaveCount(0);
+    await expect(page.locator('main')).not.toContainText(/Орієнтовна вартість|грн/);
     await page.goto('/dyakuyemo?demoPrice=1');
-    await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'A');
-    await expect(page.locator('[data-result="A"]')).toContainText('грн');
+    await expect(page.locator('[data-result="A"]')).toHaveCount(0);
+    const ctx = await browser.newContext({ javaScriptEnabled: false });
+    const noJs = await ctx.newPage();
+    await noJs.goto('/dyakuyemo');
+    await expect(noJs.locator('main')).not.toContainText(/Орієнтовна вартість|грн|від\s+до/);
+    await ctx.close();
+  });
+
+  test('посадочные: шаг 1 пропущен — /kukhni с формы кухни (2 з 6), /mebli с типа шафы (2 з 5); «Назад» — на шаг 1', async ({ page }) => {
+    await openQuiz(page, '/kukhni#kvyz', false);
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
+    await expect(visibleStep(page).locator('h3')).toHaveText('Яка форма кухні?');
+    await expect(progressText(page)).toHaveText('Крок 2 з 6');
+    await expect(quiz(page).locator('[data-quiz-restart]')).toBeHidden();
+    await quiz(page).locator('[data-quiz-back]').click();
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'true');
+    await openQuiz(page, '/mebli#kvyz', false);
+    await expect(visibleStep(page)).toHaveAttribute('data-step', 'wardrobeType');
+    await expect(visibleStep(page).locator('h3')).toHaveText('Що саме потрібно?');
+    await expect(progressText(page)).toHaveText('Крок 2 з 5');
   });
 });
 
@@ -397,10 +425,12 @@ test('320 px: ни на одном шаге квиза страница не е�
   }
   await noOverflow(); // шаг контакта
   await quiz(page).locator('[data-quiz-restart]').click();
+  await quiz(page).locator('[data-quiz-back]').click();
   await choose(page, 'Шафа або гардеробна');
   await choose(page, 'Гардеробна');
   await noOverflow(); // шаг ширины
   await quiz(page).locator('[data-quiz-restart]').click();
+  await quiz(page).locator('[data-quiz-back]').click();
   await choose(page, 'Інші меблі');
   await noOverflow(); // «що саме»
 });

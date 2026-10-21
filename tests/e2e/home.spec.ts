@@ -114,12 +114,13 @@ test.describe('главная бренда', () => {
     await expect(page.locator('[data-block="3"]').getByRole('link', { name: 'Усі роботи' })).toHaveAttribute('href', '/roboty');
   });
 
-  test('«Без колл-центру»: текст и телефон', async ({ page }) => {
+  test('«Без колл-центру»: текст без номера телефона (номер — в финале)', async ({ page }) => {
     await page.goto('/');
     const b = page.locator('[data-block="no-call-center"]');
     await expect(b).toContainText('Відповідає людина, яка веде ваш проєкт');
     await expect(b).toContainText('Від першого повідомлення до монтажу ви спілкуєтесь з тим, хто знає ваш проєкт.');
-    await expect(b.locator('a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
+    await expect(b.locator('a[href^="tel:"]')).toHaveCount(0);
+    await expect(b).not.toContainText('991 48 43');
   });
 
   test('финал: «Скажіть розмір — ми скажемо ціну», Viber, Telegram, Подзвонити', async ({ page }) => {
