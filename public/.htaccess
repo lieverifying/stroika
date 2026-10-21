@@ -4,14 +4,23 @@ ErrorDocument 404 /404.html
 # Сборка кладёт страницы файлами (build.format = 'file': kukhni.html), а ссылки на сайте — без расширения (/kukhni).
 # Отдаём /kukhni из kukhni.html; адрес с .html перенаправляем на адрес без расширения.
 RewriteEngine On
+
+# Один адрес сайта: https и без www. На adm.tools перед Apache стоит nginx: схему запроса Apache видит
+# только в заголовке X-Forwarded-Proto (REQUEST_SCHEME всегда http), поэтому проверяем его.
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Ремонт убран с сайта (2026-10-20): сразу на https-адрес главной
+RewriteRule ^remont/?$ https://%{HTTP_HOST}/ [R=301,L]
+
 RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.html[\s?]
 RewriteRule ^ /%1 [R=301,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.+)$ $1.html [L]
 
-# Ремонт убран с сайта (2026-10-20)
-Redirect 301 /remont /
 
 # Сжатие текстовых ответов (на мобильном интернете страница приходит в 3–4 раза меньше)
 <IfModule mod_deflate.c>
