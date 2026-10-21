@@ -30,7 +30,7 @@ const FLAG_FACTS = {
   trustNumbers: ['trust', 'warranty.years'],
   reviews: ['reviews', 'google'],
   warrantyPayment: ['warranty', 'payment'],
-  instagram: ['contacts.instagramHandle'],
+  instagram: ['contacts.instagramHandle', 'contacts.tiktokHandle'],
   schedule: ['contacts.scheduleText'],
   address: ['contacts.address'],
   serviceAreaMap: ['serviceArea.map'],

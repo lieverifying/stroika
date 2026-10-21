@@ -1,0 +1,26 @@
+---
+// Instagram и TikTok @vymir.che — подвал, «Контакти», «Дякуємо». Нет факта или выключен флаг — ничего не выводим.
+import Button from './Button.astro';
+import { facts } from '../../content/facts';
+import { contactLinks } from '../../lib/contacts';
+
+interface Props {
+  variant?: 'outline' | 'secondary';
+}
+
+const { variant = 'outline' } = Astro.props;
+const links = facts.flags.instagram
+  ? [
+      { href: contactLinks.instagram, icon: 'instagram' as const, label: 'Instagram' },
+      { href: contactLinks.tiktok, icon: 'tiktok' as const, label: 'TikTok' },
+    ].filter((l) => l.href)
+  : [];
+---
+
+{
+  links.map((l) => (
+    <Button href={l.href} variant={variant} icon={l.icon} target="_blank" rel="noopener">
+      {l.label}
+    </Button>
+  ))
+}

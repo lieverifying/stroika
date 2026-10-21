@@ -28,7 +28,7 @@ test('галочка согласия во всех формах ведёт на
 });
 
 test.describe('/polityka', () => {
-  test('разделы политики; владелец — ФОП {{FOP_NAME}}, контакт {{PRIVACY_EMAIL}} и телефон', async ({ page }) => {
+  test('разделы политики; владелец — ФОП Мєшалкін Андрій Леонідович, контакт {{PRIVACY_EMAIL}} и телефон', async ({ page }) => {
     await page.goto('/polityka');
     await expect(page.locator('h1')).toHaveText('Політика конфіденційності');
     await expect(page.locator('article h2')).toHaveText([
@@ -43,22 +43,23 @@ test.describe('/polityka', () => {
       'Зміни політики',
     ]);
     await expect(page.locator('main')).toContainText('Про захист персональних даних');
-    await expect(page.locator('main')).toContainText('Володілець персональних даних — ФОП');
+    await expect(page.locator('main')).toContainText('Володілець персональних даних — ФОП Мєшалкін Андрій Леонідович');
     await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
-    // единственные заглушки режима запуска — их пришлёт владелец
+    // единственная заглушка режима запуска — почту пришлёт владелец
     const names = await page.locator('.fact-ph').evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('data-placeholder')))].sort());
-    expect(names).toEqual(['FOP_NAME', 'PRIVACY_EMAIL']);
+    expect(names).toEqual(['PRIVACY_EMAIL']);
   });
 });
 
 test.describe('/kontakty', () => {
-  test('телефон, Viber и Telegram на один номер, зона виїзду, коротка форма; без фактов — без графіка, адреси, карти, Instagram', async ({ page }) => {
+  test('телефон, Viber и Telegram на один номер, Instagram і TikTok, зона виїзду, коротка форма; без фактов — без графіка, адреси, карти', async ({ page }) => {
     await page.goto('/kontakty');
     await expect(page.locator('h1')).toHaveText('Контакти');
     await expect(page.locator('main a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
     await expect(page.locator('main').getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
     await expect(page.locator('main').getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
-    await expect(page.locator('main').getByRole('link', { name: 'Instagram' })).toHaveCount(0);
+    await expect(page.locator('main').getByRole('link', { name: 'Instagram' })).toHaveAttribute('href', 'https://www.instagram.com/vymir.che');
+    await expect(page.locator('main').getByRole('link', { name: 'TikTok' })).toHaveAttribute('href', 'https://www.tiktok.com/@vymir.che');
     await expect(page.locator('main')).not.toContainText(/Графік|Адреса|Пошта/);
     await expect(page.locator('main .ph, main .fact-ph')).toHaveCount(0);
     await expect(page.locator('main')).toContainText('Черкаси та область');
@@ -108,4 +109,13 @@ test('телефон +380 75 991 48 43 и ссылки tel / Viber / Telegram: �
   await page.goto('/dyakuyemo');
   await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
   await expect(page.locator('main a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
+  await expect(page.locator('main a[href="https://www.instagram.com/vymir.che"]')).toHaveCount(1);
+  await expect(page.locator('main a[href="https://www.tiktok.com/@vymir.che"]')).toHaveCount(1);
+});
+
+test('ФОП — только в политике, больше нигде', async ({ page }) => {
+  for (const path of ['/', '/kukhni', '/mebli', '/roboty', '/kontakty', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404']) {
+    await page.goto(path);
+    expect(await page.locator('body').innerText(), path).not.toMatch(/ФОП|Мєшалкін/);
+  }
 });

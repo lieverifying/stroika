@@ -1,10 +1,11 @@
 ---
 // Блок 14 — футер (ТЗ): контакты, график, соцсети, ссылка на политику. Реквизитов ФОП нет (решение владельца, 2026-10-21).
-// Режим запуска: почта, график, адрес и Instagram — только когда есть факт и включён флаг.
+// Режим запуска: почта, график и адрес — только когда есть факт и включён флаг. Instagram и TikTok — SocialLinks.
 // Тёмный фон; все ссылки — зоны нажатия ≥ 48 px. Нижнюю панель телефона футер не прячет: body уже с отступом под неё.
 import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import Icon from '../ui/Icon.astro';
+import SocialLinks from '../ui/SocialLinks.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
 import { has } from '../../lib/facts';
@@ -43,17 +44,11 @@ const year = new Date().getFullYear();
     </div>
 
     <div class="site-footer__col">
-      <h2 class="site-footer__title">Месенджери</h2>
+      <h2 class="site-footer__title">Месенджери та соцмережі</h2>
       <div class="site-footer__social">
         <Button href={contactLinks.viber} variant="outline" icon="viber">Viber</Button>
         <Button href={contactLinks.telegram} variant="outline" icon="telegram">Telegram</Button>
-        {
-          facts.flags.instagram && contactLinks.instagram && (
-            <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">
-              Instagram
-            </Button>
-          )
-        }
+        <SocialLinks />
       </div>
     </div>
 

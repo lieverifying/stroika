@@ -12,10 +12,11 @@ import SectionTitle from '../components/ui/SectionTitle.astro';
 import { facts } from '../content/facts';
 import { contactLinks } from '../lib/contacts';
 import { has } from '../lib/facts';
+import SocialLinks from '../components/ui/SocialLinks.astro';
 import CustomRequest from '../components/sections/CustomRequest.astro';
 
 const { contacts: c, serviceArea, flags } = facts;
-// Нет факта — нет строки: график, почта, адрес, Instagram, условия выезда и карта — только когда есть данные
+// Нет факта — нет строки: график, почта, адрес, условия выезда и карта — только когда есть данные
 const rows = [
   ...(flags.schedule && has(c.scheduleText) ? [{ label: 'Графік', text: c.scheduleText }] : []),
   ...(has(c.emailPublic) ? [{ label: 'Пошта', text: c.emailPublic, href: contactLinks.email }] : []),
@@ -23,7 +24,7 @@ const rows = [
 ];
 ---
 
-<BaseLayout title="Контакти — Вимір, кухні та меблі на замовлення в Черкасах" description="Телефон, Viber, Telegram і графік роботи «Вимір». Замір і монтаж — Черкаси та область.">
+<BaseLayout title="Контакти — Вимір, кухні та меблі на замовлення в Черкасах" description="Телефон, Viber, Telegram, Instagram і TikTok «Вимір». Замір і монтаж — Черкаси та область.">
   <div class="container-site section-pad contacts">
     <h1 class="text-h1">Контакти</h1>
 
@@ -37,13 +38,7 @@ const rows = [
         <div class="contacts__messengers">
           <Button href={contactLinks.viber} variant="secondary" icon="viber">Viber</Button>
           <Button href={contactLinks.telegram} variant="secondary" icon="telegram">Telegram</Button>
-          {
-            flags.instagram && contactLinks.instagram && (
-              <Button href={contactLinks.instagram} variant="outline" icon="instagram" target="_blank" rel="noopener">
-                Instagram
-              </Button>
-            )
-          }
+          <SocialLinks />
         </div>
         {
           rows.length > 0 && (

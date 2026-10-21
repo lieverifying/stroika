@@ -4,6 +4,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import QuizResult from '../components/quiz/QuizResult.astro';
 import Button from '../components/ui/Button.astro';
+import SocialLinks from '../components/ui/SocialLinks.astro';
 import { contactLinks } from '../lib/contacts';
 ---
 
@@ -15,6 +16,9 @@ import { contactLinks } from '../lib/contacts';
       <Button href={contactLinks.tel} variant="secondary" icon="phone">Подзвонити</Button>
       <Button href={contactLinks.viber} variant="secondary" icon="viber">Написати у Viber</Button>
       <Button href="/" variant="outline">На головну</Button>
+    </div>
+    <div class="thanks__actions" aria-label="Соцмережі">
+      <SocialLinks />
     </div>
   </section>
 </BaseLayout>

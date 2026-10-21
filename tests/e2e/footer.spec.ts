@@ -9,9 +9,10 @@ test.describe('футер', () => {
     await expect(f.locator('a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
     await expect(f.locator('a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
     await expect(f.locator('a[href="https://t.me/+380759914843"]')).toHaveCount(1);
-    // режим запуска: почты, Instagram, графика, адреса и ФОП нет, пока нет фактов
+    await expect(f.locator('a[href="https://www.instagram.com/vymir.che"]')).toHaveCount(1);
+    await expect(f.locator('a[href="https://www.tiktok.com/@vymir.che"]')).toHaveCount(1);
+    // режим запуска: почты, графика и адреса нет, пока нет фактов; ФОП — только в политике
     await expect(f.locator('a[href^="mailto:"]')).toHaveCount(0);
-    await expect(f.locator('a[href*="instagram.com"]')).toHaveCount(0);
     await expect(f).not.toContainText(/ФОП|ІПН/);
     await expect(f.locator('.fact-ph')).toHaveCount(0);
     await expect(f.locator('a[href="/polityka"]')).toHaveCount(1);

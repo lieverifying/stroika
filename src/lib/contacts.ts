@@ -12,6 +12,7 @@ export const contactLinks = {
   viber: viberHref(c.viberPhoneE164),
   telegram: telegramHref(c.telegramUsername),
   // Нет факта — пустая строка; компонент такую ссылку не выводит (флаги facts.flags.instagram, has(emailPublic))
-  instagram: isMissing(c.instagramHandle) ? '' : `https://instagram.com/${c.instagramHandle}`,
+  instagram: isMissing(c.instagramHandle) ? '' : `https://www.instagram.com/${c.instagramHandle}`,
+  tiktok: isMissing(c.tiktokHandle) ? '' : `https://www.tiktok.com/@${c.tiktokHandle}`,
   email: isMissing(c.emailPublic) ? '' : `mailto:${c.emailPublic}`,
 } as const;

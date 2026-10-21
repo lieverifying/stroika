@@ -129,7 +129,9 @@ export const facts = {
     viberPhoneE164: '+380759914843',
     // Telegram по номеру телефона: https://t.me/+380759914843
     telegramUsername: '+380759914843',
-    instagramHandle: missing('INSTAGRAM_HANDLE'),
+    // Instagram и TikTok — подтверждено владельцем 2026-10-21, без @
+    instagramHandle: 'vymir.che',
+    tiktokHandle: 'vymir.che',
     emailPublic: missing('EMAIL_PUBLIC'),
     scheduleText: missing('SCHEDULE_TEXT'),
     scheduleSchema: missing('SCHEDULE_SCHEMA'),
@@ -151,10 +153,10 @@ export const facts = {
     mapsUrl: missing('GOOGLE_MAPS_URL'),
   },
 
-    // Политика: владелец данных — ФОП (в подвале не показываем). Эти две заглушки владелец пришлёт до запуска —
-  // боевая сборка падает, пока они не заменены.
+  // Политика: владелец данных — ФОП (только в политике, больше нигде). Заглушку почты владелец пришлёт до запуска —
+  // боевая сборка падает, пока она не заменена.
   legal: {
-    fopName: '{{FOP_NAME}}',
+    fopName: 'Мєшалкін Андрій Леонідович', // подтверждено владельцем 2026-10-21; «ФОП» дописывает страница
     privacyEmail: '{{PRIVACY_EMAIL}}',
     // Дата этой редакции текста политики
     privacyUpdatedAt: '21.10.2026',
@@ -235,7 +237,7 @@ export const facts = {
     trustNumbers: false as boolean, // «Цифри довіри» — trust.*, warranty.years
     reviews: false as boolean, // «Відгуки» — reviews, google.*
     warrantyPayment: false as boolean, // гарантия и порядок оплаты — warranty.*, payment.*
-    instagram: false as boolean, // Instagram — contacts.instagramHandle
+    instagram: true as boolean, // Instagram и TikTok — contacts.instagramHandle, contacts.tiktokHandle
     schedule: false as boolean, // график работы — contacts.scheduleText
     address: false as boolean, // адрес — contacts.address
     serviceAreaMap: false as boolean, // карта зоны выезда — serviceArea.map
