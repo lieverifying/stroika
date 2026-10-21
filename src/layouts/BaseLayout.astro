@@ -16,9 +16,11 @@ interface Props {
   description: string;
   noindex?: boolean;
   bare?: boolean;
+  /** Фото первого экрана (LCP): предзагрузка в <head>, чтобы браузер начал качать его до разбора CSS */
+  lcpImage?: { srcset: string; sizes: string };
 }
 
-const { title, description, noindex, bare = false } = Astro.props;
+const { title, description, noindex, bare = false, lcpImage } = Astro.props;
 const landing = landingOfPath(pagePath(Astro.url));
 ---
 
@@ -32,6 +34,7 @@ const landing = landingOfPath(pagePath(Astro.url));
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#F1F1EE" />
     <Fonts />
+    {lcpImage && <link rel="preload" as="image" imagesrcset={lcpImage.srcset} imagesizes={lcpImage.sizes} fetchpriority="high" />}
   </head>
   <body data-landing={landing ?? undefined} class:list={{ 'is-bare': bare }}>
     <SkipLink />

@@ -5,7 +5,7 @@
 // Фото — кнопка, открывает просмотр на весь экран (Lightbox.astro). Видео — muted, playsinline, loop, controls,
 // preload="none"; запускается без звука, только когда видно на экране (скрипт portfolio.ts).
 // Первые eager превью грузятся сразу, остальные — loading="lazy".
-import { url, type PortfolioItem } from '../../lib/portfolio';
+import { responsive, url, type PortfolioItem } from '../../lib/portfolio';
 
 interface Props {
   items: PortfolioItem[];
@@ -16,6 +16,11 @@ interface Props {
 }
 const { items, eager = 4, cols = [2, 3], wide = false, class: className } = Astro.props;
 const isWide = (i: PortfolioItem) => wide && i.width / i.height > 1.2;
+// Ширина карточки на экране: доля колонки (широкие — две колонки)
+const sizes = (i: PortfolioItem) => {
+  const span = isWide(i) ? 2 : 1;
+  return `(min-width: 48rem) ${Math.round((100 * span) / cols[1])}vw, ${Math.round((100 * span) / cols[0])}vw`;
+};
 ---
 
 <ul class:list={['pf', className]} style={`--cols-m: ${cols[0]}; --cols-d: ${cols[1]}`} data-pf-grid>
@@ -37,7 +42,9 @@ const isWide = (i: PortfolioItem) => wide && i.width / i.height > 1.2;
             aria-label={`Відкрити на весь екран: ${item.alt}`}
           >
             <img
-              src={url(item.thumb)}
+              src={responsive(item).src}
+              srcset={responsive(item).srcset}
+              sizes={sizes(item)}
               width={item.width}
               height={item.height}
               alt={item.alt}

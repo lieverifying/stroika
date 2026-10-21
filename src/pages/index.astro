@@ -11,12 +11,13 @@ import Portfolio from '../components/sections/Portfolio.astro';
 import NoCallCenter from '../components/sections/NoCallCenter.astro';
 import FinalCta from '../components/sections/FinalCta.astro';
 import { quizHref } from '../lib/landing';
-import { FEATURED } from '../lib/portfolio';
+import { FEATURED, photoById, responsive } from '../lib/portfolio';
 ---
 
 <BaseLayout
   title="Вимір — кухні та корпусні меблі під ваш розмір у Черкасах"
   description="Меблі, які точно підходять: кухні, шафи та гардеробні на замовлення. Замір, дизайн-проєкт і монтаж — Черкаси та область."
+  lcpImage={{ srcset: responsive(photoById('kukhnia-05')).srcset, sizes: '(min-width: 64rem) 45vw, 90vw' }}
 >
   <HomeHero quizHref={quizHref(null)} />
   <Promises />

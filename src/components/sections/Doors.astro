@@ -3,7 +3,7 @@
 // подписи категорий и стрелка. Ведут на посадочные /kukhni и /mebli.
 import Icon from '../ui/Icon.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
-import { photoById, url } from '../../lib/portfolio';
+import { photoById, responsive } from '../../lib/portfolio';
 
 const doors = [
   { href: '/kukhni', title: 'Кухні', sub: 'Прямі, кутові, П-подібні, з островом', photo: photoById('kukhnia-06'), focus: '55% 55%' },
@@ -21,8 +21,8 @@ const doors = [
             <a href={d.href} class="door">
               <span class="door__media" style={`--focus: ${d.focus}`}>
                 <img
-                  src={url(d.photo.thumb)}
-                  srcset={`${url(d.photo.thumb)} 720w, ${url(d.photo.src)} ${d.photo.width}w`}
+                  src={responsive(d.photo).src}
+                  srcset={responsive(d.photo).srcset}
                   sizes="(min-width: 48rem) 45vw, 90vw"
                   width={d.photo.width}
                   height={d.photo.height}

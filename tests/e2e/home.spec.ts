@@ -21,7 +21,7 @@ test.describe('главная бренда', () => {
     await expect(hero.locator('.home-hero__lead')).toHaveText(
       'Кухні, шафи та гардеробні під ваш простір. Замір, дизайн-проєкт і монтаж — наша команда.',
     );
-    await expect(hero.locator('img')).toHaveAttribute('src', /\/kukhnia-05\.webp$/);
+    await expect(hero.locator('img')).toHaveAttribute('src', /\/kukhnia-05-960\.webp$/);
     const cta = hero.getByRole('link', { name: 'Порахувати вартість' });
     await expect(cta).toHaveAttribute('href', '/kukhni#kvyz');
     await expect(cta).toHaveAttribute('data-cta', 'primary');

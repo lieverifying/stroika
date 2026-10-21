@@ -11,7 +11,7 @@ import Button from '../ui/Button.astro';
 import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
-import { HERO, url, type PortfolioPhoto } from '../../lib/portfolio';
+import { HERO, responsive, type PortfolioPhoto } from '../../lib/portfolio';
 
 interface Props {
   title: string;
@@ -60,8 +60,8 @@ const portrait = photo.height > photo.width;
 
     <div class="hero__media">
       <img
-        src={url(photo.src)}
-        srcset={`${url(photo.thumb)} ${Math.round((photo.width * 640) / Math.max(photo.width, photo.height))}w, ${url(photo.src)} ${photo.width}w`}
+        src={responsive(photo).src}
+        srcset={responsive(photo).srcset}
         sizes="(min-width: 64rem) 40vw, 100vw"
         width={photo.width}
         height={photo.height}

@@ -5,7 +5,7 @@
 import Button from '../ui/Button.astro';
 import DimLine from '../ui/DimLine.astro';
 import { SLOGAN } from '../../content/brand';
-import { photoById, url } from '../../lib/portfolio';
+import { photoById, responsive } from '../../lib/portfolio';
 
 interface Props {
   quizHref: string;
@@ -26,8 +26,8 @@ const photo = photoById('kukhnia-05');
     <div class="home-hero__media">
       <DimLine label="2700 мм" vertical class="home-hero__height" />
       <img
-        src={url(photo.src)}
-        srcset={`${url(photo.thumb)} 720w, ${url(photo.src)} ${photo.width}w`}
+        src={responsive(photo).src}
+        srcset={responsive(photo).srcset}
         sizes="(min-width: 64rem) 45vw, 90vw"
         width={photo.width}
         height={photo.height}

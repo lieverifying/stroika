@@ -2,7 +2,7 @@ import { expect, test, type Page } from './fixtures';
 import { readFileSync } from 'node:fs';
 
 // «Наші роботи» (ТЗ v2, 2026-10-21): галерея из src/content/portfolio.json — фото архива vymir-foto, блоки на главной и посадочных
-interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; thumb?: string; poster?: string; width: number; height: number; focus?: string; alt: string }
+interface Item { id: string; type: 'photo' | 'video'; category: string; src: string; poster?: string; width: number; height: number; focus?: string; alt: string }
 const data = JSON.parse(readFileSync(new URL('../../src/content/portfolio.json', import.meta.url), 'utf8')) as {
   categories: { id: string; title: string }[];
   featured: { home: string[]; kukhni: string[]; mebli: string[] };
@@ -23,7 +23,8 @@ test.describe('/roboty', () => {
     await expect(imgs).toHaveCount(photos().length);
     for (const [n, item] of photos().entries()) {
       const img = imgs.nth(n);
-      await expect(img).toHaveAttribute('src', `/portfolio/${item.thumb}`);
+      await expect(img).toHaveAttribute('src', `/portfolio/${item.src.replace('.webp', '-960.webp')}`);
+      await expect(img).toHaveAttribute('srcset', new RegExp(`-480\\.webp 480w, .+-960\\.webp ${Math.min(960, item.width)}w`));
       await expect(img).toHaveAttribute('alt', item.alt);
       await expect(img).toHaveAttribute('width', String(item.width));
       if (n < 4) await expect(img).not.toHaveAttribute('loading', 'lazy');

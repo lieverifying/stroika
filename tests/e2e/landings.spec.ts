@@ -31,7 +31,7 @@ for (const l of [
       await page.goto(l.path);
       await expect(page).toHaveTitle(l.title);
       await expect(page.locator('h1')).toHaveText(l.h1);
-      await expect(page.locator('[data-block="1"] img')).toHaveAttribute('src', new RegExp(`${l.photo}\\.webp$`));
+      await expect(page.locator('[data-block="1"] img')).toHaveAttribute('src', new RegExp(`${l.photo}-960\\.webp$`));
       await expect(page.locator('[data-block="1"]').getByRole('link', { name: 'Написати у Viber' })).toBeVisible();
       const order = await page.locator('main [data-block], main [data-story]').evaluateAll((els) =>
         els.map((e) => e.getAttribute('data-block') ?? `story:${e.getAttribute('data-story')}`),

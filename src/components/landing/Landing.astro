@@ -13,7 +13,7 @@ import FinalCta from '../sections/FinalCta.astro';
 import Story, { type StoryData } from '../story/Story.astro';
 import { FAQ } from '../../content/faq';
 import { quizHref, type Landing } from '../../lib/landing';
-import type { PortfolioItem, PortfolioPhoto } from '../../lib/portfolio';
+import { HERO, responsive, type PortfolioItem, type PortfolioPhoto } from '../../lib/portfolio';
 
 interface Props {
   landing: Landing;
@@ -33,9 +33,10 @@ interface Props {
   quizTitle: string;
 }
 const p = Astro.props;
+const HERO_SIZES = '(min-width: 64rem) 40vw, 100vw';
 ---
 
-<BaseLayout title={p.title} description={p.description}>
+<BaseLayout title={p.title} description={p.description} lcpImage={{ srcset: responsive(p.heroPhoto ?? HERO).srcset, sizes: HERO_SIZES }}>
   <Hero title={p.h1} lead={p.lead} photo={p.heroPhoto} focus={p.heroFocus} quizHref={quizHref(p.landing)} />
   <div class="container-site section-pad">
     <Story story={p.story} heading={p.storyHeading} moreHref="/yak-my-stvoriuiemo" />
