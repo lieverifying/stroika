@@ -101,7 +101,7 @@ test.describe('квиз: переходы, «Назад», восстановл�
     await resume.click();
     await expect(resume).toBeHidden();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'facade');
-    await expect(progressText(page)).toHaveText('Крок 4 з 6');
+    await expect(progressText(page)).toHaveText('Крок 3 з 5');
     // имя и телефон в хранилище не попадают — их там и нет: только ответы
     const saved = await page.evaluate(() => localStorage.getItem('vymir.quiz.v1') ?? '');
     expect(saved).toContain('"kitchenShape":"p-podibna"');
@@ -320,19 +320,30 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await ctx.close();
   });
 
-  test('посадочные: шаг 1 пропущен — /kukhni с формы кухни (2 з 6), /mebli с типа шафы (2 з 5); «Назад» — на шаг 1', async ({ page }) => {
+  test('посадочные: шаг выбора пропущен — нумерация без него (кухня 1…5, шафа 1…4); после «Назад» на выбор — полная ветка', async ({ page }) => {
     await openQuiz(page, '/kukhni#kvyz', false);
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'kitchenShape');
     await expect(visibleStep(page).locator('h3')).toHaveText('Яка форма кухні?');
-    await expect(progressText(page)).toHaveText('Крок 2 з 6');
+    await expect(progressText(page)).toHaveText('Крок 1 з 5');
     await expect(quiz(page).locator('[data-quiz-restart]')).toBeHidden();
-    await quiz(page).locator('[data-quiz-back]').click();
+    for (const [label, next] of [['Кутова', 'Крок 2 з 5'], ['3–4 м', 'Крок 3 з 5'], ['ДСП', 'Крок 4 з 5'], ['Пізніше', 'Крок 5 з 5']] as const) {
+      await choose(page, label);
+      await expect(progressText(page)).toHaveText(next);
+    }
+    for (let i = 0; i < 5; i++) await quiz(page).locator('[data-quiz-back]').click();
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'goal');
+    await expect(progressText(page)).toHaveText('Крок 1 з 6');
     await expect(visibleStep(page).getByRole('radio', { name: 'Кухня' })).toHaveAttribute('aria-checked', 'true');
+    await choose(page, 'Кухня');
+    await expect(progressText(page)).toHaveText('Крок 2 з 6');
+    await choose(page, 'Пряма');
+    await expect(progressText(page)).toHaveText('Крок 3 з 6');
+    await quiz(page).locator('[data-quiz-restart]').click();
+    await expect(progressText(page)).toHaveText('Крок 1 з 5');
     await openQuiz(page, '/mebli#kvyz', false);
     await expect(visibleStep(page)).toHaveAttribute('data-step', 'wardrobeType');
     await expect(visibleStep(page).locator('h3')).toHaveText('Що саме потрібно?');
-    await expect(progressText(page)).toHaveText('Крок 2 з 5');
+    await expect(progressText(page)).toHaveText('Крок 1 з 4');
   });
 });
 

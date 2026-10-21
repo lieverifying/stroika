@@ -61,6 +61,9 @@ export function initQuiz(root: HTMLElement): void {
   // Главная не открывается на шаге контакта: сохранённое прохождение предлагаем продолжить кнопкой.
   const fresh = (): QuizState => (preset?.goal ? answer(start(Date.now()), preset.goal, Date.now()) : start(Date.now()));
   let state: QuizState = fresh();
+  // Шаг выбора пропущен (посадочная): нумерация без него — первый видимый шаг «Крок 1», кухня 5 шагов, шафа 4.
+  // Вернулись «Назад» на шаг выбора — нумерация по полной ветке (кухня 6, шафа 5) до «Почати заново».
+  let skippedGoal = state.stepId !== 'goal';
   const initial = { stepId: state.stepId, depth: state.history.length };
   const atStart = () => state.stepId === initial.stepId && state.history.length === initial.depth;
   const saved = loadState(Date.now());
@@ -89,7 +92,10 @@ export function initQuiz(root: HTMLElement): void {
     options.forEach((o) => (o.tabIndex = o === tabStop ? 0 : -1));
 
     // «Крок N з M» — шаги текущей ветки (кухня 6, шафа 5, інші меблі 4); пока ветка не выбрана — просто «Крок 1»
-    const { current: n, total } = progress(state);
+    if (state.stepId === 'goal') skippedGoal = false;
+    const p = progress(state);
+    const n = skippedGoal ? p.current - 1 : p.current;
+    const total = skippedGoal ? p.total - 1 : p.total;
     const label = branchOf(state.answers.goal) ? `Крок ${n} з ${total}` : `Крок ${n}`;
     if (bar) {
       bar.setAttribute('aria-valuenow', String(n));
@@ -203,6 +209,7 @@ export function initQuiz(root: HTMLElement): void {
     clearState();
     resumable = null;
     state = fresh();
+    skippedGoal = state.stepId !== 'goal';
     history.replaceState({ ...history.state, quizStep: state.stepId, quizDepth: 0 }, '');
     render(true);
   });

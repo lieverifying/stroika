@@ -13,7 +13,7 @@ for (const l of [
     cats: ['kukhni'],
     works: 6,
     firstStep: 'kitchenShape',
-    progress: 'Крок 2 з 6',
+    progress: 'Крок 1 з 5',
     walk: ['Кутова', 'До 3 м', 'ДСП', 'Пізніше'],
     active: 'Кухні',
   },
@@ -27,7 +27,7 @@ for (const l of [
     cats: ['shafy', 'garderobni', 'inshi'],
     works: 4,
     firstStep: 'wardrobeType',
-    progress: 'Крок 2 з 5',
+    progress: 'Крок 1 з 4',
     walk: ['Купе', 'Не знаю', 'Пізніше'],
     active: 'Меблі',
   },
@@ -54,7 +54,7 @@ for (const l of [
       for (const c of cats) expect(l.cats as readonly string[]).toContain(c);
     });
 
-    test('квиз без шага 1: сразу вопрос ветки страницы, «Крок 2 з N»; «Порахувати вартість» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
+    test('квиз без шага выбора: сразу вопрос ветки страницы, «Крок 1 з N» (кухня 5, шафа 4); «Порахувати вартість» ведёт в квиз этой страницы', async ({ page, isMobile }) => {
       await page.goto(`${l.path}#kvyz`);
       await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
       await expect(page.locator('[data-quiz] [data-step]:visible')).toHaveCount(1);
