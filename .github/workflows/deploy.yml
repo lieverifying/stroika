@@ -1,6 +1,6 @@
 # Выкладка сайта на хостинг adm.tools (фаза 9).
 # push в main или запуск вручную → тесты (юнит, PHP, e2e) → сборка → загрузка по SSH (rsync) → проверка живого сайта.
-# Сборка: SITE_ENV из переменной репозитория SITE_ENV (по умолчанию staging — с noindex). Боевая (production) включается
+# Сборка: SITE_ENV из переменной репозитория SITE_ENV (по умолчанию development — тестовая, с noindex). Боевая (production) включается
 # переменной SITE_ENV=production, когда в facts.ts не останется заглушек: scripts/check-release.mjs не пропустит иначе.
 # Секреты (Settings → Secrets → Actions): DEPLOY_SSH_KEY — приватный ключ для выкладки, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID;
 # необязательно GAS_URL, GAS_SECRET, LEAD_EMAIL_TO, LEAD_EMAIL_FROM. В логах их нет: GitHub маскирует значения.
@@ -21,7 +21,7 @@ env:
   # Каталог сайта в домашней папке аккаунта: внутри www — сайт, рядом config/ — секреты заявок (вне публичной папки)
   DEPLOY_SITE_DIR: prime-studio.space
   SITE_URL: ${{ vars.SITE_URL || 'https://prime-studio.space' }}
-  SITE_ENV: ${{ vars.SITE_ENV || 'staging' }}
+  SITE_ENV: ${{ vars.SITE_ENV || 'development' }}
 
 jobs:
   test:
@@ -52,7 +52,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment:
-      name: ${{ vars.SITE_ENV || 'staging' }}
+      name: ${{ vars.SITE_ENV == 'production' && 'production' || 'staging' }}
       url: ${{ vars.SITE_URL || 'https://prime-studio.space' }}
     steps:
       - name: Секреты для выкладки на месте
