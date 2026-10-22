@@ -12,16 +12,18 @@ interface Props extends Omit<HTMLAttributes<'input'>, 'id' | 'name'> {
   hint?: string;
   /** Текст ошибки, который покажет скрипт формы */
   error?: string;
+  /** Не писать «(необов’язково)» у необязательного поля (когда это сказано в общей подписи группы) */
+  hideOptional?: boolean;
 }
 
-const { name, label, id = `f-${name}`, hint, error = 'Заповніть це поле', required, class: className, ...rest } = Astro.props;
+const { name, label, id = `f-${name}`, hint, error = 'Заповніть це поле', required, hideOptional = false, class: className, ...rest } = Astro.props;
 const describedBy = hint ? `${id}-hint` : undefined;
 ---
 
 <div class:list={['field', className]}>
   <label class="field__label" for={id}>
     {label}
-    {!required && <span class="field__optional"> (необов’язково)</span>}
+    {!required && !hideOptional && <span class="field__optional"> (необов’язково)</span>}
   </label>
   <input class="field__control" id={id} name={name} required={required} aria-describedby={describedBy} {...rest} />
   {hint && <p class="field__hint" id={`${id}-hint`}>{hint}</p>}

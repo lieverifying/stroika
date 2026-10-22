@@ -29,7 +29,23 @@ test('только логотип: без меню, переключателя, 
   await expect(page.locator('img[alt="Вимір"]')).toHaveCount(1);
   for (const sel of ['[data-header]', '[data-landing-switch]', 'footer', '[data-bottom-bar]', 'nav']) await expect(page.locator(sel)).toHaveCount(0);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
-  await expect(page.locator('main a[href="/"]')).toHaveText(['Подивитися всі роботи']);
+  await expect(page.locator('main')).not.toContainText('Подивитися всі роботи');
+});
+
+test('«Переглянути сайт» — кнопка с обводкой после работ и в финале, ведёт на главную; на первом экране её нет', async ({ page }) => {
+  await page.goto(PATH);
+  const site = page.locator('[data-site-link]');
+  await expect(site).toHaveCount(2);
+  await expect(site).toHaveText(['Переглянути сайт', 'Переглянути сайт']);
+  for (const b of await site.all()) {
+    await expect(b).toHaveAttribute('href', '/');
+    await expect(b).toHaveClass(/btn--outline/);
+    await expect(b).not.toHaveAttribute('data-cta', 'primary');
+    expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  }
+  await expect(page.locator('[data-block="3"] [data-site-link]')).toHaveCount(1);
+  await expect(page.locator('[data-block="13"] [data-site-link]')).toHaveCount(1);
+  await expect(page.locator('[data-block="1"] [data-site-link], [data-block="1"] a[href="/"]')).toHaveCount(0);
 });
 
 test('первый экран: kukhnia-05, H1, подзаголовок со сроком 36 годин, «Надіслати план» к форме и «Надіслати у Viber»', async ({ page }) => {
@@ -159,4 +175,113 @@ test('не больше одного жёлтого на экране, без п
     expect(yellow.length, `y=${y}: ${yellow.join(' | ')}`).toBeLessThanOrEqual(1);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+});
+
+// /planuvannya-mebli — та же структура про шафи та меблі
+test.describe('/planuvannya-mebli', () => {
+  const M = '/planuvannya-mebli';
+
+  test('первый экран: shafa-01, H1, подзаголовок, «Надіслати розміри» к форме; без меню; noindex', async ({ page }) => {
+    await page.goto(M);
+    for (const sel of ['[data-header]', '[data-landing-switch]', 'footer', '[data-bottom-bar]', 'nav']) await expect(page.locator(sel)).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+    const hero = page.locator('[data-block="1"]');
+    await expect(hero.locator('h1')).toHaveText('Два варіанти наповнення вашої шафи — безкоштовно');
+    await expect(hero.locator('.hero__lead')).toHaveText(
+      'Надішліть фото ніші або кімнати з розмірами — дизайнер запропонує два варіанти полиць, штанг і шухляд протягом 36 годин у робочі дні та надішле розрахунок у Viber або Telegram.',
+    );
+    await expect(hero.locator('img')).toHaveAttribute('src', /shafa-01-960\.webp$/);
+    await expect(hero.getByRole('link', { name: 'Надіслати розміри' })).toHaveAttribute('href', '#plan');
+    await expect(hero.getByRole('link', { name: 'Надіслати у Viber' })).toBeVisible();
+    await expect(page.locator('[data-block="how"] .plan-steps__text')).toHaveText([
+      'Надсилаєте фото і розміри ніші',
+      'Дизайнер готує 2 варіанти наповнення до 36 годин у робочі дні',
+      'Отримуєте розрахунок у месенджер',
+      'Безкоштовний замір і точна ціна в договорі',
+    ]);
+  });
+
+  test('форма: фото ніші, ширина / висота / глибина, «Що потрібно» → «plan_mebli»; Lead planuvannya_mebli; «Дякуємо» про наповнення', async ({ page, leadApi }) => {
+    await spyAnalytics(page);
+    await page.goto(`${M}?utm_source=instagram&utm_campaign=shafy`);
+    const form = page.locator('form[data-plan-form]');
+    await expect(form.locator('label[for="plan-files"]')).toContainText('Фото ніші або кімнати');
+    await form.locator('#plan-files').setInputFiles([{ name: 'nisha.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(200) }]);
+    await form.locator('#plan-width').fill('2,4');
+    await form.locator('#plan-height').fill('2,7');
+    await expect(form.locator('#plan-item option')).toHaveText(['Оберіть', 'Шафа-купе', 'Розпашна шафа', 'Гардеробна', 'Передпокій', 'Інше']);
+    await form.locator('#plan-item').selectOption('harderobna');
+    await form.getByRole('radio', { name: 'Telegram' }).check();
+    await form.locator('#plan-name').fill('Марія');
+    await form.locator('#plan-phone').click();
+    await form.locator('#plan-phone').pressSequentially('0671234567');
+    await form.locator('#plan-consent').check();
+    await form.getByRole('button', { name: 'Отримати 2 варіанти' }).click();
+    await expect(page).toHaveURL(/\/dyakuyemo$/);
+    await expect(page.locator('[data-thanks]')).toHaveText(
+      'Дякуємо. Дизайнер підготує два варіанти наповнення протягом 36 годин у робочі дні і надішле їх у Telegram.',
+    );
+    expect(leadApi.leads[0]).toMatchObject({
+      contactMethod: 'telegram',
+      form: 'plan_mebli',
+      landing: 'planuvannya-mebli',
+      nicheWidth: '2,4',
+      nicheHeight: '2,7',
+      nicheDepth: '',
+      item: 'harderobna',
+      name: 'Марія',
+      attribution: { utm_source: 'instagram', utm_campaign: 'shafy' },
+      __files: ['nisha.jpg'],
+    });
+    expect(await stored(page, 'test.fbq')).toEqual([['track', 'Lead', { content_name: 'planuvannya_mebli' }]]);
+  });
+
+  test('«Немає розмірів? Замовте безкоштовний замір»: графитовая кнопка, «zamir_mebli», Lead planuvannya_mebli_zamir', async ({ page, leadApi }) => {
+    await spyAnalytics(page);
+    await page.goto(M);
+    const box = page.locator('#zamir');
+    await expect(box.locator('h2')).toHaveText('Немає розмірів? Замовте безкоштовний замір');
+    const submit = box.getByRole('button', { name: 'Замовити замір' });
+    await expect(submit).toHaveCSS('background-color', 'rgb(30, 33, 36)');
+    await box.locator('#pz-name').fill('Ігор');
+    await box.locator('#pz-phone').click();
+    await box.locator('#pz-phone').pressSequentially('0671234567');
+    await box.locator('#pz-consent').check();
+    await submit.click();
+    await expect(page).toHaveURL(/\/dyakuyemo$/);
+    expect(leadApi.leads[0]).toMatchObject({ contactMethod: 'call', form: 'zamir_mebli', landing: 'planuvannya-mebli', time: 'soon' });
+    expect(await stored(page, 'test.fbq')).toEqual([['track', 'Lead', { content_name: 'planuvannya_mebli_zamir' }]]);
+  });
+
+  test('работы — только мебель (5 фото), вопросы, «Переглянути сайт» → /mebli; один жёлтый на экране', async ({ page }) => {
+    await page.goto(M);
+    const cats = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.category));
+    expect(cats).toHaveLength(5);
+    for (const c of cats) expect(['shafy', 'garderobni', 'inshi']).toContain(c);
+    // ряды заполнены целиком: нет карточки, которая стоит одна в ряду и не растянута на ширину
+    const rows = await page.locator('[data-block="3"] .pf__item').evaluateAll((els) => {
+      const m = new Map<number, number>();
+      for (const e of els) {
+        const r = e.getBoundingClientRect();
+        m.set(Math.round(r.top), (m.get(Math.round(r.top)) ?? 0) + r.width);
+      }
+      return [...m.values()].map((w) => w / els[0].parentElement!.getBoundingClientRect().width);
+    });
+    for (const share of rows) expect(share).toBeGreaterThan(0.95);
+    const faq = page.locator('[data-block="12"]');
+    await expect(faq.locator('summary')).toHaveText(['Це справді безкоштовно?', 'Що, якщо я не знаю точних розмірів?', 'Чи зобов’язує це мене замовляти?']);
+    await faq.locator('summary').nth(1).click();
+    await expect(faq.locator('details').nth(1)).toContainText('Надішліть фото і приблизні розміри — або замовте безкоштовний замір');
+    await expect(faq.locator('details').nth(1).getByRole('link')).toHaveAttribute('href', '#zamir');
+    const site = page.locator('[data-site-link]');
+    await expect(site).toHaveCount(2);
+    for (const b of await site.all()) await expect(b).toHaveAttribute('href', '/mebli');
+    await noTransitions(page);
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < height; y += 500) {
+      await page.evaluate((top) => window.scrollTo(0, top), y);
+      await nextFrames(page);
+      expect((await yellowOnScreen(page)).length, `y=${y}`).toBeLessThanOrEqual(1);
+    }
+  });
 });

@@ -96,6 +96,23 @@ t('/planuvannya: «Планування» и «Замір з лендингу» 
     [$bad] = lead_validate(['form' => 'zamir', 'time' => '<x>', 'quiz' => null] + $valid);
     eq($bad['time'], '', 'чужое значение времени отбрасывается');
 });
+t('/planuvannya-mebli: «Планування меблів» с размерами ниши и «що потрібно»; «Замір з лендингу меблів»', function () use ($valid) {
+    [$plan, $err] = lead_validate(['form' => 'plan_mebli', 'item' => 'harderobna', 'nicheWidth' => '2,4', 'nicheHeight' => '2,7', 'nicheDepth' => '', 'landing' => 'planuvannya-mebli', 'quiz' => null] + $valid);
+    eq($err, []);
+    eq($plan['landing'], 'planuvannya-mebli');
+    $lines = explode("\n", lead_telegram_text($plan));
+    eq($lines[0], '<b>Планування меблів</b>');
+    eq($lines[1], "Зв'язок: Viber");
+    ok(in_array('Що потрібно: Гардеробна', $lines, true), 'що потрібно');
+    ok(in_array('Розміри, м: ширина 2,4 · висота 2,7', $lines, true), 'размеры без пустой глубины');
+    [$z, $err] = lead_validate(['form' => 'zamir_mebli', 'time' => 'morning', 'contactMethod' => 'call', 'quiz' => null] + $valid);
+    eq($err, []);
+    $zl = explode("\n", lead_telegram_text($z));
+    eq($zl[0], '<b>Замір з лендингу меблів</b>');
+    ok(in_array('Зручний час: Зранку', $zl, true), 'время');
+    [$bad] = lead_validate(['form' => 'plan_mebli', 'item' => '<b>', 'quiz' => null] + $valid);
+    eq($bad['item'], '', 'чужое значение «що потрібно» отбрасывается');
+});
 t('Sheets: 22 колонки A–V, формулы обезврежены', function () use ($valid) {
     [$lead] = lead_validate(['name' => '=HYPERLINK("x")'] + $valid);
     $row = lead_sheet_row($lead, new DateTimeImmutable('2026-10-21T10:00:00Z'));

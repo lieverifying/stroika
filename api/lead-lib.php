@@ -5,15 +5,25 @@
  */
 declare(strict_types=1);
 
-const LEAD_FORMS = ['quiz', 'zapyt', 'plan', 'zamir'];
+const LEAD_FORMS = ['quiz', 'zapyt', 'plan', 'zamir', 'plan_mebli', 'zamir_mebli'];
 const LEAD_METHODS = ['viber' => 'Viber', 'telegram' => 'Telegram', 'call' => 'Дзвінок'];
-// plan — лид-магнит «Два варіанти планування», zamir — безкоштовний замір с лендинга /planuvannya
-const LEAD_FORM_TITLES = ['quiz' => 'Квіз', 'zapyt' => 'Нестандартне завдання', 'plan' => 'Планування', 'zamir' => 'Замір з лендингу'];
-/** Формы, у которых первая строка сообщения — тип заявки (решение владельца для /planuvannya), а не способ связи */
-const LEAD_TYPE_FIRST = ['plan', 'zamir'];
+// plan / zamir — лендинг /planuvannya (кухня), plan_mebli / zamir_mebli — /planuvannya-mebli (шафи та меблі)
+const LEAD_FORM_TITLES = [
+    'quiz' => 'Квіз',
+    'zapyt' => 'Нестандартне завдання',
+    'plan' => 'Планування',
+    'zamir' => 'Замір з лендингу',
+    'plan_mebli' => 'Планування меблів',
+    'zamir_mebli' => 'Замір з лендингу меблів',
+];
+/** Формы, у которых первая строка сообщения — тип заявки (решение владельца для лендингов), а не способ связи */
+const LEAD_TYPE_FIRST = ['plan', 'zamir', 'plan_mebli', 'zamir_mebli'];
 /** Формы, к которым можно приложить файлы */
-const LEAD_FILE_FORMS = ['zapyt', 'plan'];
-const LEAD_LANDINGS = ['kukhni', 'mebli', 'planuvannya', 'none'];
+const LEAD_FILE_FORMS = ['zapyt', 'plan', 'plan_mebli'];
+const LEAD_ZAMIR_FORMS = ['zamir', 'zamir_mebli'];
+const LEAD_LANDINGS = ['kukhni', 'mebli', 'planuvannya', 'planuvannya-mebli', 'none'];
+/** «Що потрібно» в форме /planuvannya-mebli */
+const LEAD_ITEMS = ['kupe' => 'Шафа-купе', 'rozpashna' => 'Розпашна шафа', 'harderobna' => 'Гардеробна', 'peredpokii' => 'Передпокій', 'inshe' => 'Інше'];
 const LEAD_TIMES = ['soon' => 'Найближчим часом', 'morning' => 'Зранку', 'day' => 'Вдень', 'evening' => 'Увечері'];
 const LEAD_MIN_ELAPSED_MS = 3000; // быстрее — бот
 const LEAD_MAX_JSON_BYTES = 10240;
@@ -143,7 +153,10 @@ function lead_validate(array $in): array
         'referrer' => lead_clean($in['referrer'] ?? '', 100),
         'request' => $form === 'zapyt' ? $request : '',
         'wallWidths' => $form === 'plan' ? lead_clean($in['wallWidths'] ?? '', 100) : '',
-        'time' => $form === 'zamir' ? (LEAD_TIMES[$time] ?? '') : '',
+        'time' => in_array($form, LEAD_ZAMIR_FORMS, true) ? (LEAD_TIMES[$time] ?? '') : '',
+        // /planuvannya-mebli: размеры ниши в метрах (необязательно) и что нужно
+        'niche' => $form === 'plan_mebli' ? lead_niche($in) : '',
+        'item' => $form === 'plan_mebli' ? (LEAD_ITEMS[lead_clean($in['item'] ?? '', 20)] ?? '') : '',
         'landing' => in_array($landing, LEAD_LANDINGS, true) ? $landing : 'none',
         'page' => lead_clean($in['page'] ?? '', 200),
         'quizSummary' => lead_clean($quiz['summary'] ?? '', 400),
@@ -153,6 +166,17 @@ function lead_validate(array $in): array
         'attribution' => $attribution,
     ];
     return [$lead, $errors];
+}
+
+/** Размеры ниши «ширина × висота × глибина, м» из необязательных полей; пустые пропускаются */
+function lead_niche(array $in): string
+{
+    $parts = [];
+    foreach (['nicheWidth' => 'ширина', 'nicheHeight' => 'висота', 'nicheDepth' => 'глибина'] as $k => $label) {
+        $v = lead_clean($in[$k] ?? '', 20);
+        if ($v !== '') $parts[] = "$label $v";
+    }
+    return implode(' · ', $parts);
 }
 
 function lead_html(string $s): string
@@ -184,6 +208,8 @@ function lead_telegram_text(array $lead, array $files = []): string
     if ($lead['request'] !== '') $lines[] = 'Завдання: ' . lead_html($lead['request']);
     if ($lead['wallWidths'] !== '') $lines[] = 'Ширина стін, м: ' . lead_html($lead['wallWidths']);
     if ($lead['time'] !== '') $lines[] = 'Зручний час: ' . lead_html($lead['time']);
+    if ($lead['item'] !== '') $lines[] = 'Що потрібно: ' . lead_html($lead['item']);
+    if ($lead['niche'] !== '') $lines[] = 'Розміри, м: ' . lead_html($lead['niche']);
     if ($files) $lines[] = 'Файли: ' . count($files) . ' (нижче)';
     if ($lead['referrer'] !== '') $lines[] = 'Порекомендував: ' . lead_html($lead['referrer']);
     $a = $lead['attribution'];
@@ -218,7 +244,8 @@ function lead_sheet_row(array $lead, DateTimeImmutable $now): array
         $lead['quizSummary'],
         '',
         '',
-        trim($lead['request'] . ($lead['wallWidths'] !== '' ? ' Ширина стін, м: ' . $lead['wallWidths'] : '')),
+        trim($lead['request'] . ($lead['wallWidths'] !== '' ? ' Ширина стін, м: ' . $lead['wallWidths'] : '')
+            . ($lead['item'] !== '' ? ' ' . $lead['item'] . '.' : '') . ($lead['niche'] !== '' ? ' Розміри, м: ' . $lead['niche'] : '')),
         $a['utm_source'] ?? '',
         $a['utm_medium'] ?? '',
         $a['utm_campaign'] ?? '',

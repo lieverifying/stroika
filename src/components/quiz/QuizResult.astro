@@ -84,11 +84,12 @@ const planHours = facts.leadMagnet.planHours;
   if (box) {
     const data: ThanksData | null = takeThanks();
     const hasA = Boolean(box.querySelector('[data-result="A"]'));
-    if (data?.kind === 'plan') {
-      // «Дякуємо. Дизайнер підготує два варіанти протягом 36 годин у робочі дні і надішле їх у Viber.»
+    if (data?.kind === 'plan' || data?.kind === 'plan_mebli') {
+      // «Дякуємо. Дизайнер підготує два варіанти [наповнення] протягом 36 годин у робочі дні і надішле їх у Viber.»
       const hours = box.dataset.planHours;
+      const what = data.kind === 'plan_mebli' ? 'два варіанти наповнення' : 'два варіанти';
       const tail = data.method === 'call' ? 'і зателефонує вам' : `і надішле їх у ${CHANNEL_LABEL[data.method]}`;
-      box.querySelector('[data-thanks]')!.textContent = `Дякуємо. Дизайнер підготує два варіанти протягом ${hours} годин у робочі дні ${tail}.`;
+      box.querySelector('[data-thanks]')!.textContent = `Дякуємо. Дизайнер підготує ${what} протягом ${hours} годин у робочі дні ${tail}.`;
       box.dataset.method = data.method;
       box.dataset.shown = 'plan';
     } else if (data) {

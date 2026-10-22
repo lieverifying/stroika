@@ -1,20 +1,67 @@
 ---
-// Форма лид-магнита «Два варіанти планування» (/planuvannya, якорь #plan): фото или план (до 3 файлов, необязательно),
-// ширина стен в метрах (необязательно), способ связи, имя, телефон, согласие. Кнопка — жёлтая: это главная цель страницы.
-// Успех → Lead в Pixel (content_name=planuvannya), lead_submit в dataLayer, /dyakuyemo со своим текстом.
-// В Telegram заявка приходит с первой строкой «Планування» (api/lead-lib.php).
+// Форма лид-магнита на лендингах (#plan). kitchen — /planuvannya «Два варіанти планування»: фото или план (до 3 файлов),
+// ширина стін; mebli — /planuvannya-mebli «Два варіанти наповнення»: фото ниши или комнаты, ширина / висота / глибина,
+// «Що потрібно». Дальше у обеих — способ связи, имя, телефон, согласие. Кнопка жёлтая: главная цель страницы.
+// Успех → Lead в Pixel (content_name = slug лендинга), lead_submit в dataLayer, /dyakuyemo со своим текстом.
+// В Telegram первой строкой тип: «Планування» / «Планування меблів» (api/lead-lib.php).
 import ContactFields from '../quiz/ContactFields.astro';
 import Button from '../ui/Button.astro';
 import FilesField from '../ui/form/FilesField.astro';
 import Input from '../ui/form/Input.astro';
+import Select from '../ui/form/Select.astro';
 import '../ui/form/field.css';
+
+interface Props {
+  variant: 'kitchen' | 'mebli';
+}
+const { variant } = Astro.props;
+const mebli = variant === 'mebli';
+const cfg = mebli
+  ? { form: 'plan_mebli', landing: 'planuvannya-mebli', content: 'planuvannya_mebli', kind: 'plan_mebli', files: 'Фото ніші або кімнати' }
+  : { form: 'plan', landing: 'planuvannya', content: 'planuvannya', kind: 'plan', files: 'Фото або план приміщення' };
+const ITEMS = [
+  { value: 'kupe', label: 'Шафа-купе' },
+  { value: 'rozpashna', label: 'Розпашна шафа' },
+  { value: 'harderobna', label: 'Гардеробна' },
+  { value: 'peredpokii', label: 'Передпокій' },
+  { value: 'inshe', label: 'Інше' },
+];
 ---
 
-<form class="plan-form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-plan-form>
-  <input type="hidden" name="form" value="plan" />
-  <input type="hidden" name="landing" value="planuvannya" />
-  <FilesField id="plan-files" label="Фото або план приміщення" />
-  <Input name="wallWidths" id="plan-walls" label="Ширина стін у метрах" inputmode="decimal" autocomplete="off" />
+<form
+  class="plan-form"
+  action="/api/lead.php"
+  method="post"
+  enctype="multipart/form-data"
+  novalidate
+  data-plan-form
+  data-form-type={cfg.form}
+  data-landing={cfg.landing}
+  data-content={cfg.content}
+  data-kind={cfg.kind}
+>
+  <input type="hidden" name="form" value={cfg.form} />
+  <input type="hidden" name="landing" value={cfg.landing} />
+  <FilesField id="plan-files" label={cfg.files} />
+  {
+    mebli ? (
+      <>
+        <fieldset class="plan-form__dims">
+          <legend class="field__label">
+            Розміри у метрах <span class="field__optional">(необов’язково)</span>
+          </legend>
+          <div class="plan-form__dims-row">
+            <Input name="nicheWidth" id="plan-width" label="Ширина" inputmode="decimal" autocomplete="off" hideOptional />
+            <Input name="nicheHeight" id="plan-height" label="Висота" inputmode="decimal" autocomplete="off" hideOptional />
+            <Input name="nicheDepth" id="plan-depth" label="Глибина" inputmode="decimal" autocomplete="off" hideOptional />
+          </div>
+        </fieldset>
+        <Select name="item" id="plan-item" label="Що потрібно" options={ITEMS} placeholder="Оберіть" />
+      </>
+    ) : (
+      <Input name="wallWidths" id="plan-walls" label="Ширина стін у метрах" inputmode="decimal" autocomplete="off" />
+    )
+  }
   <ContactFields prefix="plan" />
   <Button type="submit" size="lg" fullWidth ctaPriority={3}>Отримати 2 варіанти</Button>
   <p class="plan-form__status" role="status" aria-live="polite" data-form-status></p>
@@ -27,6 +74,20 @@ import '../ui/form/field.css';
     padding: 1.25rem;
     border-radius: var(--radius-lg);
     background: var(--color-white);
+  }
+  .plan-form__dims {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  /* Три поля размеров в ряд; подписи у них короткие («Ширина»), необязательность — в общей подписи над ними */
+  .plan-form__dims-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
   }
   .plan-form__status:empty {
     display: none;
@@ -59,9 +120,10 @@ import '../ui/form/field.css';
     phone: (f: Field) => validatePhone(f.value),
     consent: (f: Field) => validateConsent((f as HTMLInputElement).checked),
   };
+  const text = (data: FormData, key: string) => String(data.get(key) ?? '').trim();
 
-  const form = document.querySelector<HTMLFormElement>('form[data-plan-form]');
-  if (form) {
+  document.querySelectorAll<HTMLFormElement>('form[data-plan-form]').forEach((form) => {
+    const { formType = 'plan', landing = 'planuvannya', content = 'planuvannya', kind } = form.dataset;
     const status = form.querySelector<HTMLElement>('[data-form-status]');
     const filesInput = form.querySelector<HTMLInputElement>('input[name="files"]')!;
     clearErrorsOnFix(form, CHECKS);
@@ -78,31 +140,35 @@ import '../ui/form/field.css';
       if (status) status.textContent = 'Надсилаємо…';
       const data = new FormData(form);
       const method = toMethod(data.get('method'));
-      const name = String(data.get('name') ?? '').trim();
-      // Способ связи — первым полем (общее правило заявок); тип «Планування» ставит сервер по form
+      const name = text(data, 'name');
+      // Способ связи — первым полем (общее правило заявок); тип заявки первой строкой ставит сервер по form
+      const extra =
+        formType === 'plan_mebli'
+          ? { nicheWidth: text(data, 'nicheWidth'), nicheHeight: text(data, 'nicheHeight'), nicheDepth: text(data, 'nicheDepth'), item: text(data, 'item') }
+          : { wallWidths: text(data, 'wallWidths') };
       const res = await submitLead(
         {
           contactMethod: method,
-          form: 'plan',
-          landing: 'planuvannya',
-          wallWidths: String(data.get('wallWidths') ?? '').trim(),
+          form: formType,
+          landing,
+          ...extra,
           name,
-          phone: normalizePhone(String(data.get('phone') ?? '')),
-          referrer: String(data.get('referrer') ?? '').trim(),
+          phone: normalizePhone(text(data, 'phone')),
+          referrer: text(data, 'referrer'),
           consent: true,
           website: data.get('website') ?? '',
         },
         { files: Array.from(filesInput.files ?? []) },
       );
       if (res.ok) {
-        track('lead_submit', { form: 'plan', landing: 'planuvannya', content_name: 'planuvannya' });
-        pixelLead('planuvannya');
-        saveThanks({ name, method, result: null, kind: 'plan' });
+        track('lead_submit', { form: formType, landing, content_name: content });
+        pixelLead(content);
+        saveThanks({ name, method, result: null, kind: kind === 'plan_mebli' ? 'plan_mebli' : 'plan' });
         location.assign('/dyakuyemo');
       } else {
         if (button) button.disabled = false;
         showSendError(status);
       }
     });
-  }
+  });
 </script>

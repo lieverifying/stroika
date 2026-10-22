@@ -12,10 +12,12 @@ interface Props {
   eager?: number;
   cols?: [number, number];
   wide?: boolean;
+  /** id работ, которые всегда на две колонки (чтобы последний ряд не остался с одной карточкой) */
+  wideIds?: string[];
   class?: string;
 }
-const { items, eager = 4, cols = [2, 3], wide = false, class: className } = Astro.props;
-const isWide = (i: PortfolioItem) => wide && i.width / i.height > 1.2;
+const { items, eager = 4, cols = [2, 3], wide = false, wideIds = [], class: className } = Astro.props;
+const isWide = (i: PortfolioItem) => wideIds.includes(i.id) || (wide && i.width / i.height > 1.2);
 // Ширина карточки на экране: доля колонки (широкие — две колонки)
 const sizes = (i: PortfolioItem) => {
   const span = isWide(i) ? 2 : 1;

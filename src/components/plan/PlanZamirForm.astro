@@ -1,8 +1,9 @@
 ---
-// Запасной вариант на /planuvannya (якорь #zamir): нет плана или фото — короткая форма безкоштовного заміру.
+// Запасной вариант на лендингах (якорь #zamir): нет плана, фото или размеров — короткая форма безкоштовного заміру.
+// kitchen — /planuvannya («Замір з лендингу», Lead planuvannya_zamir), mebli — /planuvannya-mebli
+// («Замір з лендингу меблів», Lead planuvannya_mebli_zamir).
 // Ім'я, телефон, зручний час, згода. Кнопка графитовая: главная цель страницы остаётся «Надіслати план».
-// Успех → Lead в Pixel (content_name=planuvannya_zamir), /dyakuyemo с общим текстом («Зателефонуємо у робочий час»).
-// В Telegram заявка приходит с первой строкой «Замір з лендингу» (api/lead-lib.php).
+// Успех → Lead в Pixel, /dyakuyemo с общим текстом («Зателефонуємо у робочий час»). Тип заявки первой строкой — api/lead-lib.php.
 import Button from '../ui/Button.astro';
 import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
 import Honeypot from '../ui/form/Honeypot.astro';
@@ -11,6 +12,14 @@ import PhoneInput from '../ui/form/PhoneInput.astro';
 import Select from '../ui/form/Select.astro';
 import '../ui/form/field.css';
 
+interface Props {
+  variant: 'kitchen' | 'mebli';
+}
+const { variant } = Astro.props;
+const cfg =
+  variant === 'mebli'
+    ? { form: 'zamir_mebli', landing: 'planuvannya-mebli', content: 'planuvannya_mebli_zamir' }
+    : { form: 'zamir', landing: 'planuvannya', content: 'planuvannya_zamir' };
 const TIMES = [
   { value: 'soon', label: 'Найближчим часом' },
   { value: 'morning', label: 'Зранку' },
@@ -19,9 +28,18 @@ const TIMES = [
 ];
 ---
 
-<form class="zamir-lite" action="/api/lead.php" method="post" novalidate data-plan-zamir-form>
-  <input type="hidden" name="form" value="zamir" />
-  <input type="hidden" name="landing" value="planuvannya" />
+<form
+  class="zamir-lite"
+  action="/api/lead.php"
+  method="post"
+  novalidate
+  data-plan-zamir-form
+  data-form-type={cfg.form}
+  data-landing={cfg.landing}
+  data-content={cfg.content}
+>
+  <input type="hidden" name="form" value={cfg.form} />
+  <input type="hidden" name="landing" value={cfg.landing} />
   <input type="hidden" name="contactMethod" value="call" />
   <Input name="name" id="pz-name" label="Ім’я" autocomplete="given-name" required error="Вкажіть, як до вас звертатися" />
   <PhoneInput id="pz-phone" />
@@ -71,8 +89,8 @@ const TIMES = [
     consent: (f: Field) => validateConsent((f as HTMLInputElement).checked),
   };
 
-  const form = document.querySelector<HTMLFormElement>('form[data-plan-zamir-form]');
-  if (form) {
+  document.querySelectorAll<HTMLFormElement>('form[data-plan-zamir-form]').forEach((form) => {
+    const { formType = 'zamir', landing = 'planuvannya', content = 'planuvannya_zamir' } = form.dataset;
     const status = form.querySelector<HTMLElement>('[data-form-status]');
     clearErrorsOnFix(form, CHECKS);
     form.addEventListener('submit', async (e) => {
@@ -88,8 +106,8 @@ const TIMES = [
       const name = String(data.get('name') ?? '').trim();
       const res = await submitLead({
         contactMethod: 'call',
-        form: 'zamir',
-        landing: 'planuvannya',
+        form: formType,
+        landing,
         name,
         phone: normalizePhone(String(data.get('phone') ?? '')),
         time: String(data.get('time') ?? ''),
@@ -97,8 +115,8 @@ const TIMES = [
         website: data.get('website') ?? '',
       });
       if (res.ok) {
-        track('lead_submit', { form: 'zamir', landing: 'planuvannya', content_name: 'planuvannya_zamir' });
-        pixelLead('planuvannya_zamir');
+        track('lead_submit', { form: formType, landing, content_name: content });
+        pixelLead(content);
         saveThanks({ name, method: 'call', result: null });
         location.assign('/dyakuyemo');
       } else {
@@ -106,5 +124,5 @@ const TIMES = [
         showSendError(status);
       }
     });
-  }
+  });
 </script>
