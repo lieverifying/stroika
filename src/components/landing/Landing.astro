@@ -13,6 +13,7 @@ import Faq from '../sections/Faq.astro';
 import FinalCta from '../sections/FinalCta.astro';
 import Story, { type StoryData } from '../story/Story.astro';
 import { FAQ } from '../../content/faq';
+import { faqPage } from '../../lib/schema';
 import { quizHref, type Landing } from '../../lib/landing';
 import { HERO, responsive, type PortfolioItem, type PortfolioPhoto } from '../../lib/portfolio';
 
@@ -37,7 +38,7 @@ const p = Astro.props;
 const HERO_SIZES = '(min-width: 64rem) 40vw, 100vw';
 ---
 
-<BaseLayout title={p.title} description={p.description} compactH2 lcpImage={{ srcset: responsive(p.heroPhoto ?? HERO).srcset, sizes: HERO_SIZES }}>
+<BaseLayout title={p.title} description={p.description} ogImage={`/og/${p.landing}.jpg`} jsonLd={[faqPage(FAQ)]} compactH2 lcpImage={{ srcset: responsive(p.heroPhoto ?? HERO).srcset, sizes: HERO_SIZES }}>
   <Hero title={p.h1} lead={p.lead} photo={p.heroPhoto} focus={p.heroFocus} quizHref={quizHref(p.landing)} />
   <QuizSection title={p.quizTitle} preset={p.landing === 'mebli' ? 'wardrobe' : 'kitchen'} />
   <Portfolio title={p.worksTitle} items={p.works} cols={p.worksCols} moreHref={p.worksMoreHref} moreLabel={p.worksMoreLabel} />

@@ -32,13 +32,15 @@ const LEAD_FILE_MAX_BYTES = 10 * 1024 * 1024;
 const LEAD_FILE_EXT = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'pdf'];
 
 /**
- * Конфиг вне публичной папки. Порядок поиска: VYMIR_LEAD_CONFIG → <над корнем сайта>/config/lead.php
- * (хостинг: api/ лежит в public_html) → <корень репозитория>/config/lead.php (локальная разработка).
+ * Конфиг вне публичной папки. Порядок поиска: VYMIR_LEAD_CONFIG → <над корнем сайта>/vymir-config/lead.php
+ * (Namecheap: /home/vymimufd/vymir-config, api/ лежит в public_html) → <над корнем сайта>/config/lead.php
+ * → <корень репозитория>/config/lead.php (локальная разработка).
  */
 function lead_config_path(string $apiDir): ?string
 {
     $candidates = array_filter([
         getenv('VYMIR_LEAD_CONFIG') ?: null,
+        dirname($apiDir, 2) . '/vymir-config/lead.php',
         dirname($apiDir, 2) . '/config/lead.php',
         dirname($apiDir) . '/config/lead.php',
     ]);

@@ -1151,7 +1151,7 @@ ID: <leadId>
 | `SITE_ENV` | `production` / `development`: noindex, строгая проверка заглушек |
 | `PUBLIC_GTM_ID`, `META_PIXEL_ID`, `PUBLIC_CLARITY_ID` | Аналитика (фаза 7) |
 
-**PHP на хостинге** — файл `config/lead.php` **вне публичной папки**: `api/lead.php` ищет его по `VYMIR_LEAD_CONFIG`, затем в `<над корнем сайта>/config/lead.php` (хостинг), затем в `<репозиторий>/config/lead.php` (локально, в `.gitignore`). В репозитории — только `config/lead.example.php`. Telegram-токен и chat ID лежат в GitHub Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`); деплой (фаза 9) собирает из них `config/lead.php` на хостинге. Журнал, счётчики частоты, последние ID и резерв `leads-failed.jsonl` — в `config/data/`.
+**PHP на хостинге (Namecheap)** — файл `/home/vymimufd/vymir-config/lead.php` **вне public_html**. `api/lead.php` ищет конфиг так: `VYMIR_LEAD_CONFIG` → `<над корнем сайта>/vymir-config/lead.php` → `<над корнем сайта>/config/lead.php` → `<репозиторий>/config/lead.php` (локально, в `.gitignore`). Файл создаёт владелец в File Manager cPanel по образцу `config/lead.example.php`; FTP-аккаунт выкладки в эту папку доступа не имеет, GitHub токен не видит. Журнал, счётчики частоты, последние ID и резерв `leads-failed.jsonl` — в `vymir-config/data/` (создаётся сама).
 
 | Ключ | Назначение |
 |---|---|
@@ -1164,22 +1164,22 @@ ID: <leadId>
 
 `.htaccess` в `api/` запрещает доступ ко всему, кроме `lead.php`; служебные файлы (лог, счётчики, резерв заявок) лежат вне публичной папки.
 
-### 7.5. Деплой (ФАЗА 9)
+### 7.5. Деплой (ФАЗА 9, Namecheap)
 
 ```
-push в main ─► GitHub Actions
-                ├─ npm ci
-                ├─ npm run build (SITE_ENV=production) + check:placeholders --strict
-                ├─ npx playwright test (необязательно, при наличии времени)
-                └─ SFTP-загрузка на хостинг adm.tools
-                     ├─ dist/  → корень сайта (public_html / www — уточнить в панели)
-                     └─ api/   → <корень сайта>/api/  (lead.php, .htaccess; без lead-config.php)
+push в main ─► GitHub Actions (.github/workflows/deploy.yml)
+                ├─ test: npm ci → vitest → npm run test:php → playwright (тестовая сборка, noindex)
+                └─ deploy: npm run build (SITE_ENV=production, SITE_URL=https://vymir.site; падает на заглушках)
+                     ├─ deploy/ = dist/ + api/ (lead.php, lead-lib.php, .htaccess)
+                     ├─ FTPS (явный TLS, порт 21), deploy@vymir.site → /home/vymimufd/public_html
+                     │    синхронизация по .ftp-deploy-sync-state.json: удаляется только выложенное ранее
+                     └─ проверка: страницы 200, 404, /api/lead.php 405, lead-lib.php 403, POST без полей → 422 (конфиг на месте)
 ```
 
-- Доступы (`SFTP_HOST`, `SFTP_PORT`, `SFTP_USER`, `SFTP_PASSWORD` или `SFTP_KEY`, `SFTP_REMOTE_DIR`) и `SITE_URL` хранятся **только в GitHub Secrets**, владелец вносит их сам. В репозитории и в логах Actions их нет.
-- Загрузка синхронизирует файлы (удаляет устаревшие в корне сайта), но никогда не трогает `lead-config.php`, логи и файлы вне корня сайта.
-- Редиректы (`/kukhni` → `/`, HTTP → HTTPS, `www` → без `www`, позже prime-studio.space → новый домен) — в `public/.htaccess` (Apache на хостинге). Бесплатный SSL Let's Encrypt включается в панели adm.tools.
-- Пока домена нет, сайт можно выкладывать на технический адрес хостинга с `SITE_ENV` ≠ `production` (noindex).
+- Секреты GitHub (вносит владелец): `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`. Переменные: `PUBLIC_GA4_ID`, `PUBLIC_META_PIXEL_ID`, `PUBLIC_GSC_VERIFICATION` (необязательные), `SITE_URL`, `SITE_ENV` (по умолчанию https://vymir.site и production).
+- Токен бота и ID чата в GitHub не хранятся: только в `/home/vymimufd/vymir-config/lead.php`.
+- `public/.htaccess` целиком заменяет файл в public_html (правила Force HTTPS из cPanel перезаписываются): https и без www — по `%{HTTPS}` и `X-Forwarded-Proto`, `/.well-known/` без редиректа (продление SSL), сжатие, кэш, 404, адреса без `.html`. `api/.htaccess` отдаёт только `lead.php` (через mod_rewrite — работает на LiteSpeed).
+- SSL — Namecheap, до 08.05.2027.
 
 ---
 

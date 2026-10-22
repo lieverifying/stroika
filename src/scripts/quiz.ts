@@ -16,6 +16,7 @@ import { clearErrorsOnFix, validateForm } from '../lib/lead/field-errors';
 import { saveThanks, toMethod } from '../lib/lead/result-store';
 import { showSendError } from '../lib/lead/send-error';
 import { submitLead } from '../lib/lead/submit';
+import { leadSucceeded } from '../lib/tags';
 import { normalizePhone } from '../lib/phone';
 import { STEPS, branchOf } from '../lib/quiz/config';
 import { computeResult, factsToPriceInput } from '../lib/quiz/price';
@@ -263,6 +264,7 @@ export function initQuiz(root: HTMLElement): void {
     });
     if (res.ok) {
       track('lead_submit', { form: 'quiz', landing });
+      leadSucceeded('quiz');
       saveThanks({ name, method, result });
       clearState();
       location.assign('/dyakuyemo');

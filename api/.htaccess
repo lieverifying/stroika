@@ -1,6 +1,5 @@
-# Доступ только к приёмнику заявок; служебные файлы (lead-lib.php) снаружи не открываются
-Require all denied
-<Files "lead.php">
-  Require all granted
-</Files>
+# Доступ только к приёмнику заявок; служебный lead-lib.php снаружи не открывается.
+# Через mod_rewrite — одинаково работает на Apache и LiteSpeed (Namecheap), без зависимости от синтаксиса Require.
 Options -Indexes
+RewriteEngine On
+RewriteRule ^(?!lead\.php$). - [F,L]

@@ -1,9 +1,15 @@
-# Выкладка сайта на хостинг adm.tools (фаза 9).
-# push в main или запуск вручную → тесты (юнит, PHP, e2e) → сборка → загрузка по SSH (rsync) → проверка живого сайта.
-# Сборка: SITE_ENV из переменной репозитория SITE_ENV (по умолчанию development — тестовая, с noindex). Боевая (production) включается
-# переменной SITE_ENV=production, когда в facts.ts не останется заглушек: scripts/check-release.mjs не пропустит иначе.
-# Секреты (Settings → Secrets → Actions): DEPLOY_SSH_KEY — приватный ключ для выкладки, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID;
-# необязательно GAS_URL, GAS_SECRET, LEAD_EMAIL_TO, LEAD_EMAIL_FROM. В логах их нет: GitHub маскирует значения.
+# Выкладка на Namecheap Shared Hosting (cPanel, LiteSpeed) — https://vymir.site (фаза 9, переезд 2026-10-22).
+# push в main или запуск вручную → тесты (юнит, PHP, e2e) → боевая сборка → загрузка по FTPS (явный TLS, порт 21)
+# в public_html → проверка живого сайта.
+#
+# Секреты (Settings → Secrets and variables → Actions → Secrets), вносит владелец:
+#   FTP_SERVER    — адрес FTP-сервера (premium25.web-hosting.com)
+#   FTP_USERNAME  — deploy@vymir.site (доступ только к /home/vymimufd/public_html)
+#   FTP_PASSWORD  — пароль этого FTP-аккаунта
+# Переменные (Settings → Secrets and variables → Actions → Variables), необязательные — без них тег не выводится:
+#   PUBLIC_GA4_ID, PUBLIC_META_PIXEL_ID, PUBLIC_GSC_VERIFICATION; SITE_URL и SITE_ENV — если нужно переопределить.
+# Секреты заявок (токен бота, ID чата) в GitHub не нужны: они в /home/vymimufd/vymir-config/lead.php, его создаёт
+# владелец в cPanel. Сюда не попадают ни значения секретов, ни их вывод: GitHub маскирует их в логах.
 name: Deploy
 
 on:
@@ -16,16 +22,15 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  DEPLOY_HOST: xk589064.ftp.tools
-  DEPLOY_USER: xk589064
-  # Каталог сайта в домашней папке аккаунта: внутри www — сайт, рядом config/ — секреты заявок (вне публичной папки)
-  DEPLOY_SITE_DIR: prime-studio.space
-  SITE_URL: ${{ vars.SITE_URL || 'https://prime-studio.space' }}
-  SITE_ENV: ${{ vars.SITE_ENV || 'development' }}
+  SITE_URL: ${{ vars.SITE_URL || 'https://vymir.site' }}
+  SITE_ENV: ${{ vars.SITE_ENV || 'production' }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # тесты — на тестовой сборке (noindex, без тегов аналитики)
+      SITE_ENV: development
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -52,95 +57,59 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment:
-      name: ${{ vars.SITE_ENV == 'production' && 'production' || 'staging' }}
-      url: ${{ vars.SITE_URL || 'https://prime-studio.space' }}
+      name: ${{ (vars.SITE_ENV || 'production') == 'production' && 'production' || 'staging' }}
+      url: ${{ vars.SITE_URL || 'https://vymir.site' }}
     steps:
       - name: Секреты для выкладки на месте
         env:
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          if [ -z "$DEPLOY_SSH_KEY" ]; then echo "::error::Нет секрета DEPLOY_SSH_KEY (приватный ключ выкладки)"; exit 1; fi
-          if [ -z "$TG_TOKEN" ]; then echo "::error::Нет секрета TELEGRAM_BOT_TOKEN — заявки не будут уходить"; exit 1; fi
+          for v in FTP_SERVER FTP_USERNAME FTP_PASSWORD; do
+            if [ -z "${!v}" ]; then echo "::error::Нет секрета $v"; exit 1; fi
+          done
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Боевая сборка падает на заглушках {{…}} (scripts/check-release.mjs) — тогда выкладки не будет
       - name: Сборка (${{ env.SITE_ENV }})
+        env:
+          PUBLIC_GA4_ID: ${{ vars.PUBLIC_GA4_ID }}
+          PUBLIC_META_PIXEL_ID: ${{ vars.PUBLIC_META_PIXEL_ID }}
+          PUBLIC_GSC_VERIFICATION: ${{ vars.PUBLIC_GSC_VERIFICATION }}
         run: npm run build
 
       - name: Каталог выкладки — сайт и приёмник заявок
         run: |
-          mkdir -p deploy
-          cp -a dist/. deploy/
           mkdir -p deploy/api
+          cp -a dist/. deploy/
           cp api/lead.php api/lead-lib.php api/.htaccess deploy/api/
 
-      - name: Конфиг заявок из секретов (кладётся вне www)
-        env:
-          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GAS_URL: ${{ secrets.GAS_URL }}
-          GAS_SECRET: ${{ secrets.GAS_SECRET }}
-          LEAD_EMAIL_TO: ${{ secrets.LEAD_EMAIL_TO }}
-          LEAD_EMAIL_FROM: ${{ secrets.LEAD_EMAIL_FROM }}
-        run: |
-          umask 077
-          mkdir -p private
-          php -r '
-            $site = rtrim(getenv("SITE_URL"), "/");
-            $host = parse_url($site, PHP_URL_HOST);
-            $cfg = [
-              "site_url" => $site,
-              "allowed_origins" => ["https://www.$host", "http://$host", "http://www.$host"],
-              "telegram_bot_token" => getenv("TG_TOKEN") ?: "",
-              "telegram_chat_id" => getenv("TG_CHAT") ?: "",
-              "gas_url" => getenv("GAS_URL") ?: "",
-              "gas_secret" => getenv("GAS_SECRET") ?: "",
-              "lead_email_to" => getenv("LEAD_EMAIL_TO") ?: "",
-              "lead_email_from" => getenv("LEAD_EMAIL_FROM") ?: "",
-              "rate_limit" => 5,
-              "rate_window_sec" => 600,
-            ];
-            if ($cfg["telegram_bot_token"] === "" && $cfg["lead_email_to"] === "" && $cfg["gas_url"] === "") {
-              fwrite(STDERR, "Нет ни одного канала заявок: внесите TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в секреты\n");
-              exit(1);
-            }
-            file_put_contents("private/lead.php", "<?php\n// Создано выкладкой из GitHub Secrets. Не редактировать на сервере — перезапишется.\nreturn " . var_export($cfg, true) . ";\n");
-          '
-          php -l private/lead.php
-
-      - name: SSH-ключ
-        env:
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          # Ключи сервера закреплены: подмена хоста остановит выкладку
-          cat >> ~/.ssh/known_hosts <<'KNOWN'
-          xk589064.ftp.tools ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYIz/av0LW+J36t7lCPNuwKRRIK1PdC1zhmR5qWPDPm
-          xk589064.ftp.tools ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBApcbMhssclNR5v7PV+2W/uzLTNZdIfJoO3UCxIkELZ+po8Rd8KTpV1uQ+EfUMM9zgJqeQ1/x7D+lFHTeOiLCYs=
-          KNOWN
-          sed -i 's/^ *//' ~/.ssh/known_hosts
-
-      - name: Загрузка на хостинг
-        run: |
-          SSH="ssh -i $HOME/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes"
-          TARGET="$DEPLOY_USER@$DEPLOY_HOST"
-          $SSH "$TARGET" "mkdir -p ~/$DEPLOY_SITE_DIR/www ~/$DEPLOY_SITE_DIR/config/data && chmod 700 ~/$DEPLOY_SITE_DIR/config ~/$DEPLOY_SITE_DIR/config/data"
-          # Конфиг — первым: новый lead.php не должен увидеть сайт без конфига
-          rsync -a --chmod=F600 -e "$SSH" private/lead.php "$TARGET:$DEPLOY_SITE_DIR/config/lead.php"
-          # Сайт: точная копия каталога выкладки, устаревшие файлы удаляются (только внутри www)
-          rsync -az --delete --delay-updates -e "$SSH" deploy/ "$TARGET:$DEPLOY_SITE_DIR/www/"
+      # Синхронизация: загружаются изменённые файлы, удаляются только те, что выложила эта же выкладка
+      # (состояние — .ftp-deploy-sync-state.json в public_html; .well-known и чужие файлы не трогаются)
+      - name: Загрузка по FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./deploy/
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
 
       - name: Проверка живого сайта
         run: |
           set -e
           base="${SITE_URL%/}"
-          for p in / /kukhni /mebli /roboty /kontakty /yak-my-stvoriuiemo /dyakuyemo /polityka; do
+          for p in / /kukhni /mebli /roboty /kontakty /yak-my-stvoriuiemo /dyakuyemo /polityka /planuvannya /planuvannya-mebli /sitemap.xml /robots.txt; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "$base$p")
             echo "$p → $code"
             test "$code" = 200
@@ -148,11 +117,8 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/takoi-storinky-nemaie")" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/api/lead.php")" = 405
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/api/lead-lib.php")" = 403
-          # приёмник видит конфиг: на пустую заявку отвечает 422 (неверные поля), а не 500 (нет конфига)
+          # приёмник видит конфиг в vymir-config: на пустую заявку — 422 (неверные поля), а не 500 (нет конфига)
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"elapsedMs":9000}' "$base/api/lead.php")
           echo "api POST → $code"
+          if [ "$code" = 500 ]; then echo "::error::Нет /home/vymimufd/vymir-config/lead.php — заявки не уходят"; exit 1; fi
           test "$code" = 422
-
-      - name: Удалить ключ и конфиг с раннера
-        if: always()
-        run: rm -f ~/.ssh/deploy_key private/lead.php

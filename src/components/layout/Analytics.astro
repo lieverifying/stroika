@@ -1,0 +1,57 @@
+---
+// Google Analytics 4 и Meta Pixel (фаза 7). Только боевая сборка (SITE_ENV=production) и только с заданным ID:
+// PUBLIC_GA4_ID, PUBLIC_META_PIXEL_ID. Без ID тег не выводится, сборка не падает.
+// GA4: page_view (автоматически), события — src/lib/tags.ts. Pixel: PageView на каждой странице, Lead, Contact.
+// Клики по телефону и мессенджерам ловит один обработчик на документе.
+import { PUBLIC_GA4_ID, PUBLIC_META_PIXEL_ID, SITE_ENV } from 'astro:env/client';
+
+const prod = SITE_ENV === 'production';
+const ga4 = prod && PUBLIC_GA4_ID ? PUBLIC_GA4_ID : '';
+const pixel = prod && PUBLIC_META_PIXEL_ID ? PUBLIC_META_PIXEL_ID : '';
+---
+
+{ga4 && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${ga4}`} />}
+{
+  ga4 && (
+    <script is:inline define:vars={{ ga4 }}>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', ga4);
+    </script>
+  )
+}
+{
+  pixel && (
+    <script is:inline define:vars={{ pixel }}>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      window.fbq('init', pixel);
+      window.fbq('track', 'PageView');
+    </script>
+  )
+}
+<script>
+  // Без gtag и fbq (не боевая сборка, ID не заданы) contactClicked ничего не делает
+  import { contactClicked } from '../../lib/tags';
+  document.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
+    if (a) contactClicked(a.getAttribute('href') ?? '');
+  });
+</script>

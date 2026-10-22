@@ -55,6 +55,7 @@ const p = Astro.props;
   noindex
   bare
   compactH2
+  ogImage={`/og/${p.variant === 'mebli' ? 'planuvannya-mebli' : 'planuvannya'}.jpg`}
   lcpImage={{ srcset: responsive(p.photo).srcset, sizes: '(min-width: 64rem) 40vw, 100vw' }}
 >
   <header class="plan-top container-site">

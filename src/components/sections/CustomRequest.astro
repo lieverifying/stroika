@@ -83,6 +83,7 @@ import '../ui/form/field.css';
   import { track } from '../../lib/track';
   import { showSendError } from '../../lib/lead/send-error';
   import { submitLead } from '../../lib/lead/submit';
+  import { leadSucceeded } from '../../lib/tags';
   import { validateConsent, validateFiles, validateName, validatePhone, validateRequest } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
 
@@ -131,6 +132,7 @@ import '../ui/form/field.css';
       }, { files: Array.from(filesInput.files ?? []) });
       if (res.ok) {
         track('lead_submit', { form: 'zapyt', landing });
+        leadSucceeded('zapyt');
         saveThanks({ name, method, result: null });
         location.assign('/dyakuyemo');
       } else {

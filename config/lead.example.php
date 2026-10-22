@@ -1,9 +1,10 @@
 <?php
 // Конфиг приёма заявок (api/lead.php). Скопировать в config/lead.php и заполнить.
-// На хостинге файл лежит ВНЕ public_html: <домашний каталог>/config/lead.php. В репозиторий настоящие значения не попадают.
+// На Namecheap файл лежит ВНЕ public_html: /home/vymimufd/vymir-config/lead.php (создаётся в File Manager cPanel).
+// В репозиторий настоящие значения не попадают.
 return [
-  'site_url' => '',               // https://vymir.ua — разрешённый Origin; пусто — не проверяем (технический адрес)
-  'allowed_origins' => [],        // дополнительные Origin, например технический адрес хостинга
+  'site_url' => '',               // https://vymir.site — разрешённый Origin; пусто — не проверяем
+  'allowed_origins' => [],        // дополнительные Origin, например ['https://www.vymir.site']
   'telegram_bot_token' => '',
   'telegram_chat_id' => '',
   'telegram_thread_id' => '',     // тема в группе-форуме, необязательно

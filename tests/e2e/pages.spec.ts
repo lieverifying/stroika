@@ -28,7 +28,7 @@ test('галочка согласия во всех формах ведёт на
 });
 
 test.describe('/polityka', () => {
-  test('разделы политики; владелец — ФОП Мєшалкін Андрій Леонідович, контакт {{PRIVACY_EMAIL}} и телефон', async ({ page }) => {
+  test('разделы политики; владелец — ФОП Мєшалкін Андрій Леонідович, контакт vymir.che@gmail.com и телефон; GA4 и Pixel', async ({ page }) => {
     await page.goto('/polityka');
     await expect(page.locator('h1')).toHaveText('Політика конфіденційності');
     await expect(page.locator('article h2')).toHaveText([
@@ -39,15 +39,18 @@ test.describe('/polityka', () => {
       'Де зберігаються дані і хто має доступ',
       'Скільки зберігаємо',
       'Дані у вашому браузері',
+      'Аналітика: Google Analytics і Meta Pixel',
       'Ваші права',
       'Зміни політики',
     ]);
     await expect(page.locator('main')).toContainText('Про захист персональних даних');
     await expect(page.locator('main')).toContainText('Володілець персональних даних — ФОП Мєшалкін Андрій Леонідович');
     await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
-    // единственная заглушка режима запуска — почту пришлёт владелец
-    const names = await page.locator('.fact-ph').evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('data-placeholder')))].sort());
-    expect(names).toEqual(['PRIVACY_EMAIL']);
+    // заглушек больше нет: почта для вопросов о персональных данных подтверждена 2026-10-22
+    await expect(page.locator('.fact-ph')).toHaveCount(0);
+    await expect(page.locator('main a[href="mailto:vymir.che@gmail.com"]').first()).toHaveText('vymir.che@gmail.com');
+    await expect(page.locator('main')).toContainText('Ваше ім’я, номер телефону, опис завдання і файли в Google Analytics і Meta Pixel не передаються ніколи');
+    await expect(page.locator('main a[href="https://tools.google.com/dlpage/gaoptout"]')).toHaveCount(1);
   });
 });
 

@@ -79,7 +79,7 @@ const TIMES = [
   import { submitLead } from '../../lib/lead/submit';
   import { validateConsent, validateName, validatePhone } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
-  import { pixelLead } from '../../lib/pixel';
+  import { leadSucceeded } from '../../lib/tags';
   import { track } from '../../lib/track';
 
   type Field = HTMLInputElement | HTMLTextAreaElement;
@@ -116,7 +116,7 @@ const TIMES = [
       });
       if (res.ok) {
         track('lead_submit', { form: formType, landing, content_name: content });
-        pixelLead(content);
+        leadSucceeded(formType, content);
         saveThanks({ name, method: 'call', result: null });
         location.assign('/dyakuyemo');
       } else {

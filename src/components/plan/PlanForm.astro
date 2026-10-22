@@ -110,7 +110,7 @@ const ITEMS = [
   import { submitLead } from '../../lib/lead/submit';
   import { validateConsent, validateFiles, validateName, validatePhone } from '../../lib/lead/validate';
   import { normalizePhone } from '../../lib/phone';
-  import { pixelLead } from '../../lib/pixel';
+  import { leadSucceeded } from '../../lib/tags';
   import { track } from '../../lib/track';
 
   type Field = HTMLInputElement | HTMLTextAreaElement;
@@ -162,7 +162,7 @@ const ITEMS = [
       );
       if (res.ok) {
         track('lead_submit', { form: formType, landing, content_name: content });
-        pixelLead(content);
+        leadSucceeded(formType, content);
         saveThanks({ name, method, result: null, kind: kind === 'plan_mebli' ? 'plan_mebli' : 'plan' });
         location.assign('/dyakuyemo');
       } else {

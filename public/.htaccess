@@ -1,19 +1,26 @@
-# Хостинг adm.tools (Apache). Страница 404 и постоянные перенаправления (CLAUDE.md, «Страницы»).
+# Хостинг Namecheap (LiteSpeed, cPanel), https://vymir.site. Страница 404, редиректы, сжатие, кэш (CLAUDE.md, «Страницы»).
 ErrorDocument 404 /404.html
 
 # Сборка кладёт страницы файлами (build.format = 'file': kukhni.html), а ссылки на сайте — без расширения (/kukhni).
 # Отдаём /kukhni из kukhni.html; адрес с .html перенаправляем на адрес без расширения.
 RewriteEngine On
 
-# Один адрес сайта: https и без www. На adm.tools перед Apache стоит nginx: схему запроса Apache видит
-# только в заголовке X-Forwarded-Proto (REQUEST_SCHEME всегда http), поэтому проверяем его.
+# Один адрес сайта: https://vymir.site, без www. Этот файл целиком заменяет public_html/.htaccess при каждой выкладке,
+# поэтому правила Force HTTPS из cPanel / SSL-плагина должны быть здесь. Схема — по %{HTTPS} (LiteSpeed на Namecheap)
+# и по X-Forwarded-Proto (если перед сервером стоит прокси); редирект — только когда обе говорят «не https».
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
-RewriteCond %{HTTP:X-Forwarded-Proto} =http
+# /.well-known/ не трогаем: через него продлевается SSL-сертификат
+RewriteCond %{REQUEST_URI} !^/\.well-known/
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 # Ремонт убран с сайта (2026-10-20): сразу на https-адрес главной
 RewriteRule ^remont/?$ https://%{HTTP_HOST}/ [R=301,L]
+
+# Служебный файл выкладки FTP (состояние синхронизации) — не отдавать
+RewriteRule ^\.ftp-deploy-sync-state\.json$ - [F,L]
 
 RewriteCond %{THE_REQUEST} \s/([^\s?]+)\.html[\s?]
 RewriteRule ^ /%1 [R=301,L]
@@ -21,23 +28,22 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.+)$ $1.html [L]
 
-
 # Сжатие текстовых ответов (на мобильном интернете страница приходит в 3–4 раза меньше)
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/plain text/javascript application/javascript application/json image/svg+xml
 </IfModule>
 
-# Кэш: файлы сборки с хешем в имени (/_astro/) не меняются — год; фото работ — 30 дней; страницы — всегда проверять
+# Кэш (LiteSpeed и Apache): CSS, JS и шрифты лежат в /_astro/ с хешем в имени — год; фото — 30 дней; страницы — проверять
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html)$">
+  <FilesMatch "\.(html|xml|txt)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
-  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+  <FilesMatch "\.(css|js|woff2)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
-  </If>
-  <If "%{REQUEST_URI} =~ m#^/(portfolio|brand)/#">
+  </FilesMatch>
+  <FilesMatch "\.(webp|avif|jpg|jpeg|png|svg)$">
     Header set Cache-Control "public, max-age=2592000"
-  </If>
+  </FilesMatch>
 </IfModule>
 <IfModule mod_mime.c>
   AddType image/webp .webp

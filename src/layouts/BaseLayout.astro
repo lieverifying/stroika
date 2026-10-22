@@ -9,7 +9,9 @@ import SkipLink from '../components/layout/SkipLink.astro';
 import Header from '../components/layout/Header.astro';
 import MobileBottomBar from '../components/layout/MobileBottomBar.astro';
 import Footer from '../components/layout/Footer.astro';
+import Analytics from '../components/layout/Analytics.astro';
 import { landingOfPath, pagePath } from '../lib/landing';
+import { localBusiness } from '../lib/schema';
 
 interface Props {
   title: string;
@@ -20,9 +22,14 @@ interface Props {
   lcpImage?: { srcset: string; sizes: string };
   /** H2 мельче (главная и посадочные, правки 2026-10-21): −15 % на телефоне, −25 % на десктопе */
   compactH2?: boolean;
+  /** Open Graph-картинка из public/og/ */
+  ogImage?: string;
+  /** Дополнительные схемы JSON-LD; LocalBusiness добавляется на всех индексируемых страницах */
+  jsonLd?: Record<string, unknown>[];
 }
 
-const { title, description, noindex, bare = false, lcpImage, compactH2 = false } = Astro.props;
+const { title, description, noindex = false, bare = false, lcpImage, compactH2 = false, ogImage, jsonLd = [] } = Astro.props;
+const schemas = noindex ? jsonLd : [localBusiness(Astro.site), ...jsonLd];
 const landing = landingOfPath(pagePath(Astro.url));
 ---
 
@@ -32,7 +39,8 @@ const landing = landingOfPath(pagePath(Astro.url));
     <meta charset="utf-8" />
     <!-- Масштабирование не запрещаем (CLAUDE.md) -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <SeoHead title={title} description={description} noindex={noindex} />
+    <SeoHead title={title} description={description} noindex={noindex} ogImage={ogImage} jsonLd={schemas} />
+    <Analytics />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#F1F1EE" />
     <Fonts />
