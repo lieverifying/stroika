@@ -35,14 +35,14 @@ describe('tags', () => {
   test('generate_lead { form_type, page } и Lead { content_name }: явный или «форма_страница»', () => {
     const { gtag, fbq } = stubs();
     leadSucceeded('zapyt', undefined, '/kontakty.html');
-    leadSucceeded('plan', 'planuvannya', '/planuvannya');
+    leadSucceeded('zapyt', 'zapyt_special', '/kontakty');
     leadSucceeded('quiz', undefined, '/');
     expect(gtag.mock.calls).toEqual([
       ['event', 'generate_lead', { form_type: 'zapyt', page: '/kontakty' }],
-      ['event', 'generate_lead', { form_type: 'plan', page: '/planuvannya' }],
+      ['event', 'generate_lead', { form_type: 'zapyt', page: '/kontakty' }],
       ['event', 'generate_lead', { form_type: 'quiz', page: '/' }],
     ]);
-    expect(fbq.mock.calls.map((c) => c[2].content_name)).toEqual(['zapyt_kontakty', 'planuvannya', 'quiz_home']);
+    expect(fbq.mock.calls.map((c) => c[2].content_name)).toEqual(['zapyt_kontakty', 'zapyt_special', 'quiz_home']);
   });
   test('клик: телефон, Viber, Telegram — события и Contact; обычная ссылка — ничего', () => {
     const { gtag, fbq } = stubs();

@@ -15,8 +15,6 @@ const PAGES = [
   ['yak-my-stvoriuiemo', 'src/assets/stories/kitchen/kitchen-07-ready.png', 'Як ми створюємо'],
   ['kontakty', 'public/portfolio/img/kukhni/kukhnia-09.webp', 'Контакти'],
   ['polityka', 'public/portfolio/img/kukhni/kukhnia-14.webp', 'Політика конфіденційності'],
-  ['planuvannya', 'public/portfolio/img/kukhni/kukhnia-05.webp', 'Два варіанти планування кухні — безкоштовно'],
-  ['planuvannya-mebli', 'public/portfolio/img/shafy/shafa-02.webp', 'Два варіанти наповнення шафи — безкоштовно'],
 ];
 const logo = await readFile(`${root}/public/brand/logo-dark.svg`, 'utf8');
 const css = String.raw`

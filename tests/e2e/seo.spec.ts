@@ -20,8 +20,6 @@ test('каждая страница: canonical без .html, Open Graph 1200 × 
     ['/kontakty', 'kontakty'],
     ['/polityka', 'polityka'],
     ['/yak-my-stvoriuiemo', 'yak-my-stvoriuiemo'],
-    ['/planuvannya', 'planuvannya'],
-    ['/planuvannya-mebli', 'planuvannya-mebli'],
   ] as const) {
     await page.goto(path);
     await expect(page.locator('link[rel="canonical"]'), path).toHaveAttribute('href', new RegExp(`${path === '/' ? '/' : path}$`));
@@ -52,11 +50,11 @@ test('JSON-LD: LocalBusiness на индексируемых страницах,
   const kukhni = await schemas('/kukhni');
   expect(kukhni.map((s) => s['@type'])).toEqual(['LocalBusiness', 'FAQPage']);
   expect(kukhni[1].mainEntity).toHaveLength(5);
-  for (const path of ['/planuvannya', '/planuvannya-mebli', '/dyakuyemo']) expect(await schemas(path), path).toEqual([]);
+  expect(await schemas('/dyakuyemo')).toEqual([]);
 });
 
-test('noindex всегда: лендинги под рекламу, «Дякуємо», 404', async ({ page }) => {
-  for (const path of ['/planuvannya', '/planuvannya-mebli', '/dyakuyemo', '/takoi-storinky-nemaie']) {
+test('noindex всегда: «Дякуємо», 404', async ({ page }) => {
+  for (const path of ['/dyakuyemo', '/takoi-storinky-nemaie']) {
     await page.goto(path);
     await expect(page.locator('meta[name="robots"]'), path).toHaveAttribute('content', /noindex/);
   }

@@ -109,7 +109,7 @@ jobs:
         run: |
           set -e
           base="${SITE_URL%/}"
-          for p in / /kukhni /mebli /roboty /kontakty /yak-my-stvoriuiemo /dyakuyemo /polityka /planuvannya /planuvannya-mebli /sitemap.xml /robots.txt; do
+          for p in / /kukhni /mebli /roboty /kontakty /yak-my-stvoriuiemo /dyakuyemo /polityka /sitemap.xml /robots.txt; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "$base$p")
             echo "$p → $code"
             test "$code" = 200

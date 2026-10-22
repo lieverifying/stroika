@@ -35,8 +35,7 @@ export function forwardToGa4(name: string, params: Params = {}): void {
 
 /**
  * Успешная отправка любой формы: GA4 generate_lead (form_type, page) и Pixel Lead (content_name).
- * content_name — тип формы и страница: на лендингах задан явно (planuvannya, planuvannya_mebli_zamir…),
- * иначе «форма_страница» (quiz_kukhni, zapyt_kontakty).
+ * content_name — тип формы и страница: «форма_страница» (quiz_kukhni, zapyt_kontakty); можно задать явно.
  */
 export function leadSucceeded(formType: string, contentName?: string, pathname = location.pathname): void {
   const page = pageName(pathname);

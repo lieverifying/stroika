@@ -10,11 +10,9 @@ import { has } from '../../lib/facts';
 
 const { promises } = facts;
 const variantA = facts.flags.quizResultVariant === 'A';
-// Лид-магнит «Два варіанти планування»: срок из facts.leadMagnet.planHours (PLAN_HOURS)
-const planHours = facts.leadMagnet.planHours;
 ---
 
-<div class="quiz-result" data-quiz-result data-shown="generic" data-plan-hours={planHours}>
+<div class="quiz-result" data-quiz-result data-shown="generic">
   {
     variantA && (
       <div data-result="A" hidden>
@@ -84,15 +82,7 @@ const planHours = facts.leadMagnet.planHours;
   if (box) {
     const data: ThanksData | null = takeThanks();
     const hasA = Boolean(box.querySelector('[data-result="A"]'));
-    if (data?.kind === 'plan' || data?.kind === 'plan_mebli') {
-      // «Дякуємо. Дизайнер підготує два варіанти [наповнення] протягом 36 годин у робочі дні і надішле їх у Viber.»
-      const hours = box.dataset.planHours;
-      const what = data.kind === 'plan_mebli' ? 'два варіанти наповнення' : 'два варіанти';
-      const tail = data.method === 'call' ? 'і зателефонує вам' : `і надішле їх у ${CHANNEL_LABEL[data.method]}`;
-      box.querySelector('[data-thanks]')!.textContent = `Дякуємо. Дизайнер підготує ${what} протягом ${hours} годин у робочі дні ${tail}.`;
-      box.dataset.method = data.method;
-      box.dataset.shown = 'plan';
-    } else if (data) {
+    if (data) {
       if (data.name) box.querySelector('[data-thanks-name]')!.textContent = `, ${data.name}`;
       box.querySelector('[data-thanks-action]')!.textContent =
         data.method === 'call' ? 'Зателефонуємо' : `Надішлемо розрахунок у ${CHANNEL_LABEL[data.method]}`;

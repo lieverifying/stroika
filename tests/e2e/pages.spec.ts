@@ -2,7 +2,7 @@ import { expect, test } from './fixtures';
 import { yellowOnScreen } from './helpers';
 
 // Внутренние страницы (ТЗ): «Меблі», «Контакти», «Політика конфіденційності», 404 — и ни одной битой ссылки
-const PAGES = ['/', '/kukhni', '/mebli', '/roboty', '/kontakty', '/polityka', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404', '/planuvannya', '/planuvannya-mebli'];
+const PAGES = ['/', '/kukhni', '/mebli', '/roboty', '/kontakty', '/polityka', '/yak-my-stvoriuiemo', '/dyakuyemo', '/404'];
 
 test('все внутренние ссылки со всех страниц ведут на существующие страницы', async ({ page, request }) => {
   const links = new Set<string>();

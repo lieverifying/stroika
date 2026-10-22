@@ -47,7 +47,7 @@
 - Не запрещать масштабирование страницы (никаких `user-scalable=no`).
 
 ## Страницы
-`/` (главная бренда, ТЗ v2), `/kukhni` и `/mebli` (посадочные), `/planuvannya` и `/planuvannya-mebli` (реклама Meta, noindex), `/yak-my-stvoriuiemo` («Як ми створюємо»), `/roboty`, `/roboty/[slug]`, `/mebli`, `/kontakty`, `/dyakuyemo`, `/polityka`, `404`.
+`/` (главная бренда, ТЗ v2), `/kukhni` и `/mebli` (посадочные), `/yak-my-stvoriuiemo` («Як ми створюємо»), `/roboty`, `/roboty/[slug]`, `/mebli`, `/kontakty`, `/dyakuyemo`, `/polityka`, `404`.
 `/remont` не делаем: ремонт убран полностью (2026-10-20).
 `/kukhni` — отдельная посадочная (2026-10-21), перенаправления на `/` нет. В `.htaccess`: адреса без `.html` (`/kukhni` → `kukhni.html`), 404 и 301 с `/remont` на `/`.
 
@@ -185,20 +185,9 @@
 - Нет выдуманных фактов, нет слова «масив».
 - Коммит и push сделаны.
 
-## Лендинги /planuvannya и /planuvannya-mebli под рекламу Meta (решение владельца, 2026-10-22)
-- Общая структура — `src/components/plan/PlanLanding.astro`; формы `PlanForm` / `PlanZamirForm` с `variant` kitchen | mebli.
-- «Переглянути сайт» — кнопка с обводкой после работ и в финале под главной кнопкой (на первом экране нет): /planuvannya → `/`, /planuvannya-mebli → `/mebli`.
-- /planuvannya-mebli: фото shafa-01, «Надіслати розміри», форма: фото ниши, ширина / висота / глибина (необязательно), «Що потрібно»; типы в Telegram «Планування меблів» и «Замір з лендингу меблів»; Lead `planuvannya_mebli` / `planuvannya_mebli_zamir`; «Дякуємо» — «…два варіанти наповнення…». Работы — 5 фото мебели архива, сетка 2 колонки без одиночных карточек.
-- Одна цель — лид-магнит «Два варіанти планування»; запасной вариант — безкоштовний замір. Только логотип: без меню, переключателя, подвала и нижней панели (`BaseLayout bare`), noindex всегда, с сайта ссылок нет.
-- Первый экран (kukhnia-05, «Надіслати план» → #plan, «Надіслати у Viber») → «Як це працює» (4 шага, четвёртый — безкоштовний замір) → форма плана (`PlanForm`: файлы до 3, ширина стін, способ связи, ім'я, телефон, згода; жёлтая «Отримати 2 варіанти») → форма заміру (`PlanZamirForm`: ім'я, телефон, зручний час, згода; графитовая «Замовити замір») → 6 работ → 3 вопроса → финал с «Надіслати план» и ссылкой «Подивитися всі роботи» на главную.
-- Срок — `facts.leadMagnet.planHours` (PLAN_HOURS = 36, в рабочие дни). Сколько планировок в неделю — на сайт не выводим.
-- В Telegram первой строкой тип заявки: «Планування» или «Замір з лендингу», второй — способ связи (`LEAD_TYPE_FIRST` в `api/lead-lib.php`).
-- Pixel: `pixelLead()` (`src/lib/pixel.ts`) — Lead с content_name `planuvannya` / `planuvannya_zamir` после успешной отправки; сам Pixel подключается в фазе 7. UTM уходят в заявку (`attribution`).
-- /dyakuyemo после плана: «Дякуємо. Дизайнер підготує два варіанти протягом 36 годин у робочі дні і надішле їх у {канал}.»
-
 ## SEO и аналитика (фаза 7, 2026-10-22)
-- Только боевая сборка индексируется (`index, follow`); всегда noindex: /planuvannya, /planuvannya-mebli, /dyakuyemo, 404 (`/styleguide` в боевую сборку не попадает).
-- `sitemap.xml` (/, /kukhni, /mebli, /roboty, /yak-my-stvoriuiemo, /kontakty, /polityka) и `robots.txt` со ссылкой на sitemap — эндпоинты `src/pages/*.ts`; тестовая сборка закрыта `Disallow: /`. Лендинги и /dyakuyemo в robots.txt не закрываем — у них meta noindex.
+- Только боевая сборка индексируется (`index, follow`); всегда noindex: /dyakuyemo, 404 (лендинги /planuvannya и /planuvannya-mebli удалены 2026-10-22) (`/styleguide` в боевую сборку не попадает).
+- `sitemap.xml` (/, /kukhni, /mebli, /roboty, /yak-my-stvoriuiemo, /kontakty, /polityka) и `robots.txt` со ссылкой на sitemap — эндпоинты `src/pages/*.ts`; тестовая сборка закрыта `Disallow: /`. /dyakuyemo в robots.txt не закрываем — у него meta noindex.
 - Canonical без .html; Open Graph 1200 × 630 — `public/og/<страница>.jpg` (`node scripts/og-images.mjs`); JSON-LD `LocalBusiness` на индексируемых страницах, `FAQPage` на /kukhni и /mebli (`src/lib/schema.ts`); `google-site-verification` из `PUBLIC_GSC_VERIFICATION`.
-- GA4 и Meta Pixel (`src/components/layout/Analytics.astro`, мост `src/lib/tags.ts`) — только при `SITE_ENV=production` и заданном ID (`PUBLIC_GA4_ID`, `PUBLIC_META_PIXEL_ID`). GA4: quiz_start, quiz_step {step}, generate_lead {form_type, page}, click_phone, click_messenger {messenger}, story_complete. Pixel: PageView, Lead {content_name: тип формы и страница — на лендингах `planuvannya…`, иначе «форма_страница»}, Contact на телефон / Viber / Telegram. Имя, телефон, описание и файлы туда не передаются никогда. Политика описывает GA4 и Pixel и как отказаться.
+- GA4 и Meta Pixel (`src/components/layout/Analytics.astro`, мост `src/lib/tags.ts`) — только при `SITE_ENV=production` и заданном ID (`PUBLIC_GA4_ID`, `PUBLIC_META_PIXEL_ID`). GA4: quiz_start, quiz_step {step}, generate_lead {form_type, page}, click_phone, click_messenger {messenger}, story_complete. Pixel: PageView, Lead {content_name: «форма_страница»}, Contact на телефон / Viber / Telegram. Имя, телефон, описание и файлы туда не передаются никогда. Политика описывает GA4 и Pixel и как отказаться.
 - PRIVACY_EMAIL = vymir.che@gmail.com — заглушек на сайте больше нет.
