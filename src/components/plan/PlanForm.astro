@@ -1,0 +1,108 @@
+---
+// Форма лид-магнита «Два варіанти планування» (/planuvannya, якорь #plan): фото или план (до 3 файлов, необязательно),
+// ширина стен в метрах (необязательно), способ связи, имя, телефон, согласие. Кнопка — жёлтая: это главная цель страницы.
+// Успех → Lead в Pixel (content_name=planuvannya), lead_submit в dataLayer, /dyakuyemo со своим текстом.
+// В Telegram заявка приходит с первой строкой «Планування» (api/lead-lib.php).
+import ContactFields from '../quiz/ContactFields.astro';
+import Button from '../ui/Button.astro';
+import FilesField from '../ui/form/FilesField.astro';
+import Input from '../ui/form/Input.astro';
+import '../ui/form/field.css';
+---
+
+<form class="plan-form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-plan-form>
+  <input type="hidden" name="form" value="plan" />
+  <input type="hidden" name="landing" value="planuvannya" />
+  <FilesField id="plan-files" label="Фото або план приміщення" />
+  <Input name="wallWidths" id="plan-walls" label="Ширина стін у метрах" inputmode="decimal" autocomplete="off" />
+  <ContactFields prefix="plan" />
+  <Button type="submit" size="lg" fullWidth ctaPriority={3}>Отримати 2 варіанти</Button>
+  <p class="plan-form__status" role="status" aria-live="polite" data-form-status></p>
+</form>
+
+<style>
+  .plan-form {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .plan-form__status:empty {
+    display: none;
+  }
+  .plan-form__status {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 48rem) {
+    .plan-form {
+      padding: 2rem;
+    }
+  }
+</style>
+
+<script>
+  import { clearErrorsOnFix, setFieldError, validateForm } from '../../lib/lead/field-errors';
+  import { saveThanks, toMethod } from '../../lib/lead/result-store';
+  import { showSendError } from '../../lib/lead/send-error';
+  import { submitLead } from '../../lib/lead/submit';
+  import { validateConsent, validateFiles, validateName, validatePhone } from '../../lib/lead/validate';
+  import { normalizePhone } from '../../lib/phone';
+  import { pixelLead } from '../../lib/pixel';
+  import { track } from '../../lib/track';
+
+  type Field = HTMLInputElement | HTMLTextAreaElement;
+  const CHECKS = {
+    files: (f: Field) => validateFiles((f as HTMLInputElement).files ?? []),
+    name: (f: Field) => validateName(f.value),
+    phone: (f: Field) => validatePhone(f.value),
+    consent: (f: Field) => validateConsent((f as HTMLInputElement).checked),
+  };
+
+  const form = document.querySelector<HTMLFormElement>('form[data-plan-form]');
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const filesInput = form.querySelector<HTMLInputElement>('input[name="files"]')!;
+    clearErrorsOnFix(form, CHECKS);
+    filesInput.addEventListener('change', () => setFieldError(filesInput, CHECKS.files(filesInput)));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateForm(form, CHECKS)) {
+        if (status) status.textContent = '';
+        return;
+      }
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Надсилаємо…';
+      const data = new FormData(form);
+      const method = toMethod(data.get('method'));
+      const name = String(data.get('name') ?? '').trim();
+      // Способ связи — первым полем (общее правило заявок); тип «Планування» ставит сервер по form
+      const res = await submitLead(
+        {
+          contactMethod: method,
+          form: 'plan',
+          landing: 'planuvannya',
+          wallWidths: String(data.get('wallWidths') ?? '').trim(),
+          name,
+          phone: normalizePhone(String(data.get('phone') ?? '')),
+          referrer: String(data.get('referrer') ?? '').trim(),
+          consent: true,
+          website: data.get('website') ?? '',
+        },
+        { files: Array.from(filesInput.files ?? []) },
+      );
+      if (res.ok) {
+        track('lead_submit', { form: 'plan', landing: 'planuvannya', content_name: 'planuvannya' });
+        pixelLead('planuvannya');
+        saveThanks({ name, method, result: null, kind: 'plan' });
+        location.assign('/dyakuyemo');
+      } else {
+        if (button) button.disabled = false;
+        showSendError(status);
+      }
+    });
+  }
+</script>

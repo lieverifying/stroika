@@ -5,10 +5,16 @@
  */
 declare(strict_types=1);
 
-const LEAD_FORMS = ['quiz', 'zapyt'];
+const LEAD_FORMS = ['quiz', 'zapyt', 'plan', 'zamir'];
 const LEAD_METHODS = ['viber' => 'Viber', 'telegram' => 'Telegram', 'call' => 'Дзвінок'];
-const LEAD_FORM_TITLES = ['quiz' => 'Квіз', 'zapyt' => 'Нестандартне завдання'];
-const LEAD_LANDINGS = ['kukhni', 'mebli', 'none'];
+// plan — лид-магнит «Два варіанти планування», zamir — безкоштовний замір с лендинга /planuvannya
+const LEAD_FORM_TITLES = ['quiz' => 'Квіз', 'zapyt' => 'Нестандартне завдання', 'plan' => 'Планування', 'zamir' => 'Замір з лендингу'];
+/** Формы, у которых первая строка сообщения — тип заявки (решение владельца для /planuvannya), а не способ связи */
+const LEAD_TYPE_FIRST = ['plan', 'zamir'];
+/** Формы, к которым можно приложить файлы */
+const LEAD_FILE_FORMS = ['zapyt', 'plan'];
+const LEAD_LANDINGS = ['kukhni', 'mebli', 'planuvannya', 'none'];
+const LEAD_TIMES = ['soon' => 'Найближчим часом', 'morning' => 'Зранку', 'day' => 'Вдень', 'evening' => 'Увечері'];
 const LEAD_MIN_ELAPSED_MS = 3000; // быстрее — бот
 const LEAD_MAX_JSON_BYTES = 10240;
 const LEAD_FILES_MAX = 3;
@@ -116,6 +122,7 @@ function lead_validate(array $in): array
         if ($rl < 10 || $rl > 1000) $errors[] = 'request';
     }
     $landing = lead_clean($in['landing'] ?? 'none', 20);
+    $time = lead_clean($in['time'] ?? '', 20);
     $eventId = lead_clean($in['eventId'] ?? '', 64);
     if (!preg_match('/^[A-Za-z0-9-]{8,64}$/', $eventId)) $eventId = bin2hex(random_bytes(8));
 
@@ -135,6 +142,8 @@ function lead_validate(array $in): array
         'phone' => $phone ?? '',
         'referrer' => lead_clean($in['referrer'] ?? '', 100),
         'request' => $form === 'zapyt' ? $request : '',
+        'wallWidths' => $form === 'plan' ? lead_clean($in['wallWidths'] ?? '', 100) : '',
+        'time' => $form === 'zamir' ? (LEAD_TIMES[$time] ?? '') : '',
         'landing' => in_array($landing, LEAD_LANDINGS, true) ? $landing : 'none',
         'page' => lead_clean($in['page'] ?? '', 200),
         'quizSummary' => lead_clean($quiz['summary'] ?? '', 400),
@@ -156,17 +165,25 @@ function lead_html(string $s): string
  */
 function lead_telegram_text(array $lead, array $files = []): string
 {
-    $lines = ['<b>' . lead_html(LEAD_METHODS[$lead['contactMethod']] ?? $lead['contactMethod']) . '</b>'];
+    $method = lead_html(LEAD_METHODS[$lead['contactMethod']] ?? $lead['contactMethod']);
     $title = LEAD_FORM_TITLES[$lead['form']] ?? $lead['form'];
+    if (in_array($lead['form'], LEAD_TYPE_FIRST, true)) {
+        // /planuvannya: первая строка — тип заявки, вторая — способ связи
+        $lines = ['<b>' . lead_html($title) . '</b>', 'Зв\'язок: ' . $method];
+    } else {
+        $lines = ['<b>' . $method . '</b>'];
+    }
     if ($lead['form'] === 'quiz' && $lead['quizSummary'] !== '') {
         $first = explode(' · ', $lead['quizSummary'])[0];
         $title .= ' · ' . $first;
     }
-    $lines[] = 'Нова заявка: ' . lead_html($title);
+    if (!in_array($lead['form'], LEAD_TYPE_FIRST, true)) $lines[] = 'Нова заявка: ' . lead_html($title);
     $lines[] = "Ім'я: " . lead_html($lead['name']);
     $lines[] = 'Телефон: ' . lead_html($lead['phone']);
     if ($lead['quizSummary'] !== '') $lines[] = 'Відповіді: ' . lead_html($lead['quizSummary']);
     if ($lead['request'] !== '') $lines[] = 'Завдання: ' . lead_html($lead['request']);
+    if ($lead['wallWidths'] !== '') $lines[] = 'Ширина стін, м: ' . lead_html($lead['wallWidths']);
+    if ($lead['time'] !== '') $lines[] = 'Зручний час: ' . lead_html($lead['time']);
     if ($files) $lines[] = 'Файли: ' . count($files) . ' (нижче)';
     if ($lead['referrer'] !== '') $lines[] = 'Порекомендував: ' . lead_html($lead['referrer']);
     $a = $lead['attribution'];
@@ -195,13 +212,13 @@ function lead_sheet_row(array $lead, DateTimeImmutable $now): array
         $lead['name'],
         $lead['phone'],
         LEAD_METHODS[$lead['contactMethod']] ?? '',
-        '',
+        $lead['time'],
         $lead['quizTiming'],
         $lead['quizBranch'],
         $lead['quizSummary'],
         '',
         '',
-        $lead['request'],
+        trim($lead['request'] . ($lead['wallWidths'] !== '' ? ' Ширина стін, м: ' . $lead['wallWidths'] : '')),
         $a['utm_source'] ?? '',
         $a['utm_medium'] ?? '',
         $a['utm_campaign'] ?? '',

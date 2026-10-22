@@ -103,6 +103,12 @@ export const facts = {
     countertopTypesConfirmed: missing('COUNTERTOP_TYPES_CONFIRMED'),
   },
 
+  // Лид-магнит «Два варіанти планування» (/planuvannya, решение владельца 2026-10-22): срок подготовки в часах
+  // в рабочие дни (PLAN_HOURS). Сколько планировок в неделю делаем — на сайт не выводим.
+  leadMagnet: {
+    planHours: 36,
+  },
+
   // Обещания из ТЗ: на сайт попадут только после подтверждения владельцем
   promises: {
     callbackMinutes: missing('PROMISE_CALLBACK_MINUTES'),
@@ -278,6 +284,7 @@ interface FactsSchema {
     facadeTypesConfirmed: Fact<string[]>;
     countertopTypesConfirmed: Fact<string[]>;
   };
+  leadMagnet: { planHours: number };
   promises: {
     callbackMinutes: Fact<number>;
     priceFixedText: Fact<string>;

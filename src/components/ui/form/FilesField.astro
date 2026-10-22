@@ -1,0 +1,79 @@
+---
+// Поле выбора файлов к заявке: до 3 фото или планов (JPG, PNG, HEIC, PDF, до 10 МБ каждый).
+// Настоящий input прозрачно лежит поверх «кнопки» — работает мышью, пальцем и с клавиатуры. Имена выбранных
+// файлов показывает скрипт ниже; проверку (validateFiles) и ошибку под полем ставит скрипт формы.
+// Используется в «Нестандартне завдання» (/kontakty) и в форме «Два варіанти планування» (/planuvannya).
+import { FILES_MAX } from '../../../lib/lead/validate';
+
+interface Props {
+  id: string;
+  label: string;
+  optional?: boolean;
+}
+const { id, label, optional = true } = Astro.props;
+const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic,image/heif,application/pdf';
+---
+
+<div class="field files">
+  <label class="field__label" for={id}>
+    {label} {optional && <span class="field__optional">(необов’язково)</span>}
+  </label>
+  <div class="files__box">
+    <input class="files__input" type="file" id={id} name="files" multiple accept={ACCEPT} aria-describedby={`${id}-hint`} data-files-input />
+    <span class="files__pick" aria-hidden="true">Додати файли</span>
+    <span class="files__chosen" data-files-chosen aria-hidden="true">Файли не вибрано</span>
+  </div>
+  <p class="field__hint" id={`${id}-hint`}>До {FILES_MAX} файлів: JPG, PNG, HEIC або PDF, до 10 МБ кожен.</p>
+  <p class="field__error" id={`${id}-error`} hidden></p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLInputElement>('[data-files-input]').forEach((input) => {
+    const chosen = input.parentElement!.querySelector<HTMLElement>('[data-files-chosen]')!;
+    input.addEventListener('change', () => {
+      const list = Array.from(input.files ?? []);
+      chosen.textContent = list.length ? list.map((f) => f.name).join(', ') : 'Файли не вибрано';
+    });
+  });
+</script>
+
+<style>
+  /* Выбор файлов: настоящий input поверх «кнопки» (прозрачный) */
+  .files__box {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--control-h);
+  }
+  .files__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .files__pick {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    padding-inline: 1.25rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-btn);
+    font-weight: 600;
+  }
+  .files__box:has(.files__input:focus-visible) .files__pick {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  .files__box:has(.files__input[aria-invalid='true']) .files__pick {
+    border: 2px solid var(--color-error);
+  }
+  .files__chosen {
+    min-width: 0;
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+    overflow-wrap: anywhere;
+  }
+</style>

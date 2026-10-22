@@ -8,6 +8,7 @@
 // Бейдж — facts.flags.seasonalBadge.
 import Badge from '../ui/Badge.astro';
 import Button from '../ui/Button.astro';
+import type { IconName } from '../ui/Icon.astro';
 import Fact from '../ui/Fact.astro';
 import { facts } from '../../content/facts';
 import { contactLinks } from '../../lib/contacts';
@@ -21,8 +22,22 @@ interface Props {
   /** Точка кадра при обрезке до 16:10 на телефоне */
   focus?: string;
   quizHref: string;
+  /** Подпись жёлтой кнопки (на /planuvannya — «Надіслати план») */
+  ctaLabel?: string;
+  /** Подпись кнопки Viber */
+  viberLabel?: string;
+  ctaIcon?: IconName;
 }
-const { title, lead, photo = HERO, focus = facts.media.heroFocus, quizHref } = Astro.props;
+const {
+  title,
+  lead,
+  photo = HERO,
+  focus = facts.media.heroFocus,
+  quizHref,
+  ctaLabel = 'Порахувати вартість',
+  viberLabel = 'Написати у Viber',
+  ctaIcon = 'calculator',
+} = Astro.props;
 const { flags } = facts;
 const portrait = photo.height > photo.width;
 
@@ -51,9 +66,9 @@ const portrait = photo.height > photo.width;
       <p class="hero__lead">{lead}</p>
 
       <div class="hero__actions">
-        <Button href={quizHref} size="lg" icon="calculator" ctaPriority={3}>Порахувати вартість</Button>
+        <Button href={quizHref} size="lg" icon={ctaIcon} ctaPriority={3}>{ctaLabel}</Button>
         <Button href={contactLinks.viber} variant="secondary" icon="viber">
-          Написати у Viber
+          {viberLabel}
         </Button>
       </div>
     </div>

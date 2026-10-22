@@ -1,0 +1,110 @@
+---
+// Запасной вариант на /planuvannya (якорь #zamir): нет плана или фото — короткая форма безкоштовного заміру.
+// Ім'я, телефон, зручний час, згода. Кнопка графитовая: главная цель страницы остаётся «Надіслати план».
+// Успех → Lead в Pixel (content_name=planuvannya_zamir), /dyakuyemo с общим текстом («Зателефонуємо у робочий час»).
+// В Telegram заявка приходит с первой строкой «Замір з лендингу» (api/lead-lib.php).
+import Button from '../ui/Button.astro';
+import ConsentCheckbox from '../ui/form/ConsentCheckbox.astro';
+import Honeypot from '../ui/form/Honeypot.astro';
+import Input from '../ui/form/Input.astro';
+import PhoneInput from '../ui/form/PhoneInput.astro';
+import Select from '../ui/form/Select.astro';
+import '../ui/form/field.css';
+
+const TIMES = [
+  { value: 'soon', label: 'Найближчим часом' },
+  { value: 'morning', label: 'Зранку' },
+  { value: 'day', label: 'Вдень' },
+  { value: 'evening', label: 'Увечері' },
+];
+---
+
+<form class="zamir-lite" action="/api/lead.php" method="post" novalidate data-plan-zamir-form>
+  <input type="hidden" name="form" value="zamir" />
+  <input type="hidden" name="landing" value="planuvannya" />
+  <input type="hidden" name="contactMethod" value="call" />
+  <Input name="name" id="pz-name" label="Ім’я" autocomplete="given-name" required error="Вкажіть, як до вас звертатися" />
+  <PhoneInput id="pz-phone" />
+  <Select name="time" id="pz-time" label="Зручний час для дзвінка" options={TIMES} />
+  <ConsentCheckbox id="pz-consent" />
+  <Honeypot id="pz-website" />
+  <Button type="submit" variant="secondary" size="lg" fullWidth>Замовити замір</Button>
+  <p class="zamir-lite__status" role="status" aria-live="polite" data-form-status></p>
+</form>
+
+<style>
+  .zamir-lite {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .zamir-lite__status:empty {
+    display: none;
+  }
+  .zamir-lite__status {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 48rem) {
+    .zamir-lite {
+      padding: 2rem;
+    }
+  }
+</style>
+
+<script>
+  import { clearErrorsOnFix, validateForm } from '../../lib/lead/field-errors';
+  import { saveThanks } from '../../lib/lead/result-store';
+  import { showSendError } from '../../lib/lead/send-error';
+  import { submitLead } from '../../lib/lead/submit';
+  import { validateConsent, validateName, validatePhone } from '../../lib/lead/validate';
+  import { normalizePhone } from '../../lib/phone';
+  import { pixelLead } from '../../lib/pixel';
+  import { track } from '../../lib/track';
+
+  type Field = HTMLInputElement | HTMLTextAreaElement;
+  const CHECKS = {
+    name: (f: Field) => validateName(f.value),
+    phone: (f: Field) => validatePhone(f.value),
+    consent: (f: Field) => validateConsent((f as HTMLInputElement).checked),
+  };
+
+  const form = document.querySelector<HTMLFormElement>('form[data-plan-zamir-form]');
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    clearErrorsOnFix(form, CHECKS);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateForm(form, CHECKS)) {
+        if (status) status.textContent = '';
+        return;
+      }
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Надсилаємо…';
+      const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
+      const res = await submitLead({
+        contactMethod: 'call',
+        form: 'zamir',
+        landing: 'planuvannya',
+        name,
+        phone: normalizePhone(String(data.get('phone') ?? '')),
+        time: String(data.get('time') ?? ''),
+        consent: true,
+        website: data.get('website') ?? '',
+      });
+      if (res.ok) {
+        track('lead_submit', { form: 'zamir', landing: 'planuvannya', content_name: 'planuvannya_zamir' });
+        pixelLead('planuvannya_zamir');
+        saveThanks({ name, method: 'call', result: null });
+        location.assign('/dyakuyemo');
+      } else {
+        if (button) button.disabled = false;
+        showSendError(status);
+      }
+    });
+  }
+</script>

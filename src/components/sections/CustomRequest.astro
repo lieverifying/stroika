@@ -8,10 +8,8 @@ import ContactFields from '../quiz/ContactFields.astro';
 import Button from '../ui/Button.astro';
 import SectionTitle from '../ui/SectionTitle.astro';
 import Textarea from '../ui/form/Textarea.astro';
+import FilesField from '../ui/form/FilesField.astro';
 import '../ui/form/field.css';
-import { FILES_MAX } from '../../lib/lead/validate';
-
-const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic,image/heif,application/pdf';
 ---
 
 <section id="zapyt" class="section-pad" aria-labelledby="zapyt-title" data-section="zapyt">
@@ -27,26 +25,7 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
     <form class="zapyt__form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-zapyt-form>
       <input type="hidden" name="source" value="zapyt" />
       <Textarea name="request" id="zapyt-request" label="Що потрібно зробити" rows={5} required error="Опишіть завдання — щонайменше 10 символів" />
-      <div class="field files">
-        <label class="field__label" for="zapyt-files">
-          До 3 фото або плану приміщення <span class="field__optional">(необов’язково)</span>
-        </label>
-        <div class="files__box">
-          <input
-            class="files__input"
-            type="file"
-            id="zapyt-files"
-            name="files"
-            multiple
-            accept={ACCEPT}
-            aria-describedby="zapyt-files-hint"
-          />
-          <span class="files__pick" aria-hidden="true">Додати файли</span>
-          <span class="files__chosen" data-files-chosen aria-hidden="true">Файли не вибрано</span>
-        </div>
-        <p class="field__hint" id="zapyt-files-hint">До {FILES_MAX} файлів: JPG, PNG, HEIC або PDF, до 10 МБ кожен.</p>
-        <p class="field__error" id="zapyt-files-error" hidden></p>
-      </div>
+      <FilesField id="zapyt-files" label="До 3 фото або плану приміщення" />
       <ContactFields prefix="zapyt" />
       <Button type="submit" variant="secondary" size="lg" fullWidth>Надіслати запит</Button>
       <p class="zapyt__status" role="status" aria-live="polite" data-form-status></p>
@@ -82,44 +61,6 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
   .zapyt__status {
     font-size: var(--text-small);
     color: var(--color-ink-muted);
-  }
-  /* Выбор файлов: настоящий input поверх «кнопки» (прозрачный) — работает мышью, пальцем и с клавиатуры */
-  .files__box {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: var(--control-h);
-  }
-  .files__input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    opacity: 0;
-    cursor: pointer;
-  }
-  .files__pick {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--control-h);
-    padding-inline: 1.25rem;
-    border: 1px solid var(--color-line-strong);
-    border-radius: var(--radius-md);
-    font-weight: 600;
-  }
-  .files__box:has(.files__input:focus-visible) .files__pick {
-    outline: 2px solid var(--color-graphite);
-    outline-offset: 2px;
-  }
-  .files__box:has(.files__input[aria-invalid='true']) .files__pick {
-    border: 2px solid var(--color-error);
-  }
-  .files__chosen {
-    min-width: 0;
-    font-size: var(--text-small);
-    color: var(--color-ink-muted);
-    overflow-wrap: anywhere;
   }
   @media (min-width: 48rem) {
     .zapyt__form {
@@ -158,15 +99,10 @@ const ACCEPT = '.jpg,.jpeg,.png,.heic,.heif,.pdf,image/jpeg,image/png,image/heic
   if (form) {
     const status = form.querySelector<HTMLElement>('[data-form-status]');
     const filesInput = form.querySelector<HTMLInputElement>('input[name="files"]')!;
-    const chosen = form.querySelector<HTMLElement>('[data-files-chosen]')!;
     clearErrorsOnFix(form, CHECKS);
 
-    // Имена выбранных файлов и проверка сразу после выбора
-    filesInput.addEventListener('change', () => {
-      const list = Array.from(filesInput.files ?? []);
-      chosen.textContent = list.length ? list.map((f) => f.name).join(', ') : 'Файли не вибрано';
-      setFieldError(filesInput, CHECKS.files(filesInput));
-    });
+    // Проверка сразу после выбора (имена файлов показывает FilesField)
+    filesInput.addEventListener('change', () => setFieldError(filesInput, CHECKS.files(filesInput)));
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

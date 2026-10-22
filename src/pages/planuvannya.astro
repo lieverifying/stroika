@@ -1,0 +1,212 @@
+---
+// /planuvannya — лендинг под рекламу Meta (решение владельца, 2026-10-22). Одна цель — заявка на лид-магнит
+// «Два варіанти планування»; запасной вариант — безкоштовний замір. Без меню и переключателя, только логотип,
+// без подвала и нижней панели; noindex всегда (страница только для рекламы, с сайта на неё ссылок нет).
+// 1 первый экран → 2 «Як це працює» (4 шага) → 3 форма плана (#plan) → форма заміру (#zamir) → 4 роботи
+// → 5 три вопроса → 6 финал с кнопкой «Надіслати план» и ссылкой на главную.
+// Срок — facts.leadMagnet.planHours (PLAN_HOURS). UTM из рекламы уходят в заявку (src/lib/lead/attribution.ts).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import PlanForm from '../components/plan/PlanForm.astro';
+import PlanZamirForm from '../components/plan/PlanZamirForm.astro';
+import PortfolioGrid from '../components/portfolio/PortfolioGrid.astro';
+import Lightbox from '../components/portfolio/Lightbox.astro';
+import Accordion from '../components/ui/Accordion.astro';
+import Button from '../components/ui/Button.astro';
+import SectionTitle from '../components/ui/SectionTitle.astro';
+import { facts } from '../content/facts';
+import { contactLinks } from '../lib/contacts';
+import { FEATURED, photoById, responsive } from '../lib/portfolio';
+
+const hours = facts.leadMagnet.planHours;
+const photo = photoById('kukhnia-05');
+const STEPS = [
+  'Надсилаєте фото або план',
+  `Дизайнер готує 2 варіанти до ${hours} годин у робочі дні`,
+  'Отримуєте розрахунок у месенджер',
+  'Безкоштовний замір і точна ціна в договорі',
+];
+---
+
+<BaseLayout
+  title="Два варіанти планування кухні безкоштовно — Вимір"
+  description={`Надішліть фото або план кухні з розмірами — дизайнер підготує два варіанти розташування протягом ${hours} годин у робочі дні.`}
+  noindex
+  bare
+  compactH2
+  lcpImage={{ srcset: responsive(photo).srcset, sizes: '(min-width: 64rem) 40vw, 100vw' }}
+>
+  <header class="plan-top container-site">
+    <img src="/brand/logo.svg" alt="Вимір" width="148" height="32" />
+  </header>
+
+  <Hero
+    title="Два варіанти планування вашої кухні — безкоштовно"
+    lead={`Надішліть фото або план приміщення з розмірами — дизайнер підготує два варіанти розташування протягом ${hours} годин у робочі дні і надішле розрахунок у Viber або Telegram.`}
+    photo={photo}
+    focus="50% 50%"
+    quizHref="#plan"
+    ctaLabel="Надіслати план"
+    ctaIcon="arrow-right"
+    viberLabel="Надіслати у Viber"
+  />
+
+  <section class="section-pad" aria-labelledby="how-title" data-block="how">
+    <div class="container-site">
+      <SectionTitle id="how-title" title="Як це працює" />
+      <ol class="plan-steps">
+        {
+          STEPS.map((s, i) => (
+            <li class="plan-steps__item">
+              <span class="plan-steps__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="plan-steps__text">{s}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section id="plan" class="section-pad plan-section" aria-labelledby="plan-title" data-block="plan-form">
+    <div class="container-site plan-forms">
+      <div class="plan-forms__main">
+        <SectionTitle id="plan-title" title="Надішліть план або фото" subtitle="Розміри можна вказати приблизно — уточнимо в месенджері." />
+        <PlanForm />
+      </div>
+      <div id="zamir" class="plan-forms__zamir" data-block="plan-zamir">
+        <h2 class="plan-forms__zamir-title">Немає плану чи фото? Замовте безкоштовний замір</h2>
+        <PlanZamirForm />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad" aria-labelledby="plan-works-title" data-block="3" data-gallery>
+    <div class="container-site">
+      <SectionTitle id="plan-works-title" title="Роботи нашої команди" />
+      <PortfolioGrid items={FEATURED.kukhni} eager={0} cols={[2, 3]} />
+    </div>
+    <Lightbox />
+  </section>
+
+  <section class="section-pad" aria-labelledby="plan-faq-title" data-block="12">
+    <div class="container-site plan-faq">
+      <SectionTitle id="plan-faq-title" title="Питання" />
+      <div class="plan-faq__list">
+        <Accordion summary="Це справді безкоштовно?" name="plan-faq">
+          <p>Так. Два варіанти планування і розрахунок — безкоштовно.</p>
+        </Accordion>
+        <Accordion summary="Що, якщо в мене немає плану?" name="plan-faq">
+          <p>
+            Надішліть фото кухні та приблизні розміри — цього достатньо. Або <a href="#zamir">замовте безкоштовний замір</a> — приїдемо
+            і все заміряємо самі.
+          </p>
+        </Accordion>
+        <Accordion summary="Чи зобов’язує це мене замовляти?" name="plan-faq">
+          <p>Ні.</p>
+        </Accordion>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad plan-final on-dark" aria-labelledby="plan-final-title" data-block="13">
+    <div class="container-site plan-final__inner">
+      <h2 id="plan-final-title" class="text-h2">Два варіанти планування — безкоштовно</h2>
+      <div class="plan-final__buttons">
+        <Button href="#plan" size="lg" icon="arrow-right" ctaPriority={3}>Надіслати план</Button>
+        <Button href={contactLinks.viber} variant="light" icon="viber">Надіслати у Viber</Button>
+      </div>
+      <a href="/" class="plan-final__all">Подивитися всі роботи</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .plan-top {
+    display: flex;
+    align-items: center;
+    min-height: var(--header-h);
+  }
+  .plan-top img {
+    height: 2rem;
+    width: auto;
+  }
+  .plan-steps {
+    display: grid;
+    gap: var(--grid-gap);
+  }
+  .plan-steps__item {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .plan-steps__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-lead);
+    color: var(--color-oak);
+  }
+  .plan-steps__text {
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .plan-forms {
+    display: grid;
+    gap: var(--space-section);
+    max-width: calc(48rem + 2 * var(--space-gutter));
+  }
+  .plan-forms__zamir {
+    display: grid;
+    gap: 1.25rem;
+    scroll-margin-top: 1rem;
+  }
+  .plan-forms__zamir-title {
+    font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+  .plan-faq {
+    max-width: calc(48rem + 2 * var(--space-gutter));
+  }
+  .plan-faq a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+  }
+  .plan-final {
+    background: var(--color-graphite);
+    color: var(--color-plaster);
+  }
+  .plan-final__inner {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+  }
+  .plan-final__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .plan-final__all {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h);
+    font-size: var(--text-small);
+    color: var(--color-ink-muted-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  @media (min-width: 48rem) {
+    .plan-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .plan-steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

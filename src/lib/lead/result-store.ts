@@ -12,6 +12,8 @@ export interface ThanksData {
   method: ContactMethod;
   /** null — заявка не из квиза (форма замера, нестандартный запрос) */
   result: QuizResult | null;
+  /** 'plan' — лид-магнит «Два варіанти планування» (/planuvannya): на /dyakuyemo свой текст */
+  kind?: 'plan';
 }
 
 const METHODS: ContactMethod[] = ['viber', 'telegram', 'call'];
@@ -38,7 +40,7 @@ export function takeThanks(): ThanksData | null {
     if (!d || typeof d.name !== 'string') return null;
     const r = d.result;
     const result = r && (r.variant === 'A' || r.variant === 'B') ? r : null;
-    return { name: d.name.slice(0, 50), method: toMethod(d.method), result };
+    return { name: d.name.slice(0, 50), method: toMethod(d.method), result, ...(d.kind === 'plan' ? { kind: 'plan' as const } : {}) };
   } catch {
     return null;
   }
