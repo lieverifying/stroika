@@ -20,8 +20,11 @@ export function landingOfPath(path: string): Landing | null {
   return null;
 }
 
-/** Ссылка «в квиз»: на посадочной — на ней же, на остальных страницах — на /kukhni (шаг 1 квиза — все варианты) */
-export const quizHref = (landing: Landing | null) => `/${landing ?? 'kukhni'}#kvyz`;
+/**
+ * Ссылка «в квиз»: на посадочной — на ней же (шаг выбора пропущен, ветка страницы выбрана). С главной и остальных
+ * страниц — квиз на /kukhni с шага 1 «Що плануєте?» без предвыбора: ?kvyz=start отменяет ветку посадочной (quiz.ts).
+ */
+export const quizHref = (landing: Landing | null) => (landing ? `/${landing}#kvyz` : '/kukhni?kvyz=start#kvyz');
 
 const KEY = 'vymir.landing';
 

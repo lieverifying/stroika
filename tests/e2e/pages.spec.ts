@@ -78,7 +78,7 @@ test.describe('404', () => {
     expect(res!.status()).toBe(404);
     await expect(page.locator('h1')).toHaveText('Сторінку не знайдено');
     await expect(page.locator('main').getByRole('link', { name: 'На головну' })).toHaveAttribute('href', '/');
-    await expect(page.locator('main').getByRole('link', { name: 'Порахувати вартість' })).toHaveAttribute('href', '/kukhni#kvyz');
+    await expect(page.locator('main').getByRole('link', { name: 'Порахувати вартість' })).toHaveAttribute('href', '/kukhni?kvyz=start#kvyz');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });

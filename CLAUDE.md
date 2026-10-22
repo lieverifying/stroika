@@ -186,7 +186,7 @@
 - Коммит и push сделаны.
 
 ## SEO и аналитика (фаза 7, 2026-10-22)
-- Только боевая сборка индексируется (`index, follow`); всегда noindex: /dyakuyemo, 404 (лендинги /planuvannya и /planuvannya-mebli удалены 2026-10-22) (`/styleguide` в боевую сборку не попадает).
+- Только боевая сборка индексируется (`index, follow`); всегда noindex: /dyakuyemo, 404 (`/styleguide` в боевую сборку не попадает).
 - `sitemap.xml` (/, /kukhni, /mebli, /roboty, /yak-my-stvoriuiemo, /kontakty, /polityka) и `robots.txt` со ссылкой на sitemap — эндпоинты `src/pages/*.ts`; тестовая сборка закрыта `Disallow: /`. /dyakuyemo в robots.txt не закрываем — у него meta noindex.
 - Canonical без .html; Open Graph 1200 × 630 — `public/og/<страница>.jpg` (`node scripts/og-images.mjs`); JSON-LD `LocalBusiness` на индексируемых страницах, `FAQPage` на /kukhni и /mebli (`src/lib/schema.ts`); `google-site-verification` из `PUBLIC_GSC_VERIFICATION`.
 - GA4 и Meta Pixel (`src/components/layout/Analytics.astro`, мост `src/lib/tags.ts`) — только при `SITE_ENV=production` и заданном ID (`PUBLIC_GA4_ID`, `PUBLIC_META_PIXEL_ID`). GA4: quiz_start, quiz_step {step}, generate_lead {form_type, page}, click_phone, click_messenger {messenger}, story_complete. Pixel: PageView, Lead {content_name: «форма_страница»}, Contact на телефон / Viber / Telegram. Имя, телефон, описание и файлы туда не передаются никогда. Политика описывает GA4 и Pixel и как отказаться.

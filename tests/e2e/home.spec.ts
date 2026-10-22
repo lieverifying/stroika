@@ -23,7 +23,7 @@ test.describe('главная бренда', () => {
     );
     await expect(hero.locator('img')).toHaveAttribute('src', /\/kukhnia-05-960\.webp$/);
     const cta = hero.getByRole('link', { name: 'Порахувати вартість' });
-    await expect(cta).toHaveAttribute('href', '/kukhni#kvyz');
+    await expect(cta).toHaveAttribute('href', '/kukhni?kvyz=start#kvyz');
     await expect(cta).toHaveAttribute('data-cta', 'primary');
     await expect(hero).toContainText('Ціну надішлемо у Viber або Telegram');
   });
@@ -149,4 +149,37 @@ test('якорь #kvyz на посадочной: заголовок квиза 
   await expect(title).toBeInViewport();
   const headerBottom = await page.locator('[data-header]').evaluate((el) => el.getBoundingClientRect().bottom);
   await expect.poll(() => title.evaluate((el) => el.getBoundingClientRect().top)).toBeGreaterThanOrEqual(headerBottom);
+});
+
+test('«Порахувати вартість» с главной (шапка, первый экран, нижняя панель) открывает квиз с шага 1 без предвыбора', async ({ page, isMobile }) => {
+  await page.goto('/');
+  const links = [page.locator('[data-block="1"] [data-cta]')];
+  if (isMobile) links.push(page.locator('[data-bottom-bar] [data-cta]'));
+  else links.push(page.locator('[data-header] [data-cta]').first());
+  for (const l of links) await expect(l).toHaveAttribute('href', '/kukhni?kvyz=start#kvyz');
+  await page.locator('[data-block="1"] [data-cta]').click();
+  await expect(page.locator('[data-quiz]')).toHaveAttribute('data-ready', '');
+  const step = page.locator('[data-quiz] [data-step]:not([hidden])');
+  await expect(step).toHaveAttribute('data-step', 'goal');
+  await expect(step.locator('[aria-checked="true"]')).toHaveCount(0);
+  await expect(page.locator('[data-quiz-progress-text]')).toHaveText('Крок 1');
+  await step.getByRole('radio', { name: 'Шафа або гардеробна' }).click();
+  await expect(page.locator('[data-quiz-progress-text]')).toHaveText('Крок 2 з 5');
+});
+
+test('шапка 1024–1239 px: пункты меню в одну строку, телефон — только иконкой; с 1240 px — с номером', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'только десктоп');
+  for (const [w, path] of [[1024, '/'], [1100, '/kukhni'], [1239, '/mebli'], [1240, '/kukhni']] as const) {
+    await page.setViewportSize({ width: w, height: 800 });
+    await page.goto(path);
+    const links = page.locator('[data-header] nav[aria-label="Головне меню"] a:visible');
+    for (const a of await links.all()) expect((await a.boundingBox())!.height, `${w} ${path}`).toBeLessThanOrEqual(48);
+    const cta = page.locator('[data-header] [data-cta]').first();
+    expect((await cta.boundingBox())!.height, `${w} кнопка`).toBeLessThanOrEqual(52);
+    const phone = page.locator('[data-header] .header-phone');
+    await expect(phone).toHaveAttribute('href', 'tel:+380759914843');
+    if (w < 1240) await expect(phone.locator('.header-phone__number')).toBeHidden();
+    else await expect(phone.locator('.header-phone__number')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  }
 });

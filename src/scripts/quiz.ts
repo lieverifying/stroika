@@ -37,10 +37,11 @@ function answersSummary(answers: QuizAnswers): string {
     .join(' · ');
 }
 
-/** Предвыбор ветки: data-preset квиза (посадочная) или адрес /?kvyz=shafa */
+/** Предвыбор ветки: data-preset квиза (посадочная) или адрес ?kvyz=shafa; ?kvyz=start — с шага 1 без предвыбора */
 function presetFor(root: HTMLElement): Partial<QuizAnswers> | undefined {
   const v = new URLSearchParams(location.search).get('kvyz');
   if (v === 'shafa') return { goal: 'wardrobe' };
+  if (v === 'start') return undefined;
   const p = root.dataset.preset;
   return p === 'kitchen' || p === 'wardrobe' ? { goal: p } : undefined;
 }

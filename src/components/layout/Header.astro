@@ -52,11 +52,12 @@ const SWITCH = [
       <ul class="flex items-center gap-1">
         {
           NAV.map((item) => (
-            <li>
+            // На посадочной при 1024–1239 px «Кухні» и «Меблі» есть в переключателе рядом — в меню их прячем, чтобы всё влезло
+            <li class:list={{ 'nav-dup': landing && (item.href === '/kukhni' || item.href === '/mebli') }}>
               <a
                 href={item.href}
                 aria-current={path === item.href ? 'page' : undefined}
-                class="nav-link flex min-h-12 items-center rounded-md px-3 font-medium"
+                class="nav-link flex min-h-12 items-center rounded-md px-2 font-medium whitespace-nowrap min-[77.5rem]:px-3"
               >
                 {item.label}
               </a>
@@ -66,12 +67,13 @@ const SWITCH = [
       </ul>
     </nav>
 
-    <div class="hidden items-center gap-4 lg:flex">
-      <a href={contactLinks.tel} class="flex min-h-12 items-center gap-2 font-semibold">
+    <div class="hidden shrink-0 items-center gap-2 lg:flex min-[77.5rem]:gap-4">
+      <!-- 1024–1239 px: только иконка телефона (номер не помещается рядом с меню и кнопкой); с 1240 px — с номером -->
+      <a href={contactLinks.tel} class="header-phone flex min-h-12 min-w-12 items-center justify-center gap-2 font-semibold whitespace-nowrap" aria-label={`Подзвонити ${facts.contacts.phoneDisplay}`}>
         <Icon name="phone" size={20} />
-        <Fact value={facts.contacts.phoneDisplay} />
+        <span class="header-phone__number"><Fact value={facts.contacts.phoneDisplay} /></span>
       </a>
-      <Button href={quizHref(landing)} deferPrimary ctaPriority={1}>Порахувати вартість</Button>
+      <Button href={quizHref(landing)} deferPrimary ctaPriority={1} class="whitespace-nowrap">Порахувати вартість</Button>
     </div>
 
     <div class="flex items-center lg:hidden">
@@ -99,6 +101,19 @@ const SWITCH = [
 </header>
 
 <style>
+  .header-phone__number {
+    display: none;
+  }
+  @media (max-width: 77.49rem) {
+    .nav-dup {
+      display: none;
+    }
+  }
+  @media (min-width: 77.5rem) {
+    .header-phone__number {
+      display: inline;
+    }
+  }
   .site-header {
     transition: box-shadow var(--dur-base) var(--ease-out);
   }
