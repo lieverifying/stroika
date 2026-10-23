@@ -120,7 +120,7 @@ test.describe('главная бренда', () => {
     await expect(b).toContainText('Відповідає людина, яка веде ваш проєкт');
     await expect(b).toContainText('Від першого повідомлення до монтажу ви спілкуєтесь з тим, хто знає ваш проєкт.');
     await expect(b.locator('a[href^="tel:"]')).toHaveCount(0);
-    await expect(b).not.toContainText('991 48 43');
+    await expect(b).not.toContainText('991 48 83');
   });
 
   test('финал: «Скажіть розмір — ми скажемо ціну», Viber, Telegram, Подзвонити', async ({ page }) => {
@@ -129,9 +129,9 @@ test.describe('главная бренда', () => {
     await expect(fin.locator('h2')).toHaveText('Скажіть розмір — ми скажемо ціну');
     await expect(fin).toContainText('Надішліть розміри або фото приміщення — розрахунок прийде в месенджер.');
     await expect(fin.locator('.btn')).toHaveText(['Viber', 'Telegram', 'Подзвонити']);
-    await expect(fin.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
-    await expect(fin.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
-    await expect(fin.getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914843');
+    await expect(fin.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914883');
+    await expect(fin.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914883');
+    await expect(fin.getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914883');
     await expect(fin.locator('form')).toHaveCount(0);
   });
 
@@ -177,7 +177,7 @@ test('шапка 1024–1239 px: пункты меню в одну строку,
     const cta = page.locator('[data-header] [data-cta]').first();
     expect((await cta.boundingBox())!.height, `${w} кнопка`).toBeLessThanOrEqual(52);
     const phone = page.locator('[data-header] .header-phone');
-    await expect(phone).toHaveAttribute('href', 'tel:+380759914843');
+    await expect(phone).toHaveAttribute('href', 'tel:+380759914883');
     if (w < 1240) await expect(phone.locator('.header-phone__number')).toBeHidden();
     else await expect(phone.locator('.header-phone__number')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);

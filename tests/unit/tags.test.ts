@@ -17,7 +17,7 @@ describe('tags', () => {
     expect(() => {
       forwardToGa4('quiz_start', { quiz_branch: 'kitchen' });
       leadSucceeded('quiz', undefined, '/kukhni');
-      contactClicked('tel:+380759914843', '/');
+      contactClicked('tel:+380759914883', '/');
     }).not.toThrow();
   });
   test('quiz_step_N → quiz_step { step: N }; quiz_start; story_complete; остальное не уходит', () => {
@@ -46,9 +46,9 @@ describe('tags', () => {
   });
   test('клик: телефон, Viber, Telegram — события и Contact; обычная ссылка — ничего', () => {
     const { gtag, fbq } = stubs();
-    contactClicked('tel:+380759914843', '/kukhni');
-    contactClicked('viber://chat?number=%2B380759914843', '/kukhni');
-    contactClicked('https://t.me/+380759914843', '/kukhni');
+    contactClicked('tel:+380759914883', '/kukhni');
+    contactClicked('viber://chat?number=%2B380759914883', '/kukhni');
+    contactClicked('https://t.me/+380759914883', '/kukhni');
     contactClicked('/roboty', '/kukhni');
     expect(gtag.mock.calls.map((c) => [c[1], c[2]])).toEqual([
       ['click_phone', { page: '/kukhni' }],

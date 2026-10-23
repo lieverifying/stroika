@@ -275,9 +275,9 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await submit.click();
     const status = visibleStep(page).locator('[data-form-status]');
     await expect(status).toContainText('Не вдалося надіслати. Подзвоніть або напишіть нам', { timeout: 8000 });
-    await expect(status.getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914843');
-    await expect(status.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
-    await expect(status.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
+    await expect(status.getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914883');
+    await expect(status.getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914883');
+    await expect(status.getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914883');
     await expect(page).toHaveURL(/\/kukhni#kvyz$/);
     await expect(page.locator('#quiz-name')).toHaveValue('Олена');
     await expect(submit).toBeEnabled();

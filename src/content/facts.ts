@@ -132,11 +132,11 @@ export const facts = {
 
   contacts: {
     // Подтверждено владельцем 2026-10-21. Viber и Telegram — на тот же номер.
-    phoneDisplay: '+380 75 991 48 43',
-    phoneE164: '+380759914843',
-    viberPhoneE164: '+380759914843',
-    // Telegram по номеру телефона: https://t.me/+380759914843
-    telegramUsername: '+380759914843',
+    phoneDisplay: '+380 75 991 48 83',
+    phoneE164: '+380759914883',
+    viberPhoneE164: '+380759914883',
+    // Telegram по номеру телефона: https://t.me/+380759914883
+    telegramUsername: '+380759914883',
     // Instagram и TikTok — подтверждено владельцем 2026-10-21, без @
     instagramHandle: 'vymir.che',
     tiktokHandle: 'vymir.che',

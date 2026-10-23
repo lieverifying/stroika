@@ -6,12 +6,12 @@ test.describe('футер', () => {
     await page.goto('/kukhni');
     const f = page.locator('footer[data-block="14"]');
     const visible = (sel: string) => f.locator(`${sel}:visible`);
-    await expect(visible('a[href="tel:+380759914843"]')).toHaveCount(1);
-    await expect(visible('a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
-    await expect(visible('a[href="https://t.me/+380759914843"]')).toHaveCount(1);
+    await expect(visible('a[href="tel:+380759914883"]')).toHaveCount(1);
+    await expect(visible('a[href="viber://chat?number=%2B380759914883"]')).toHaveCount(1);
+    await expect(visible('a[href="https://t.me/+380759914883"]')).toHaveCount(1);
     await expect(visible('a[href="https://www.instagram.com/vymir.che"]')).toHaveCount(1);
     await expect(visible('a[href="https://www.tiktok.com/@vymir.che"]')).toHaveCount(1);
-    if (!isMobile) await expect(visible('a[href="tel:+380759914843"]')).toContainText('+380 75 991 48 43');
+    if (!isMobile) await expect(visible('a[href="tel:+380759914883"]')).toContainText('+380 75 991 48 83');
     await expect(visible('a[href^="mailto:"]')).toHaveCount(0);
     await expect(f).not.toContainText(/ФОП|ІПН/);
     await expect(f.locator('.fact-ph')).toHaveCount(0);
@@ -32,7 +32,7 @@ test.describe('футер', () => {
     const tops = await icons.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
     expect(new Set(tops).size).toBe(1); // одна строка
     for (const label of ['Viber', 'Telegram', 'Instagram', 'TikTok']) await expect(f.getByRole('link', { name: label, exact: true })).toBeVisible();
-    await expect(f.getByRole('link', { name: /Подзвонити/ })).toHaveAttribute('href', 'tel:+380759914843');
+    await expect(f.getByRole('link', { name: /Подзвонити/ })).toHaveAttribute('href', 'tel:+380759914883');
     await expect(f.locator('[data-footer-compact]')).toContainText('Черкаси та область');
     await expect(f.locator('.btn:visible')).toHaveCount(0);
     await expect(f.locator('.site-footer__slogan:visible')).toHaveCount(0);

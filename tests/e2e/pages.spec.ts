@@ -45,7 +45,7 @@ test.describe('/polityka', () => {
     ]);
     await expect(page.locator('main')).toContainText('Про захист персональних даних');
     await expect(page.locator('main')).toContainText('Володілець персональних даних — ФОП Мєшалкін Андрій Леонідович');
-    await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
+    await expect(page.locator('main a[href="tel:+380759914883"]')).toHaveCount(1);
     // заглушек больше нет: почта для вопросов о персональных данных подтверждена 2026-10-22
     await expect(page.locator('.fact-ph')).toHaveCount(0);
     await expect(page.locator('main a[href="mailto:vymir.che@gmail.com"]').first()).toHaveText('vymir.che@gmail.com');
@@ -58,10 +58,10 @@ test.describe('/kontakty', () => {
   test('крупные кнопки: телефон, Viber, Telegram, Instagram, TikTok; зона виїзду; форма «Нестандартне завдання»; без фактов — без графіка, адреси, карти', async ({ page }) => {
     await page.goto('/kontakty');
     await expect(page.locator('h1')).toHaveText('Контакти');
-    await expect(page.locator('main a.contacts__phone')).toContainText('+380 75 991 48 43');
-    await expect(page.locator('main').getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914843');
-    await expect(page.locator('main').getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914843');
-    await expect(page.locator('main').getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914843');
+    await expect(page.locator('main a.contacts__phone')).toContainText('+380 75 991 48 83');
+    await expect(page.locator('main').getByRole('link', { name: 'Подзвонити' })).toHaveAttribute('href', 'tel:+380759914883');
+    await expect(page.locator('main').getByRole('link', { name: 'Viber' })).toHaveAttribute('href', 'viber://chat?number=%2B380759914883');
+    await expect(page.locator('main').getByRole('link', { name: 'Telegram' })).toHaveAttribute('href', 'https://t.me/+380759914883');
     await expect(page.locator('main').getByRole('link', { name: 'Instagram' })).toHaveAttribute('href', 'https://www.instagram.com/vymir.che');
     await expect(page.locator('main').getByRole('link', { name: 'TikTok' })).toHaveAttribute('href', 'https://www.tiktok.com/@vymir.che');
     await expect(page.locator('main')).not.toContainText(/Графік|Адреса|Пошта/);
@@ -101,18 +101,18 @@ test('режим запуска: ни одной плашки-заглушки �
   }
 });
 
-test('телефон +380 75 991 48 43 и ссылки tel / Viber / Telegram: шапка, нижняя панель, подвал, /dyakuyemo', async ({ page, isMobile }) => {
+test('телефон +380 75 991 48 83 и ссылки tel / Viber / Telegram: шапка, нижняя панель, подвал, /dyakuyemo', async ({ page, isMobile }) => {
   await page.goto('/kukhni');
   if (isMobile) {
-    await expect(page.locator('[data-bottom-bar] a[href="tel:+380759914843"]')).toHaveCount(1);
-    await expect(page.locator('[data-bottom-bar] a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
+    await expect(page.locator('[data-bottom-bar] a[href="tel:+380759914883"]')).toHaveCount(1);
+    await expect(page.locator('[data-bottom-bar] a[href="viber://chat?number=%2B380759914883"]')).toHaveCount(1);
   } else {
-    await expect(page.locator('[data-header] a[href="tel:+380759914843"]').first()).toContainText('+380 75 991 48 43');
+    await expect(page.locator('[data-header] a[href="tel:+380759914883"]').first()).toContainText('+380 75 991 48 83');
   }
-  await expect(page.locator('footer a[href="tel:+380759914843"]:visible')).toHaveCount(1);
+  await expect(page.locator('footer a[href="tel:+380759914883"]:visible')).toHaveCount(1);
   await page.goto('/dyakuyemo');
-  await expect(page.locator('main a[href="tel:+380759914843"]')).toHaveCount(1);
-  await expect(page.locator('main a[href="viber://chat?number=%2B380759914843"]')).toHaveCount(1);
+  await expect(page.locator('main a[href="tel:+380759914883"]')).toHaveCount(1);
+  await expect(page.locator('main a[href="viber://chat?number=%2B380759914883"]')).toHaveCount(1);
   await expect(page.locator('main a[href="https://www.instagram.com/vymir.che"]')).toHaveCount(1);
   await expect(page.locator('main a[href="https://www.tiktok.com/@vymir.che"]')).toHaveCount(1);
 });

@@ -42,7 +42,7 @@ test('JSON-LD: LocalBusiness на индексируемых страницах,
   expect(home.map((s) => s['@type'])).toEqual(['LocalBusiness']);
   expect(home[0]).toMatchObject({
     name: 'Вимір',
-    telephone: '+380759914843',
+    telephone: '+380759914883',
     address: { addressLocality: 'Черкаси' },
     areaServed: { name: 'Черкаська область' },
     sameAs: ['https://www.instagram.com/vymir.che', 'https://www.tiktok.com/@vymir.che'],
