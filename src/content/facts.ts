@@ -121,6 +121,7 @@ export const facts = {
   warranty: {
     years: missing('WARRANTY_YEARS'),
     terms: missing('WARRANTY_TERMS'),
+    hardware: 'гарантія від виробника' as Fact<string>, // подтверждено владельцем 2026-10-23
   },
 
   payment: {
@@ -284,7 +285,7 @@ interface FactsSchema {
     oneTeam: Fact<string>;
   };
   trust: { kitchensDone: Fact<number>; years: Fact<number> };
-  warranty: { years: Fact<number>; terms: Fact<string> };
+  warranty: { years: Fact<number>; terms: Fact<string>; hardware: Fact<string> };
   payment: { prepayPercent: Fact<number>; schedule: Fact<string>; methods: Fact<string> };
   contacts: Record<string, Fact<string>>;
   serviceArea: { text: Fact<string>; terms: Fact<string>; cityDistricts: Fact<string[]>; map: Fact<string> };

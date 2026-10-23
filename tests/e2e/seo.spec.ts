@@ -49,7 +49,7 @@ test('JSON-LD: LocalBusiness на индексируемых страницах,
   });
   const kukhni = await schemas('/kukhni');
   expect(kukhni.map((s) => s['@type'])).toEqual(['LocalBusiness', 'FAQPage']);
-  expect(kukhni[1].mainEntity).toHaveLength(5);
+  expect(kukhni[1].mainEntity).toHaveLength(6);
   expect(await schemas('/dyakuyemo')).toEqual([]);
 });
 

@@ -68,7 +68,7 @@ for (const l of [
       if (isMobile) await expect(page.locator('[data-bottom-bar] [data-cta]')).toHaveAttribute('href', `${l.path}#kvyz`);
     });
 
-    test('5 вопросов FAQ (без вопроса о сроках); «Скільки коштує?» — от чего зависит цена и что она фиксируется в договоре', async ({ page }) => {
+    test('6 вопросов FAQ (без вопроса о сроках, с гарантией на фурнитуру); «Скільки коштує?» — от чего зависит цена и что она фиксируется в договоре', async ({ page }) => {
       await page.goto(l.path);
       const faq = page.locator('[data-block="12"]');
       await expect(faq.locator('summary')).toHaveText([
@@ -76,6 +76,7 @@ for (const l of [
         'Чим ви відрізняєтесь від модульних меблів з мережевого магазину?',
         'Чи можна за моїм дизайн-проєктом?',
         'Чи встановлюєте техніку і мийку?',
+        'Яка гарантія на фурнітуру?',
         'Чи працюєте в області?',
       ]);
       await faq.locator('summary').first().click();
