@@ -25,6 +25,7 @@ export default defineConfig({
       // Теги выводятся только при SITE_ENV=production. ID публичные — они видны в коде любой страницы.
       PUBLIC_GA4_ID: envField.string({ context: 'client', access: 'public', optional: true }),
       PUBLIC_GADS_ID: envField.string({ context: 'client', access: 'public', optional: true }),
+      PUBLIC_GADS_LEAD: envField.string({ context: 'client', access: 'public', optional: true }),
       PUBLIC_META_PIXEL_ID: envField.string({ context: 'client', access: 'public', optional: true }),
       PUBLIC_GSC_VERIFICATION: envField.string({ context: 'client', access: 'public', optional: true }),
     },

@@ -44,6 +44,15 @@ describe('tags', () => {
     ]);
     expect(fbq.mock.calls.map((c) => c[2].content_name)).toEqual(['zapyt_kontakty', 'zapyt_special', 'quiz_home']);
   });
+  test('конверсия Google Ads при заявке — только если задан send_to', () => {
+    const { gtag } = stubs();
+    vi.stubGlobal('vymirAdsLead', 'AW-1/abc');
+    leadSucceeded('quiz', undefined, '/kukhni');
+    expect(gtag.mock.calls).toEqual([
+      ['event', 'generate_lead', { form_type: 'quiz', page: '/kukhni' }],
+      ['event', 'conversion', { send_to: 'AW-1/abc' }],
+    ]);
+  });
   test('клик: телефон, Viber, Telegram — события и Contact; обычная ссылка — ничего', () => {
     const { gtag, fbq } = stubs();
     contactClicked('tel:+380759914883', '/kukhni');

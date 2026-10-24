@@ -1,5 +1,5 @@
 /**
- * Мост к Google Analytics 4 (gtag) и Meta Pixel (fbq). Теги подключает Analytics.astro только в боевой сборке и только
+ * Мост к Google Analytics 4 и Google Ads (gtag) и Meta Pixel (fbq). Теги подключает Analytics.astro только в боевой сборке и только
  * при заданных ID; без них все функции — пустые вызовы. Имя, телефон, текст описания и файлы сюда не передаются никогда:
  * в параметрах — только тип формы, страница, номер шага, ветка квиза, мессенджер.
  */
@@ -33,13 +33,20 @@ export function forwardToGa4(name: string, params: Params = {}): void {
   else if (name === 'story_complete') gtag('story_complete', params);
 }
 
+/** Конверсия Google Ads «заявка» (send_to AW-…/метка): Analytics.astro кладёт её в window.vymirAdsLead */
+function adsLead(): void {
+  const sendTo = (globalThis as unknown as { vymirAdsLead?: string }).vymirAdsLead;
+  if (sendTo) gtag('conversion', { send_to: sendTo });
+}
+
 /**
- * Успешная отправка любой формы: GA4 generate_lead (form_type, page) и Pixel Lead (content_name).
+ * Успешная отправка любой формы: GA4 generate_lead (form_type, page), конверсия Google Ads и Pixel Lead (content_name).
  * content_name — тип формы и страница: «форма_страница» (quiz_kukhni, zapyt_kontakty); можно задать явно.
  */
 export function leadSucceeded(formType: string, contentName?: string, pathname = location.pathname): void {
   const page = pageName(pathname);
   gtag('generate_lead', { form_type: formType, page });
+  adsLead();
   fbq('Lead', { content_name: contentName ?? `${formType}_${page === '/' ? 'home' : page.slice(1)}` });
 }
 

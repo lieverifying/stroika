@@ -1176,7 +1176,7 @@ push в main ─► GitHub Actions (.github/workflows/deploy.yml)
                      └─ проверка: страницы 200, 404, /api/lead.php 405, lead-lib.php 403, POST без полей → 422 (конфиг на месте)
 ```
 
-- Секреты GitHub (вносит владелец): `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`. Переменные: `PUBLIC_GA4_ID`, `PUBLIC_GADS_ID` (тег Google Ads AW-…), `PUBLIC_META_PIXEL_ID`, `PUBLIC_GSC_VERIFICATION` (необязательные), `SITE_URL`, `SITE_ENV` (по умолчанию https://vymir.site и production).
+- Секреты GitHub (вносит владелец): `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`. Переменные: `PUBLIC_GA4_ID`, `PUBLIC_GADS_ID` (тег Google Ads AW-…), `PUBLIC_GADS_LEAD` (send_to конверсии «заявка»), `PUBLIC_META_PIXEL_ID`, `PUBLIC_GSC_VERIFICATION` (необязательные), `SITE_URL`, `SITE_ENV` (по умолчанию https://vymir.site и production).
 - Токен бота и ID чата в GitHub не хранятся: только в `/home/vymimufd/vymir-config/lead.php`.
 - `public/.htaccess` целиком заменяет файл в public_html (правила Force HTTPS из cPanel перезаписываются): https и без www — по `%{HTTPS}` и `X-Forwarded-Proto`, `/.well-known/` без редиректа (продление SSL), сжатие, кэш, 404, адреса без `.html`. `api/.htaccess` отдаёт только `lead.php` (через mod_rewrite — работает на LiteSpeed).
 - SSL — Namecheap, до 08.05.2027.
