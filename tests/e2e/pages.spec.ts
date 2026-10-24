@@ -49,7 +49,7 @@ test.describe('/polityka', () => {
     // заглушек больше нет: почта для вопросов о персональных данных подтверждена 2026-10-22
     await expect(page.locator('.fact-ph')).toHaveCount(0);
     await expect(page.locator('main a[href="mailto:vymir.che@gmail.com"]').first()).toHaveText('vymir.che@gmail.com');
-    await expect(page.locator('main')).toContainText('Ваше ім’я, номер телефону, опис завдання і файли в Google Analytics і Meta Pixel не передаються ніколи');
+    await expect(page.locator('main')).toContainText('Ваше ім’я, номер телефону, опис завдання і файли в Google Analytics, Google Ads і Meta Pixel не передаються ніколи');
     await expect(page.locator('main a[href="https://tools.google.com/dlpage/gaoptout"]')).toHaveCount(1);
   });
 });

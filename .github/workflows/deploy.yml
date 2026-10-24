@@ -7,7 +7,7 @@
 #   FTP_USERNAME  — deploy@vymir.site (доступ только к /home/vymimufd/public_html)
 #   FTP_PASSWORD  — пароль этого FTP-аккаунта
 # Переменные (Settings → Secrets and variables → Actions → Variables), необязательные — без них тег не выводится:
-#   PUBLIC_GA4_ID, PUBLIC_META_PIXEL_ID, PUBLIC_GSC_VERIFICATION; SITE_URL и SITE_ENV — если нужно переопределить.
+#   PUBLIC_GA4_ID, PUBLIC_GADS_ID, PUBLIC_META_PIXEL_ID, PUBLIC_GSC_VERIFICATION; SITE_URL и SITE_ENV — если нужно переопределить.
 # Секреты заявок (токен бота, ID чата) в GitHub не нужны: они в /home/vymimufd/vymir-config/lead.php, его создаёт
 # владелец в cPanel. Сюда не попадают ни значения секретов, ни их вывод: GitHub маскирует их в логах.
 name: Deploy
@@ -79,6 +79,7 @@ jobs:
       - name: Сборка (${{ env.SITE_ENV }})
         env:
           PUBLIC_GA4_ID: ${{ vars.PUBLIC_GA4_ID }}
+          PUBLIC_GADS_ID: ${{ vars.PUBLIC_GADS_ID }}
           PUBLIC_META_PIXEL_ID: ${{ vars.PUBLIC_META_PIXEL_ID }}
           PUBLIC_GSC_VERIFICATION: ${{ vars.PUBLIC_GSC_VERIFICATION }}
         run: npm run build
