@@ -9,7 +9,7 @@ const MIME = { woff2: 'font/woff2', webp: 'image/webp', png: 'image/png' };
 const file = async (p) => `data:${MIME[p.split('.').pop()]};base64,${(await readFile(`${root}/${p}`)).toString('base64')}`;
 const PAGES = [
   ['home', 'public/portfolio/img/kukhni/kukhnia-05.webp', 'Меблі, які точно підходять'],
-  ['kukhni', 'public/portfolio/img/kukhni/kukhnia-06.webp', 'Кухні на замовлення в Черкасах'],
+  ['kukhni', 'public/portfolio/img/kukhni/kukhnia-06.webp', 'Кухні на замовлення в Черкасах та області'],
   ['mebli', 'public/portfolio/img/shafy/shafa-01.webp', 'Шафи, гардеробні та меблі під ваш розмір'],
   ['roboty', 'public/portfolio/img/kukhni/kukhnia-11.webp', 'Роботи нашої команди'],
   ['yak-my-stvoriuiemo', 'src/assets/stories/kitchen/kitchen-07-ready.png', 'Як ми створюємо'],
