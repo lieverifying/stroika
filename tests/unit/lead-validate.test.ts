@@ -7,6 +7,7 @@ import {
   validateName,
   validatePhone,
   validateRequest,
+  validateBudget,
   validateTask,
 } from '../../src/lib/lead/validate';
 
@@ -32,6 +33,13 @@ describe('validatePhone', () => {
   test.each(['', '   ', '067123456', 'abc', '+380 67 123'])('невалидный: «%s»', (v) =>
     expect(validatePhone(v)).toBe(msg),
   );
+});
+
+describe('validateBudget', () => {
+  test('пусто — просим сумму или «Ще не знаю»', () => expect(validateBudget('  ')).toContain('Ще не знаю'));
+  test('меньше 1000 — неполная сумма', () => expect(validateBudget('150')).toContain('повну суму'));
+  test('1000 — граница, валидно', () => expect(validateBudget('1000')).toBeNull());
+  test('сумма с пробелами — валидно', () => expect(validateBudget('150 000')).toBeNull());
 });
 
 describe('validateConsent', () => {

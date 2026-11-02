@@ -112,6 +112,13 @@ export const facts = {
     oneTeam: missing('PROMISE_ONE_TEAM'),
   },
 
+  // Оффер лендинга /zayavka. Подтверждено владельцем 2026-11-03: замір бесплатный только в Черкассах,
+  // дизайн-проєкт бесплатный; примерная цена — только по готовому проекту с материалами (строитель, 2026-11-02).
+  offer: {
+    freeMeasure: 'Замір у Черкасах — безкоштовно',
+    freeDesign: 'Дизайн-проєкт — безкоштовно',
+    projectPrice: 'Є свій проєкт — назвемо орієнтовну ціну',
+  },
 
   trust: {
     kitchensDone: missing('TRUST_KITCHENS_DONE'),
@@ -284,6 +291,7 @@ interface FactsSchema {
     gift3dText: Fact<string>;
     oneTeam: Fact<string>;
   };
+  offer: { freeMeasure: string; freeDesign: string; projectPrice: string };
   trust: { kitchensDone: Fact<number>; years: Fact<number> };
   warranty: { years: Fact<number>; terms: Fact<string>; hardware: Fact<string> };
   payment: { prepayPercent: Fact<number>; schedule: Fact<string>; methods: Fact<string> };

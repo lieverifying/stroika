@@ -68,7 +68,7 @@ if ($errors) respond(422, ['ok' => false, 'error' => 'invalid', 'fields' => $err
 if (lead_seen_before($dataDir, $lead['eventId'])) respond(200, ['ok' => true, 'leadId' => $lead['eventId']], $wantsJson);
 
 $files = [];
-if ($lead['form'] === 'zapyt' && isset($_FILES['files'])) {
+if (in_array($lead['form'], LEAD_FILE_FORMS, true) && isset($_FILES['files'])) {
     $files = array_slice(array_values(array_filter(lead_files_list($_FILES['files']), 'lead_file_ok')), 0, LEAD_FILES_MAX);
 }
 
@@ -113,7 +113,7 @@ foreach ($handles as $channel => $h) {
 }
 curl_multi_close($mh);
 
-// Файлы «Нестандартне завдання» — вслед за сообщением, в ту же группу
+// Файлы («Нестандартне завдання», лендинг) — вслед за сообщением, в ту же группу
 if ($tgOn && in_array('telegram', $ok, true)) {
     foreach ($files as $f) {
         $h = curl_init($tgBase . '/sendDocument');

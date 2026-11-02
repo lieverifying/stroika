@@ -1,0 +1,303 @@
+---
+// /zayavka — лендинг под рекламу, только заявка (решение владельца, 2026-11-03). Без шапки, подвала и панели, noindex.
+// Сначала проверка города: не из Черкасс — заявки нет. Затем 5 шагов: что нужно → бюджет → есть ли проект (с файлами)
+// → материал → контакт. Шаги переключает src/scripts/zayavka.ts; без JS все поля идут подряд и форма уходит обычным POST.
+// Диапазонов бюджета от владельца пока нет, поэтому сумма вводится цифрами (диапазоны не выдумываем).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactFields from '../components/quiz/ContactFields.astro';
+import Button from '../components/ui/Button.astro';
+import Input from '../components/ui/form/Input.astro';
+import FilesField from '../components/ui/form/FilesField.astro';
+import '../components/ui/form/field.css';
+import { facts } from '../content/facts';
+import { contactLinks } from '../lib/contacts';
+import { HERO, responsive } from '../lib/portfolio';
+import { STEPS } from '../lib/quiz/config';
+
+const CITIES = ['Черкаси', 'Інше місто'];
+const NEEDS = ['Кухня', 'Шафа або гардеробна', 'ТВ-зона', 'Інші меблі'];
+const PROJECTS = [
+  { value: 'Є дизайн-проєкт', label: 'Так, є дизайн-проєкт' },
+  { value: 'Є фото або ескіз', label: 'Є фото або ескіз' },
+  { value: 'Немає', label: 'Немає, зробіть безкоштовно' },
+];
+const MATERIALS = (STEPS.facade.options ?? []).map((o) => String(o.label));
+const { offer, contacts } = facts;
+const photo = responsive(HERO);
+---
+
+<BaseLayout bare noindex title="Заявка — Вимір, меблі на замовлення в Черкасах" description="Кухні, шафи та інші меблі під ваш розмір у Черкасах. Замір і дизайн-проєкт безкоштовно.">
+  <div class="container-site z">
+    <div class="z__main">
+      <a href="/" class="z__logo" aria-label="Вимір, на головну"><img src="/brand/logo.svg" alt="" width="148" height="32" /></a>
+      <header class="z__head">
+        <p class="z__eyebrow">Кухні та меблі · Черкаси</p>
+        <h1 class="text-h1">Меблі під ваш розмір</h1>
+        <ul class="z__offer">
+          <li>{offer.freeMeasure}</li>
+          <li>{offer.freeDesign}</li>
+          <li>{offer.projectPrice}</li>
+        </ul>
+      </header>
+
+      <form class="z-form" action="/api/lead.php" method="post" enctype="multipart/form-data" novalidate data-zayavka-form>
+        <input type="hidden" name="form" value="zayavka" />
+        <input type="hidden" name="landing" value="zayavka" />
+        <p class="z-form__progress" data-progress hidden></p>
+
+        <fieldset class="z-step" data-step="city" data-auto>
+          <legend class="z-step__title" tabindex="-1">Де потрібні меблі?</legend>
+          <div class="z-options">
+            {CITIES.map((v) => <label class="z-option"><input type="radio" name="city" value={v} /><span>{v}</span></label>)}
+          </div>
+          <p class="field__error" data-step-error hidden>Оберіть варіант</p>
+        </fieldset>
+
+        <div class="z-stop" data-stop hidden>
+          <p class="z-step__title" tabindex="-1">Поки що ми працюємо тільки в Черкасах</p>
+          <p>Дякуємо, що зазирнули. Заявку з іншого міста ми зараз виконати не зможемо.</p>
+          <Button variant="outline" data-stop-back>Назад</Button>
+        </div>
+
+        <fieldset class="z-step" data-step="need" data-auto>
+          <legend class="z-step__title" tabindex="-1">Що потрібно?</legend>
+          <div class="z-options">
+            {NEEDS.map((v) => <label class="z-option"><input type="radio" name="need" value={v} /><span>{v}</span></label>)}
+          </div>
+          <p class="field__error" data-step-error hidden>Оберіть варіант</p>
+        </fieldset>
+
+        <fieldset class="z-step" data-step="budget">
+          <legend class="z-step__title" tabindex="-1">Яку суму готові витратити?</legend>
+          <Input name="budget" id="z-budget" label="Сума, грн" inputmode="numeric" autocomplete="off" hideOptional hint="Приблизно. Це не ціна в договорі, а орієнтир для розмови." />
+          <Button variant="outline" size="lg" fullWidth data-budget-unknown data-js-only hidden>Ще не знаю</Button>
+        </fieldset>
+
+        <fieldset class="z-step" data-step="project">
+          <legend class="z-step__title" tabindex="-1">Є дизайн-проєкт?</legend>
+          <div class="z-options z-options--wide">
+            {PROJECTS.map((p) => <label class="z-option"><input type="radio" name="project" value={p.value} /><span>{p.label}</span></label>)}
+          </div>
+          <p class="field__error" data-step-error hidden>Оберіть варіант</p>
+          <div class="z-files" data-project-files>
+            <FilesField id="z-files" label="Додайте проєкт, фото або ескіз" />
+          </div>
+        </fieldset>
+
+        <fieldset class="z-step" data-step="material" data-auto>
+          <legend class="z-step__title" tabindex="-1">З якого матеріалу фасади?</legend>
+          <div class="z-options">
+            {MATERIALS.map((v) => <label class="z-option"><input type="radio" name="material" value={v} /><span>{v}</span></label>)}
+          </div>
+          <p class="field__error" data-step-error hidden>Оберіть варіант</p>
+        </fieldset>
+
+        <fieldset class="z-step" data-step="contact">
+          <legend class="z-step__title" tabindex="-1">Куди вам написати?</legend>
+          <div class="z-contact">
+            <Input name="district" id="z-district" label="Район міста" autocomplete="off" />
+            <ContactFields prefix="z" />
+            <Button type="submit" size="lg" fullWidth ctaPriority={3}>Надіслати заявку</Button>
+            <p class="z-form__status" role="status" aria-live="polite" data-form-status></p>
+          </div>
+        </fieldset>
+
+        <div class="z-form__nav" data-nav hidden>
+          <Button variant="outline" data-back>Назад</Button>
+          <Button variant="secondary" data-next>Далі</Button>
+        </div>
+      </form>
+
+      <footer class="z__foot">
+        <a href={contactLinks.tel}>{contacts.phoneDisplay}</a>
+        <a href={contactLinks.viber}>Viber</a>
+        <a href="/roboty">Наші роботи</a>
+        <a href="/polityka">Політика</a>
+      </footer>
+    </div>
+
+    <!-- Фото только с 1024 px: на телефоне первой идёт форма, скрытое lazy-фото браузер не качает -->
+    <img class="z__photo" src={photo.src} srcset={photo.srcset} sizes="40vw" width={HERO.width} height={HERO.height} alt={HERO.alt} loading="lazy" />
+  </div>
+</BaseLayout>
+
+<script>
+  import '../scripts/zayavka';
+</script>
+
+<style>
+  .z {
+    display: grid;
+    gap: 3rem;
+    padding-block: 1.25rem 2.5rem;
+  }
+  .z__main {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+    min-width: 0;
+  }
+  .z__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 3rem;
+  }
+  .z__logo img {
+    height: 2rem;
+    width: auto;
+  }
+  .z__head {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .z__eyebrow {
+    color: var(--color-oak);
+    font-weight: 600;
+  }
+  .z__offer {
+    display: grid;
+    gap: 0.25rem;
+    color: var(--color-ink-muted);
+  }
+  .z-form {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+  }
+  .z-form__progress {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-oak);
+  }
+  .z-form__progress[hidden] {
+    display: none;
+  }
+  .z-step,
+  .z-stop {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .z-step[hidden],
+  .z-stop[hidden],
+  .z-files[hidden] {
+    display: none;
+  }
+  .z-step__title {
+    padding: 0;
+    margin-bottom: 1rem;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    font-weight: 600;
+  }
+  .z-step__title:focus {
+    outline: none;
+  }
+  .z-stop .z-step__title {
+    margin-bottom: 0;
+  }
+  .z-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .z-options--wide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 4rem;
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+  }
+  /* Радиокнопка невидима, но доступна с клавиатуры и скринридеру; выбор — графитовая рамка, не жёлтая */
+  .z-option input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .z-option:has(input:checked) {
+    border: 2px solid var(--color-graphite);
+    background: var(--color-plaster);
+  }
+  .z-option:has(input:focus-visible) {
+    outline: 2px solid var(--color-graphite);
+    outline-offset: 2px;
+  }
+  .z-contact {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .z-form__nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .z-form__nav[hidden] {
+    display: none;
+  }
+  .z-form :global([data-js-only][hidden]),
+  .z-form :global([data-next][hidden]) {
+    display: none;
+  }
+  .z-form__status {
+    font-size: var(--text-small);
+    color: var(--color-ink-muted);
+  }
+  .z-form__status:empty {
+    display: none;
+  }
+  .z__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+  }
+  .z__foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .z__photo {
+    display: none;
+  }
+  @media (max-width: 63.99rem) {
+    .z.is-started .z__head {
+      display: none;
+    }
+  }
+  @media (min-width: 48rem) {
+    .z-form {
+      padding: 2rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .z {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 4rem;
+      align-items: start;
+    }
+    .z__photo {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+    }
+  }
+</style>

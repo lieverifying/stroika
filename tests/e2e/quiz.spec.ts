@@ -238,7 +238,7 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     await visibleStep(page).getByRole('button', { name: 'Отримати ціну' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
     await expect(page.locator('[data-quiz-result]')).toHaveAttribute('data-shown', 'B');
-    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Олена\. Надішлемо розрахунок у Viber у робочий час\.$/);
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Олена\. Напишемо вам у Viber у робочий час\.$/);
     await expect(page.locator('[data-result="A"]')).toBeHidden(); // экран А (цена) выключен
     // при флаге B причина всегда variant-b: строка «no-length» (только для отката с флага A) скрыта
     await expect(page.locator('[data-result="B"] [data-no-length]')).toBeHidden();
@@ -284,10 +284,10 @@ test.describe('квиз: отправка и /dyakuyemo', () => {
     expect(leadApi.leads).toHaveLength(2); // первая попытка + один повтор через 2 с
   });
 
-  test('способ «Дзвінок» → «Зателефонуємо…», Telegram → «Надішлемо розрахунок у Telegram»', async ({ page }) => {
+  test('способ «Дзвінок» → «Зателефонуємо…», Telegram → «Напишемо вам у Telegram»', async ({ page }) => {
     for (const [method, text] of [
       ['Дзвінок', /^Дякуємо, Олена\. Зателефонуємо у робочий час\.$/],
-      ['Telegram', /^Дякуємо, Олена\. Надішлемо розрахунок у Telegram у робочий час\.$/],
+      ['Telegram', /^Дякуємо, Олена\. Напишемо вам у Telegram у робочий час\.$/],
     ] as const) {
       await openQuiz(page);
       await choose(page, 'Інші меблі');

@@ -67,6 +67,34 @@ t('бот: ловушка или быстрее 3 с', function () use ($valid) 
     eq(lead_is_bot(['website' => 'http://spam'] + $valid), true);
     eq(lead_is_bot(['elapsedMs' => 900] + $valid), true);
 });
+t('лендинг /zayavka: нужен выбор «что нужно»; способ связи из поля method (форма без JS)', function () use ($valid) {
+    $base = ['form' => 'zayavka', 'quiz' => null] + $valid;
+    [, $err] = lead_validate($base);
+    eq($err, ['need']);
+    unset($base['contactMethod']);
+    [$lead, $err] = lead_validate(['need' => 'Кухня', 'method' => 'telegram'] + $base);
+    eq($err, []);
+    eq($lead['contactMethod'], 'telegram');
+});
+t('лендинг /zayavka: Telegram — способ связи, затем бюджет и проект', function () use ($valid) {
+    [$lead] = lead_validate(['form' => 'zayavka', 'landing' => 'zayavka', 'quiz' => null, 'contactMethod' => 'viber', 'need' => 'Кухня', 'budget' => '150000', 'project' => 'Є дизайн-проєкт', 'material' => 'Акрил', 'district' => 'Митниця', 'city' => 'Черкаси'] + $valid);
+    $text = lead_telegram_text($lead);
+    $lines = explode("\n", $text);
+    eq($lines[0], '<b>Viber</b>');
+    eq($lines[1], '<b>Бюджет: 150 000 грн · Проєкт: Є дизайн-проєкт</b>');
+    eq($lines[2], 'Нова заявка: Лендинг · Кухня');
+    ok(str_contains($text, 'Матеріал: Акрил'), 'материал');
+    ok(str_contains($text, 'Район: Митниця'), 'район');
+    ok(!str_contains($text, 'Місто:'), 'Черкассы не дублируем');
+    ok(!str_contains($text, 'Відповіді:'), 'ответы не дублируем');
+    eq($lead['quizSummary'], 'Кухня · 150 000 грн · Є дизайн-проєкт · Акрил · Митниця');
+});
+t('лендинг /zayavka: без суммы бюджет «не знає», чужой город виден', function () use ($valid) {
+    [$lead] = lead_validate(['form' => 'zayavka', 'quiz' => null, 'need' => 'Кухня', 'budget' => '', 'project' => 'Немає', 'city' => 'Інше місто'] + $valid);
+    $text = lead_telegram_text($lead);
+    ok(str_contains($text, 'Бюджет: не знає · Проєкт: Немає'), 'бюджет');
+    ok(str_contains($text, 'Місто: Інше місто'), 'город');
+});
 t('Telegram: первая строка — способ связи, HTML экранирован', function () use ($valid) {
     [$lead] = lead_validate(['name' => '<b>Ол</b>', 'contactMethod' => 'call'] + $valid);
     $text = lead_telegram_text($lead);
@@ -214,6 +242,13 @@ try {
         file_put_contents($png, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='));
         $payload = ['form' => 'zapyt', 'request' => 'Шафа в нішу 2,4 м, фото плану', 'eventId' => 'zapyt-file-1', 'quiz' => null] + $valid;
         [$code] = post($apiPort, ['payload' => json_encode($payload), 'files[0]' => new CURLFile($png, 'image/png', 'plan.png')], ['Accept: application/json'], true);
+        eq($code, 200);
+        $uris = array_map(fn($r) => $r['uri'], $requests());
+        ok(in_array('/botTEST/sendDocument', $uris, true), 'документ отправлен: ' . implode(', ', $uris));
+    });
+    t('лендинг /zayavka с файлом (multipart) → сообщение и документ', function () use ($valid, $apiPort, $requests, $tmp) {
+        $payload = ['form' => 'zayavka', 'landing' => 'zayavka', 'need' => 'Кухня', 'budget' => '150000', 'project' => 'Є дизайн-проєкт', 'eventId' => 'zayavka-file-1', 'quiz' => null] + $valid;
+        [$code] = post($apiPort, ['payload' => json_encode($payload), 'files[0]' => new CURLFile("$tmp/plan.png", 'image/png', 'plan.png')], ['Accept: application/json'], true);
         eq($code, 200);
         $uris = array_map(fn($r) => $r['uri'], $requests());
         ok(in_array('/botTEST/sendDocument', $uris, true), 'документ отправлен: ' . implode(', ', $uris));

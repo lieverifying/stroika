@@ -30,7 +30,7 @@ export function forwardToGa4(name: string, params: Params = {}): void {
   const step = /^quiz_step_(\d+)$/.exec(name);
   if (step) gtag('quiz_step', { step: Number(step[1]), quiz_branch: String(params.quiz_branch ?? '') });
   else if (name === 'quiz_start') gtag('quiz_start', { quiz_branch: String(params.quiz_branch ?? '') });
-  else if (name === 'story_complete') gtag('story_complete', params);
+  else if (name === 'story_complete' || name === 'zayavka_step') gtag(name, params);
 }
 
 /** Конверсия Google Ads «заявка» (send_to AW-…/метка): Analytics.astro кладёт её в window.vymirAdsLead */

@@ -5,10 +5,11 @@
  */
 declare(strict_types=1);
 
-const LEAD_FORMS = ['quiz', 'zapyt'];
+const LEAD_FORMS = ['quiz', 'zapyt', 'zayavka'];
+const LEAD_FILE_FORMS = ['zapyt', 'zayavka']; // формы, к которым можно приложить файлы
 const LEAD_METHODS = ['viber' => 'Viber', 'telegram' => 'Telegram', 'call' => 'Дзвінок'];
-const LEAD_FORM_TITLES = ['quiz' => 'Квіз', 'zapyt' => 'Нестандартне завдання'];
-const LEAD_LANDINGS = ['kukhni', 'mebli', 'none'];
+const LEAD_FORM_TITLES = ['quiz' => 'Квіз', 'zapyt' => 'Нестандартне завдання', 'zayavka' => 'Лендинг'];
+const LEAD_LANDINGS = ['kukhni', 'mebli', 'zayavka', 'none'];
 const LEAD_MIN_ELAPSED_MS = 3000; // быстрее — бот
 const LEAD_MAX_JSON_BYTES = 10240;
 const LEAD_FILES_MAX = 3;
@@ -95,6 +96,13 @@ function lead_is_bot(array $in): bool
     return is_numeric($elapsed) && (int) $elapsed < LEAD_MIN_ELAPSED_MS;
 }
 
+/** Бюджет с лендинга: цифры → «150 000 грн»; пусто — человек выбрал «Ще не знаю» */
+function lead_budget_label(string $raw): string
+{
+    $digits = substr(preg_replace('/\D/', '', $raw) ?? '', 0, 10);
+    return $digits === '' ? 'не знає' : number_format((int) $digits, 0, '', ' ') . ' грн';
+}
+
 /**
  * Серверная проверка и нормализация. Возвращает [lead, errors]: errors — список имён полей с ошибкой.
  */
@@ -103,7 +111,8 @@ function lead_validate(array $in): array
     $errors = [];
     $form = lead_clean($in['form'] ?? '', 20);
     if (!in_array($form, LEAD_FORMS, true)) $errors[] = 'form';
-    $method = lead_clean($in['contactMethod'] ?? '', 20);
+    // method — имя радиокнопки: так поле приходит из формы без JS
+    $method = lead_clean($in['contactMethod'] ?? $in['method'] ?? '', 20);
     if (!isset(LEAD_METHODS[$method])) $errors[] = 'contactMethod';
     $name = lead_clean($in['name'] ?? '', 60);
     $len = mb_strlen($name);
@@ -117,6 +126,15 @@ function lead_validate(array $in): array
         $rl = mb_strlen($request);
         if ($rl < 10 || $rl > 1000) $errors[] = 'request';
     }
+    // Лендинг /zayavka: что нужно, бюджет, наличие проекта, материал, район
+    $isZayavka = $form === 'zayavka';
+    $need = $isZayavka ? lead_clean($in['need'] ?? '', 60) : '';
+    if ($isZayavka && $need === '') $errors[] = 'need';
+    $budget = $isZayavka ? lead_budget_label(lead_clean($in['budget'] ?? '', 40)) : '';
+    $project = $isZayavka ? lead_clean($in['project'] ?? '', 60) : '';
+    $material = $isZayavka ? lead_clean($in['material'] ?? '', 60) : '';
+    $district = $isZayavka ? lead_clean($in['district'] ?? '', 100) : '';
+    $city = $isZayavka ? lead_clean($in['city'] ?? '', 60) : '';
     $landing = lead_clean($in['landing'] ?? 'none', 20);
     $eventId = lead_clean($in['eventId'] ?? '', 64);
     if (!preg_match('/^[A-Za-z0-9-]{8,64}$/', $eventId)) $eventId = bin2hex(random_bytes(8));
@@ -139,7 +157,16 @@ function lead_validate(array $in): array
         'request' => $form === 'zapyt' ? $request : '',
         'landing' => in_array($landing, LEAD_LANDINGS, true) ? $landing : 'none',
         'page' => lead_clean($in['page'] ?? '', 200),
-        'quizSummary' => lead_clean($quiz['summary'] ?? '', 400),
+        'need' => $need,
+        'budget' => $budget,
+        'project' => $project,
+        'material' => $material,
+        'district' => $district,
+        'city' => $city,
+        // Таблица и письмо читают ответы лендинга из той же колонки, что и ответы квиза
+        'quizSummary' => $isZayavka
+            ? implode(' · ', array_filter([$need, $budget, $project, $material, $district]))
+            : lead_clean($quiz['summary'] ?? '', 400),
         'quizBranch' => lead_clean($quiz['branch'] ?? '', 20),
         'quizTiming' => lead_clean($quiz['timing'] ?? '', 60),
         'resultVariant' => lead_clean($quiz['result']['variant'] ?? '', 2),
@@ -159,15 +186,24 @@ function lead_html(string $s): string
 function lead_telegram_text(array $lead, array $files = []): string
 {
     $lines = ['<b>' . lead_html(LEAD_METHODS[$lead['contactMethod']] ?? $lead['contactMethod']) . '</b>'];
+    $isZayavka = $lead['form'] === 'zayavka';
+    // Вторая строка лендинга — бюджет и проект: по ним сразу видно, кому отвечать первым
+    if ($isZayavka) $lines[] = '<b>Бюджет: ' . lead_html($lead['budget']) . ' · Проєкт: ' . lead_html($lead['project'] !== '' ? $lead['project'] : '—') . '</b>';
     $title = LEAD_FORM_TITLES[$lead['form']] ?? $lead['form'];
-    if ($lead['form'] === 'quiz' && $lead['quizSummary'] !== '') {
+    if (($lead['form'] === 'quiz' || $isZayavka) && $lead['quizSummary'] !== '') {
         $first = explode(' · ', $lead['quizSummary'])[0];
         $title .= ' · ' . $first;
     }
     $lines[] = 'Нова заявка: ' . lead_html($title);
     $lines[] = "Ім'я: " . lead_html($lead['name']);
     $lines[] = 'Телефон: ' . lead_html($lead['phone']);
-    if ($lead['quizSummary'] !== '') $lines[] = 'Відповіді: ' . lead_html($lead['quizSummary']);
+    if ($isZayavka) {
+        if ($lead['material'] !== '') $lines[] = 'Матеріал: ' . lead_html($lead['material']);
+        if ($lead['district'] !== '') $lines[] = 'Район: ' . lead_html($lead['district']);
+        if ($lead['city'] !== '' && $lead['city'] !== 'Черкаси') $lines[] = 'Місто: ' . lead_html($lead['city']);
+    } elseif ($lead['quizSummary'] !== '') {
+        $lines[] = 'Відповіді: ' . lead_html($lead['quizSummary']);
+    }
     if ($lead['request'] !== '') $lines[] = 'Завдання: ' . lead_html($lead['request']);
     if ($files) $lines[] = 'Файли: ' . count($files) . ' (нижче)';
     if ($lead['referrer'] !== '') $lines[] = 'Порекомендував: ' . lead_html($lead['referrer']);

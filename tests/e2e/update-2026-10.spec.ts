@@ -81,7 +81,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     await expect(page.locator('[data-files-chosen]')).toHaveText('план.pdf, фото.HEIC');
   });
 
-  test('заполненный запрос → одна заявка с файлом в api/lead.php, /dyakuyemo «Надішлемо розрахунок у Viber»', async ({ page, leadApi }) => {
+  test('заполненный запрос → одна заявка с файлом в api/lead.php, /dyakuyemo «Напишемо вам у Viber»', async ({ page, leadApi }) => {
     await page.goto('/kontakty#zapyt');
     await page.locator('#zapyt-request').fill('Стелаж у нішу 2,4 м і стіл для салону краси');
     await page.locator('#zapyt-files').setInputFiles([{ name: 'ескіз.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(100) }]);
@@ -93,7 +93,7 @@ test.describe('блок «Нестандартне завдання» (#zapyt)',
     await page.locator('#zapyt-consent').check();
     await page.locator('#zapyt form').getByRole('button', { name: 'Надіслати запит' }).click();
     await expect(page).toHaveURL(/\/dyakuyemo$/);
-    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Ігор\. Надішлемо розрахунок у Viber у робочий час\.$/);
+    await expect(page.locator('[data-thanks]')).toHaveText(/^Дякуємо, Ігор\. Напишемо вам у Viber у робочий час\.$/);
     expect(leadApi.leads).toHaveLength(1);
     expect(leadApi.leads[0]).toMatchObject({
       contactMethod: 'viber',

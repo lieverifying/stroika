@@ -1,6 +1,6 @@
 ---
 // Экран результата на /dyakuyemo (ARCHITECTURE.md 4.4). Скрипт подставляет имя и способ связи из sessionStorage:
-// «Дякуємо, {ім’я}. Надішлемо розрахунок у {Viber / Telegram} у робочий час»,
+// «Дякуємо, {ім’я}. Напишемо вам у {Viber / Telegram} у робочий час» (2026-11-03: цену по размеру больше не обещаем),
 // для звонка — «Зателефонуємо у робочий час» (без минут — режим запуска 2026-10-21). Без данных — общий текст со звонком.
 // Цена (экран А) — только при reason 'ok' и флаге facts.flags.quizResultVariant = 'A'; по умолчанию Б (без цены).
 // При флаге Б разметки экрана А на странице нет вовсе — ни с JS, ни без него (правка 2026-10-21).
@@ -85,7 +85,7 @@ const variantA = facts.flags.quizResultVariant === 'A';
     if (data) {
       if (data.name) box.querySelector('[data-thanks-name]')!.textContent = `, ${data.name}`;
       box.querySelector('[data-thanks-action]')!.textContent =
-        data.method === 'call' ? 'Зателефонуємо' : `Надішлемо розрахунок у ${CHANNEL_LABEL[data.method]}`;
+        data.method === 'call' ? 'Зателефонуємо' : `Напишемо вам у ${CHANNEL_LABEL[data.method]}`;
       box.dataset.method = data.method;
     }
     const result = data?.result;

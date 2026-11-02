@@ -40,6 +40,15 @@ export function validateRequest(value: string): string | null {
   return null;
 }
 
+/** Бюджет на лендинге /zayavka: полная сумма цифрами; «Ще не знаю» — отдельная кнопка, поле тогда не проверяется */
+export const BUDGET_MIN = 1000;
+
+export function validateBudget(value: string): string | null {
+  const digits = value.replace(/\D/g, '');
+  if (digits === '') return 'Вкажіть суму або натисніть «Ще не знаю»';
+  return Number(digits) >= BUDGET_MIN ? null : 'Вкажіть повну суму в гривнях';
+}
+
 /** Файлы к запросу: до 3 штук, JPG, PNG, HEIC или PDF, каждый до 10 МБ */
 export const FILES_MAX = 3;
 export const FILE_MAX_BYTES = 10 * 1024 * 1024;
