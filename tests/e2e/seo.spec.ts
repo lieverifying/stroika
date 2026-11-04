@@ -28,7 +28,7 @@ test('каждая страница: canonical без .html, Open Graph 1200 × 
     expect((await request.get(new URL(img!).pathname)).status(), img!).toBe(200);
     await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', await page.title());
-    await expect(page.locator('script[src*="googletagmanager"], script:has-text("fbq(")')).toHaveCount(0);
+    await expect(page.locator('script[src*="googletagmanager"], script:has-text("fbq("), script:has-text("TiktokAnalyticsObject")')).toHaveCount(0);
     await expect(page.locator('meta[name="google-site-verification"]')).toHaveCount(0);
   }
 });

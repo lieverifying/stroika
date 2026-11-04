@@ -7,7 +7,8 @@
 // Клики по телефону и мессенджерам ловит один обработчик на документе.
 // landingPixel — лендинг /zayavka: там дополнительно инициализируется пиксель «Вимір» (PUBLIC_META_PIXEL_ID_ZAYAVKA, 2026-11-04);
 // fbq('track') уходит во все инициализированные пиксели, поэтому PageView и Lead получают оба.
-import { PUBLIC_GA4_ID, PUBLIC_GADS_ID, PUBLIC_GADS_LEAD, PUBLIC_META_PIXEL_ID, PUBLIC_META_PIXEL_ID_ZAYAVKA, SITE_ENV } from 'astro:env/client';
+// TikTok Pixel (PUBLIC_TIKTOK_PIXEL_ID, 2026-11-04) — на всех страницах: page() при загрузке, SubmitForm и Contact — src/lib/tags.ts.
+import { PUBLIC_GA4_ID, PUBLIC_GADS_ID, PUBLIC_GADS_LEAD, PUBLIC_META_PIXEL_ID, PUBLIC_META_PIXEL_ID_ZAYAVKA, PUBLIC_TIKTOK_PIXEL_ID, SITE_ENV } from 'astro:env/client';
 
 interface Props {
   landingPixel?: boolean;
@@ -19,7 +20,48 @@ const gads = prod && PUBLIC_GADS_ID ? PUBLIC_GADS_ID : '';
 const gadsLead = gads && PUBLIC_GADS_LEAD ? PUBLIC_GADS_LEAD : '';
 const gtagIds = [ga4, gads].filter(Boolean);
 const pixels = prod ? [...new Set([PUBLIC_META_PIXEL_ID, landingPixel ? PUBLIC_META_PIXEL_ID_ZAYAVKA : ''].filter(Boolean))] : [];
+const tiktok = prod && PUBLIC_TIKTOK_PIXEL_ID ? PUBLIC_TIKTOK_PIXEL_ID : '';
 ---
+
+{
+  tiktok && (
+    <script is:inline define:vars={{ tiktok }}>
+      !(function (w, d, t) {
+        w.TiktokAnalyticsObject = t;
+        var ttq = (w[t] = w[t] || []);
+        ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie', 'holdConsent', 'revokeConsent', 'grantConsent'];
+        ttq.setAndDefer = function (t, e) {
+          t[e] = function () {
+            t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+          };
+        };
+        for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+        ttq.instance = function (t) {
+          for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
+          return e;
+        };
+        ttq.load = function (e, n) {
+          var r = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+          ttq._i = ttq._i || {};
+          ttq._i[e] = [];
+          ttq._i[e]._u = r;
+          ttq._t = ttq._t || {};
+          ttq._t[e] = +new Date();
+          ttq._o = ttq._o || {};
+          ttq._o[e] = n || {};
+          n = d.createElement('script');
+          n.type = 'text/javascript';
+          n.async = !0;
+          n.src = r + '?sdkid=' + e + '&lib=' + t;
+          e = d.getElementsByTagName('script')[0];
+          e.parentNode.insertBefore(n, e);
+        };
+        ttq.load(tiktok);
+        ttq.page();
+      })(window, document, 'ttq');
+    </script>
+  )
+}
 
 {gtagIds.length > 0 && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gtagIds[0]}`} />}
 {

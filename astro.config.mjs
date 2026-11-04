@@ -29,6 +29,8 @@ export default defineConfig({
       PUBLIC_META_PIXEL_ID: envField.string({ context: 'client', access: 'public', optional: true }),
       // Второй пиксель Meta «Вимір» — только на лендинге /zayavka (2026-11-04)
       PUBLIC_META_PIXEL_ID_ZAYAVKA: envField.string({ context: 'client', access: 'public', optional: true }),
+      // TikTok Pixel — все страницы (2026-11-04)
+      PUBLIC_TIKTOK_PIXEL_ID: envField.string({ context: 'client', access: 'public', optional: true }),
       PUBLIC_GSC_VERIFICATION: envField.string({ context: 'client', access: 'public', optional: true }),
     },
   },

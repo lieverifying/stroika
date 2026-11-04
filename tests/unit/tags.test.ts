@@ -7,9 +7,11 @@ afterEach(() => vi.unstubAllGlobals());
 function stubs() {
   const gtag = vi.fn();
   const fbq = vi.fn();
+  const ttq = { track: vi.fn() };
   vi.stubGlobal('gtag', gtag);
   vi.stubGlobal('fbq', fbq);
-  return { gtag, fbq };
+  vi.stubGlobal('ttq', ttq);
+  return { gtag, fbq, ttq };
 }
 
 describe('tags', () => {
@@ -43,6 +45,16 @@ describe('tags', () => {
       ['event', 'generate_lead', { form_type: 'quiz', page: '/' }],
     ]);
     expect(fbq.mock.calls.map((c) => c[2].content_name)).toEqual(['zapyt_kontakty', 'zapyt_special', 'quiz_home']);
+  });
+  test('TikTok: SubmitForm { content_name } при заявке, Contact при клике; имени и телефона нет', () => {
+    const { ttq } = stubs();
+    leadSucceeded('zayavka', 'zayavka', '/zayavka');
+    contactClicked('tel:+380759914883', '/zayavka');
+    contactClicked('/roboty', '/zayavka');
+    expect(ttq.track.mock.calls).toEqual([
+      ['SubmitForm', { content_name: 'zayavka' }],
+      ['Contact', undefined],
+    ]);
   });
   test('конверсия Google Ads при заявке — только если задан send_to', () => {
     const { gtag } = stubs();

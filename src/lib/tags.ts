@@ -17,6 +17,12 @@ function fbq(event: string, params?: Params): void {
   if (typeof f === 'function') f('track', event, params);
 }
 
+/** TikTok Pixel (2026-11-04): стандартные события SubmitForm и Contact, без личных данных и без identify() */
+function ttq(event: string, params?: Params): void {
+  const t = (globalThis as unknown as { ttq?: { track?: (e: string, p?: Params) => void } }).ttq;
+  if (t && typeof t.track === 'function') t.track(event, params);
+}
+
 /** Страница без «.html» и конечного «/»: /kukhni, главная — «/» */
 export function pageName(pathname: string): string {
   return pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
@@ -47,7 +53,9 @@ export function leadSucceeded(formType: string, contentName?: string, pathname =
   const page = pageName(pathname);
   gtag('generate_lead', { form_type: formType, page });
   adsLead();
-  fbq('Lead', { content_name: contentName ?? `${formType}_${page === '/' ? 'home' : page.slice(1)}` });
+  const name = contentName ?? `${formType}_${page === '/' ? 'home' : page.slice(1)}`;
+  fbq('Lead', { content_name: name });
+  ttq('SubmitForm', { content_name: name });
 }
 
 /** Клик по ссылке связи: tel: → click_phone, Viber / Telegram → click_messenger; в Pixel — Contact */
@@ -58,4 +66,5 @@ export function contactClicked(href: string, pathname = location.pathname): void
   else if (/^https:\/\/t\.me\//.test(href)) gtag('click_messenger', { messenger: 'telegram', page });
   else return;
   fbq('Contact');
+  ttq('Contact');
 }
