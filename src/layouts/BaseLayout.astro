@@ -26,11 +26,9 @@ interface Props {
   ogImage?: string;
   /** Дополнительные схемы JSON-LD; LocalBusiness добавляется на всех индексируемых страницах */
   jsonLd?: Record<string, unknown>[];
-  /** Дополнительный пиксель Meta лендинга /zayavka (Analytics.astro) */
-  landingPixel?: boolean;
 }
 
-const { title, description, noindex = false, bare = false, lcpImage, compactH2 = false, ogImage, jsonLd = [], landingPixel = false } = Astro.props;
+const { title, description, noindex = false, bare = false, lcpImage, compactH2 = false, ogImage, jsonLd = [] } = Astro.props;
 const schemas = noindex ? jsonLd : [localBusiness(Astro.site), ...jsonLd];
 const landing = landingOfPath(pagePath(Astro.url));
 ---
@@ -42,7 +40,7 @@ const landing = landingOfPath(pagePath(Astro.url));
     <!-- Масштабирование не запрещаем (CLAUDE.md) -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <SeoHead title={title} description={description} noindex={noindex} ogImage={ogImage} jsonLd={schemas} />
-    <Analytics landingPixel={landingPixel} />
+    <Analytics />
     <!-- Иконки: SVG — Chrome и Firefox; ICO и PNG — Safari во вкладках; apple-touch-icon — iOS (scripts/favicons.mjs) -->
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

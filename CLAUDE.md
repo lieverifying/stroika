@@ -192,7 +192,7 @@
 - Заявка: `form=zayavka`, `landing=zayavka`, поля need, budget, project, material, district, city. В Telegram первая строка — способ связи, вторая — бюджет и проект. В Pixel и GA4 бюджет не уходит. GA4: `zayavka_step`.
 - `/dyakuyemo`: «Напишемо вам у {канал}» вместо «Надішлемо розрахунок».
 - Статичные креативы ведут в переписку Messenger, не на лендинг.
-- На `/zayavka` второй пиксель Meta «Вимір» `1481066870583642` (`PUBLIC_META_PIXEL_ID_ZAYAVKA`, 2026-11-04) вместе с основным: `BaseLayout landingPixel`, PageView и Lead уходят в оба. На остальных страницах — только основной.
+- Пиксели на всех страницах, включая `/zayavka` (2026-11-04): Meta основной и Meta «Вимір» `1481066870583642` (`PUBLIC_META_PIXEL_ID_VYMIR`) — PageView, Lead {content_name}, Contact уходят в оба; TikTok `DBLHCCBC77UASCMH3OP0` (`PUBLIC_TIKTOK_PIXEL_ID`) — page, SubmitForm {content_name}, Contact. Личные данные в пиксели не передаются.
 - В креативах и роликах договор не упоминаем: ни текста, ни голоса, ни печати в кадре (окончательное решение владельца). Оффер рекламы: «Спершу цифра. Рішення за вами. Потім робимо для вас».
 
 ## SEO и аналитика (фаза 7, 2026-10-22)
