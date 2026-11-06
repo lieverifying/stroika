@@ -4,21 +4,40 @@
  * Без зависимостей: используется и в браузере (маска), и при сборке/тестах.
  */
 
-/** 9 цифр национального номера (код оператора + абонент) из любой записи; лишнее отбрасываем */
+/**
+ * Цифры национального номера (код оператора + абонент) из любой записи. Обычно их 9; больше 9 — в номере ошибка,
+ * normalizePhone вернёт null. Лишние цифры не отрезаем: иначе опечатка молча превратится в чужой номер.
+ */
 export function nationalDigits(raw: string): string {
   let d = raw.replace(/\D/g, '');
+  // Код страны: 00 (международный выход), 380, 80 (8 067…), 38 без 0 (+38 67…). Первый 380 снимаем всегда —
+  // это и подставленный «+380 » в поле при наборе по одной цифре.
+  if (d.startsWith('00')) d = d.slice(2);
   if (d.startsWith('380')) d = d.slice(3);
   else if (d.startsWith('80') && d.length >= 11) d = d.slice(2);
+  else if (d.startsWith('38') && d.length === 11) d = d.slice(2);
+  // Номер набран целиком поверх «+380 »: «+380 380671234567», «+380 0038…», «+380 38 67…». Повторный код снимаем,
+  // только пока цифр больше 9, поэтому короткий номер на 38… (стационарный) не трогаем.
+  for (;;) {
+    if (d.length > 9 && d.startsWith('00')) d = d.slice(2);
+    else if (d.length > 9 && d.startsWith('380')) d = d.slice(3);
+    else if (d.length > 9 && d.startsWith('80')) d = d.slice(2);
+    else if (d.length > 10 && d.startsWith('38')) d = d.slice(2);
+    else break;
+  }
   // Ведущий 0 — «междугородний» префикс: и в 0671234567, и когда в поле уже «+380 » набирают 067…
   // Код оператора с 0 не начинается, поэтому 0 всегда лишний.
   if (d.startsWith('0')) d = d.slice(1);
-  return d.slice(0, 9);
+  return d;
 }
 
-/** Номер в E.164 (+380XXXXXXXXX) или null, если цифр не хватает */
+/**
+ * Номер в E.164 (+380XXXXXXXXX) или null: цифр не 9 или номер начинается с 38 / 80. Мобильных кодов 38 и 80 нет
+ * (80 — бесплатные 0800), так выглядит недописанный номер с повторным кодом: «+380 38 067 12 34» — пусть форма попросит дописать.
+ */
 export function normalizePhone(raw: string): string | null {
   const d = nationalDigits(raw);
-  return d.length === 9 ? `+380${d}` : null;
+  return d.length === 9 && !/^(38|80)/.test(d) ? `+380${d}` : null;
 }
 
 /** Маска для поля: «+380 67 123 45 67», по мере ввода. Пустой ввод — пустая строка. */
@@ -28,6 +47,7 @@ export function maskPhone(raw: string): string {
   if (t !== '+380' && '+380'.startsWith(t)) return '';
   const d = nationalDigits(raw);
   if (!d && !/\d/.test(raw)) return '';
-  const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);
+  // Лишние цифры показываем в конце, а не отрезаем: номер с опечаткой виден и не проходит проверку
+  const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9), d.slice(9)].filter(Boolean);
   return ['+380', ...parts].join(' ');
 }

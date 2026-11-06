@@ -40,6 +40,11 @@ echo "Юнит\n";
 t('телефон: разные записи → +380XXXXXXXXX', function () {
     foreach (['0671234567', '+380671234567', '+38 (067) 123-45-67', '380671234567', '671234567'] as $p) eq(lead_normalize_phone($p), '+380671234567', $p);
     eq(lead_normalize_phone('06712'), null);
+    // Код страны набран повторно после подставленного «+380 »
+    foreach (['+380 380671234567', '+380 80671234567', '+380 3800671234567'] as $p) eq(lead_normalize_phone($p), '+380671234567', $p);
+    foreach (['+380 38 067 12 34', '+380 806712345', '+380 386712345'] as $p) eq(lead_normalize_phone($p), null, $p);
+    foreach (['00380671234567', '+38 67 123 45 67', '38671234567', '+380 00380671234567'] as $p) eq(lead_normalize_phone($p), '+380671234567', $p);
+    foreach (['06712345678', '+380 67 1234 4567'] as $p) eq(lead_normalize_phone($p), null, $p);
 });
 t('валидация: верная заявка без ошибок', function () use ($valid) {
     [$lead, $err] = lead_validate($valid);

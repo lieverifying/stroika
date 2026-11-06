@@ -73,11 +73,23 @@ function lead_origin_allowed(?string $origin, array $cfg): bool
 function lead_normalize_phone(string $raw): ?string
 {
     $d = preg_replace('/\D/', '', $raw) ?? '';
+    // Код страны: 00, 380, 80, 38 без 0 — как src/lib/phone.ts
+    if (str_starts_with($d, '00')) $d = substr($d, 2);
     if (str_starts_with($d, '380')) $d = substr($d, 3);
     elseif (str_starts_with($d, '80') && strlen($d) >= 11) $d = substr($d, 2);
+    elseif (str_starts_with($d, '38') && strlen($d) === 11) $d = substr($d, 2);
+    // Повторный код после подставленного «+380 » — снимаем, пока цифр больше 9
+    for (;;) {
+        $n = strlen($d);
+        if ($n > 9 && str_starts_with($d, '00')) $d = substr($d, 2);
+        elseif ($n > 9 && str_starts_with($d, '380')) $d = substr($d, 3);
+        elseif ($n > 9 && str_starts_with($d, '80')) $d = substr($d, 2);
+        elseif ($n > 10 && str_starts_with($d, '38')) $d = substr($d, 2);
+        else break;
+    }
     if (str_starts_with($d, '0')) $d = substr($d, 1);
-    $d = substr($d, 0, 9);
-    return strlen($d) === 9 ? '+380' . $d : null;
+    // Ровно 9 цифр: лишние не отрезаем, иначе опечатка превратится в чужой номер. Начало 38 / 80 — недописанный номер с повторным кодом
+    return strlen($d) === 9 && !preg_match('/^(38|80)/', $d) ? '+380' . $d : null;
 }
 
 /** Строка без управляющих символов, обрезанная до $max символов */

@@ -126,3 +126,21 @@ test('без шапки и панели, noindex, нет горизонталь�
   await expect(page.locator('body')).toContainText('Замір у Черкасах — безкоштовно');
   await expect(page.locator('[data-cta="primary"]')).toHaveCount(1);
 });
+
+test('телефон, набранный целиком с 380 после подставленного «+380 », не дублирует код', async ({ page, leadApi }) => {
+  await page.goto('/zayavka');
+  await pick(page, 'Черкаси');
+  await pick(page, 'Кухня');
+  await page.getByRole('button', { name: 'Ще не знаю' }).click();
+  await pick(page, 'Немає, зробіть безкоштовно');
+  await pick(page, 'Порадьте');
+  await page.locator('#z-name').fill('Іван');
+  const phone = page.locator('#z-phone');
+  await phone.click();
+  await phone.pressSequentially('380671234567', { delay: 20 });
+  await expect(phone).toHaveValue('+380 67 123 45 67');
+  await page.locator('#z-consent').check();
+  await page.getByRole('button', { name: 'Надіслати заявку' }).click();
+  await expect(page).toHaveURL(/\/dyakuyemo$/);
+  expect(leadApi.leads[0]).toMatchObject({ phone: '+380671234567' });
+});
